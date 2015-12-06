@@ -1,6 +1,6 @@
 # OWQ - Open Web Query v.1.0.1 (dev) #
 
-OWQ is a dedicated scripting language (bytecode-compiled VM system) that is written in C++.
+OWQ is a dedicated scripting language (bytecode-compiled VM system), written in C++.
 It allows execution of `.owq` scripts written with an JS like syntax that exposes a powerful
 Web-Scraping and Web based data extraction API.
 OWQ is a programmable virtual machine that allows to program Scraping and Crawling Tasks that 
