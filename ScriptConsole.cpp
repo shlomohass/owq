@@ -22,7 +22,7 @@ void ScriptConsole::print(string msg1) {
  * @param msg
  */
 void ScriptConsole::print(string msg1, string msg2) {
-    cout << ">>" << msg1 << ", " << msg2 << endl;
+    cout << "CONSOLE-OUT >> " << msg1 << ", " << msg2 << endl;
 }
 
 string ScriptConsole::toString(double number) {
