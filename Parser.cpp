@@ -4,84 +4,50 @@
  *
  */
 #include "Parser.h"
+#include "Lang.h"
 
 Parser::Parser() {
 
 }
-
 /**
  * Indicate whether or not a char constant c is one of our defined delimiters
  * Note: delimiters are used to separate individual tokens
  * @param c
  * @return return true if it is a delimiter otherwise false
  */
-bool Parser::isDelimiter(const char& c) {
-    bool ret = false;
-    switch(c){
-    case ' ':
-    case '+':
-    case '-':
-    case '*':
-    case '/':
-    case '=':
-    case '(':
-    case ')':
-    case '{':
-    case '}':
-    case '^':
-    //case '.':		ignore dot operator -- object resolution will at runtime
-    case '!':
-    case '>':
-    case '<':
-    case ',':
-    case ';':
-        ret = true;
-        break;
-    default:
-        ret = false;
-        break;
-    }
-    return ret;
-}
-/**
- *
- * String version of isDelimiter. see isDelimiter(char) for functional description
- * @param c
- * @return
- */
 bool Parser::isDelimiter(const string& c) {
-    bool ret=false;
-    if (
-        c == " " ||
-        c == "+" ||
-        c == "-" ||
-        c == "*" ||
-        c == "/" ||
-        c == "=" ||
-        c == "(" ||
-        c ==  ")" ||
-        c ==  "{" ||
-        c ==  "}" ||
-        c ==  "^" ||
-        //c == "." ||  ignore dot operator -- object resolution is at runtime
-        c == "!"  ||
-        c == ">" ||
-        c == "<" ||
-        c == "," ||
-        c == ";"
-    ) {
-        ret = true;
-    }
-    return ret;
+    return Lang::LangIsDelimiter(c);
 }
-
+bool Parser::isDelimiter(const char& c) {
+    return Lang::LangIsDelimiter(c);
+}
+/** Check whether a char is space or not
+ * 
+ * @param char c
+ * @return bool
+ * 
+ */
 bool Parser::isSpace(const char& c) {
-    return (c == ' ')?true:false;
+    return (c == Lang::LangFindDelimiter("space")) ? true : false;
 }
 
+/** Check whether we entering using a string:
+ * @param char c
+ * @return bool
+ */
+bool Parser::isQstring(const char& c) {
+    return c == Lang::LangStringIndicator;
+}
+/** Validate naming chars:
+ * 
+ * @param char|string c
+ * @return bool
+ */
 bool Parser::isLetter(const char& c) {
-    //if we do not define '"' as a character, no tokens will be generated for string quoetation marks
-    return ((c >= 'a' && c <= 'z') || (c >='A' && c <='Z') || (c == '"') || (c == '_'))?true:false;
+    return Lang::LangIsNamingAllowed(c);
+}
+bool Parser::isLetter(const string& c) {
+    return Lang::LangIsNamingAllowed(c);
 }
 
 /**
@@ -116,26 +82,32 @@ bool Parser::isDigit(const char& c) {
  * @param s
  * @return
  */
-bool Parser::isKeyword(string s){
-    bool ret =true;
-    if (currentToken == "function") {
+bool Parser::isKeyword(string s) {
+    if (Lang::LangIsKeyword(s)) {
         currentTokenType = TokenType::KEYWORD;
-    } else if (currentToken == "var") {
-        currentTokenType = TokenType::KEYWORD;
-    } else if (currentToken == "if") {
-        currentTokenType = TokenType::KEYWORD;
-    } else if (currentToken == "while") {
-        currentTokenType = TokenType::KEYWORD;
-    } else if (currentToken == "do") {
-        currentTokenType = TokenType::KEYWORD;
-    } else if (currentToken == "return") {
-        currentTokenType = TokenType::KEYWORD;
-    } else if (currentToken == "else") {
-        currentTokenType = TokenType::KEYWORD;
-    } else {
-        return false;
+        return true;
     }
-    return ret;
+    return false;
+}
+/** Parse any string to lower ASCII chars
+ * 
+ * @param s
+ * @return 
+ */
+string Parser::toLowerString(string *s) {
+    string outBuffer = *s;
+    transform(s->begin(), s->end(), outBuffer.begin(), ::tolower);
+    return outBuffer;
+}
+/** Parse any string to lower ASCII chars
+ * 
+ * @param s
+ * @return 
+ */
+string Parser::toUpperString(string *s) {
+    string outBuffer = *s;
+    transform(s->begin(), s->end(), outBuffer.begin(), ::toupper);
+    return outBuffer;
 }
 /**
  * Return the next token contain in the expression passed to function <b>compile(Script, string</b>
@@ -176,12 +148,46 @@ string Parser::getToken() {
                 break;
             }
         }
+        
+        //Set all to lower:
+        string temp_currentToken = toLowerString(&currentToken);
+        
         //Set this current token type to either variable or keyword
-        if (isKeyword(currentToken)) {
+        if (isKeyword(temp_currentToken)) {
             currentTokenType = TokenType::KEYWORD;
+            currentToken = temp_currentToken;
         } else {
             currentTokenType = TokenType::VAR;
         }
+    } else if (isQstring(expression[expressionIndex])) {
+        //Grab entire string:
+        currentToken.insert(currentToken.end(),1,expression[expressionIndex]);
+        expressionIndex++;
+        while(!isQstring(expression[expressionIndex])) {
+            if (expression[expressionIndex] == '\\') {
+                currentToken.insert(currentToken.end(),1,expression[expressionIndex]);
+                expressionIndex++;
+                if (expressionIndex >= (int)expression.length()) { 
+                    Tokens::stdError("Tokenize expression, string is not encapsulated");
+                    currentToken = "\0";
+                    break; 
+                }
+                currentToken.insert(currentToken.end(),1,expression[expressionIndex]);
+                expressionIndex++;
+            } else {
+                currentToken.insert(currentToken.end(),1,expression[expressionIndex]);
+                expressionIndex++;
+            }
+            if (expressionIndex >= (int)expression.length()) { 
+                Tokens::stdError("Tokenize expression, string is not encapsulated");
+                currentToken = "\0";
+                break; 
+            }
+        }
+        currentToken.insert(currentToken.end(),1,expression[expressionIndex]);
+        expressionIndex++;
+        currentTokenType = TokenType::STRING;
+
     } else if(isDigit(expression[expressionIndex])) {
             //Grab entire number
             while(whileNotDelimiter(expressionIndex)){ // `.` is a number too removed from the delimiter list
@@ -206,23 +212,7 @@ string Parser::getToken() {
  * @param token
  */
 void Parser::tokenize(string& exp, Tokens& token) {
-    //replace spaces in the exp that are between quotes with underscore
-    //this prevents quotes from being fragmented into individual tokens, in effect
-    //keeping quotes a a singular block
-    for (int i=0; i<(int)exp.length(); i++) {
-        if (exp[i] == '"') {
-            int j;
-            for (j=i+1; j<(int)exp.length(); j++) {
-                if(exp[j] == '"') {
-                    break;
-                }
-                if(exp[j] == ' '){
-                    exp[j] = '_';
-                }
-            }
-            i=j;
-        }
-    }
+
     expression = exp;
     expressionIndex = 0;
     int parenthesisScaler = 0;
@@ -232,21 +222,51 @@ void Parser::tokenize(string& exp, Tokens& token) {
     getToken();
 
     int priortyValue = 0;
-    while (currentToken != ""){
+    while (currentToken != "") {
         priortyValue = getDelimiterPriorty(); //get the current tokens priortyValue as a function of its evaluation hierarchy
         //this serves to ensure that multiple parenthetical grouping will be evaluated in a manner such that the deepest
         //grouping is evaluated first
-        if (currentToken == "(") {
+        if (currentToken == string(1, Lang::LangFunctionOpenArguChar)) {
             priortyValue += parenthesisScaler;
             parenthesisScaler += 1;
         }
-        //clean up the substituted spaces if we are dealing with a string:
-        if (currentToken[0] == '"') {	//if a quote, remove all underscores that stand in place of spaces
+        
+        //clean up the escaped characters of string :
+        bool isEscaped = false;
+        string buffToken = "";
+        if (currentTokenType == TokenType::STRING) {
             for (int i=0; i<(int)currentToken.length(); i++) {
-                if(currentToken[i] == '_') {
-                    currentToken[i] = ' '; //now remove the underscore
+                if(currentToken[i] == '\\' && !isEscaped) {
+                    isEscaped = true;
+                } else if (isEscaped) {
+                    switch (currentToken[i]) {
+                        case 'n':
+                            buffToken += '\n';
+                            break;
+                        case 't':
+                            buffToken += '\t';
+                            break;
+                        case 'r':
+                            buffToken += '\r';
+                            break;
+                        case '0':
+                            buffToken += '\0';
+                            break;
+                        case 'b':
+                            buffToken += '\b';
+                            break;
+                        case 'a':
+                            buffToken += '\a';
+                            break;
+                        default:
+                            buffToken += currentToken[i];
+                    }
+                    isEscaped = false;
+                } else {
+                    buffToken += currentToken[i];
                 }
             }
+            currentToken = buffToken;
         }
         
         token.addToken(currentToken, priortyValue, currentTokenType);
@@ -256,7 +276,6 @@ void Parser::tokenize(string& exp, Tokens& token) {
         //move to next iteration of this loop
     }
 }
-
 
 int Parser::compiler(Script* script, Tokens& token, int rCount){
     
@@ -270,16 +289,9 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
     // parenthetical groups are handled by first case and have the highest priority
     // func/parenthetical groups have a priority of 2 -
     
-    /* EXPOSE FOR DEBUGGING */
-    token.renderTokens();
-    // cout << "r(" << rCount << ") ";
-    
     //rCount is the nesting recursive calls limit:
     rCount++;
     if (rCount > 20) return 2;
-    
-    /* EXPOSE FOR DEBUGGING */
-    //cout << token.renderTokenPriorty();
 
     int eraseCount = 0; //used to readjust the operation index after there is any extraction of the tokens
                         //otherwise after we extract a set of tokens, may not point to the correct location of the operator
@@ -289,13 +301,13 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
 
     string leftToken = ""; //Look behind
     string rightToken = ""; //Look front
+    string rightRightToken = "";
     if ( operatorIndex > 0 ) {
         leftToken = token.getToken( operatorIndex - 1 );
     }
     if (operatorIndex < token.getSize() && token.getSize() > 1) { 
         rightToken = token.getToken( operatorIndex + 1 );
     }
-    
     string operatorToken = token.getToken(operatorIndex); //Current
 
     //If none:
@@ -309,7 +321,7 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
     if (token.isKeyWord(operatorIndex)) {
             
         //Execute functions:
-        if (operatorToken == "function") {
+        if (operatorToken == Lang::LangFindKeyword("function")) {
             
             //add the operation opcode
             script->addInstruction( Instruction(ByteCode::FUNC, rightToken) );
@@ -349,7 +361,8 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
             //at this point nothing else is need to be done with the arguments
 
             return 0;
-        } else if (operatorToken == "if") {
+            
+        } else if (operatorToken == Lang::LangFindKeyword("cond-if")) {
 
             //if(expression){
             token.pop(0);	//erase the if keyword
@@ -370,7 +383,7 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
             compiler(script, token, rCount);	//compile the expression
             script->addInstruction(Instruction(ByteCode::CMP));
             return 0;
-        } else if (operatorToken == "while") {
+        } else if (operatorToken == Lang::LangFindKeyword("loop-while")) {
 
             //while(expression){
             script->addInstruction(Instruction(ByteCode::LOOP));
@@ -392,7 +405,7 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
             script->addInstruction(Instruction(ByteCode::CMP));
             return 0;
             
-        } else if (operatorToken == "return") {
+        } else if (operatorToken == Lang::LangFindKeyword("return")) {
 
             //extract the return value and evaluate it recursively
             if (token.getSize() > 1) {
@@ -402,12 +415,13 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
             }
             script->addInstruction(Instruction(ByteCode::RET));
             return 0; //there is nothing else to be done  
-        } else if (operatorToken == "var") {
+        } else if (operatorToken == Lang::LangFindKeyword("variable")) {
             token.pop(operatorIndex);
-            script->addInstruction(Instruction(ByteCode::DEF,rightToken));
+            script->addInstruction(Instruction(ByteCode::DEF, rightToken));
             compiler(script, token, rCount);
             return 0;
         }
+        
     }//end of keywords
 
     //------------------------------------------------------------
@@ -530,8 +544,18 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
     return 0;
 }
 
-
-int Parser::compile(Script* script, string exp) { 
+/** The compile takes a parsed expression and tokenize -> colies the tokens. 
+ * 
+ * @param Script script
+ * @param string exp
+ * @param boolean debug
+ * @return int
+ * 
+ */
+int Parser::compile(Script* script, string exp) {
+    compile(script, exp, false);
+}
+int Parser::compile(Script* script, string exp, bool debug) { 
     if (script == NULL) {
         Tokens::stdError("compile expression, script pointer is null");
         return 1;
@@ -540,10 +564,10 @@ int Parser::compile(Script* script, string exp) {
     //generate our tokens
     tokenize(exp, token);
 
+    //For debuging:
+    if (debug) { token.renderTokens(); }
     //compile our tokens
     return compiler(script, token, 0);
-
-    //return now, script contains our byte code
 }
 
 bool Parser::whileNotDelimiter(int currentPos) {

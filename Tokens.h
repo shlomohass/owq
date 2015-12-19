@@ -12,7 +12,7 @@
 
 using namespace std;
 
-enum TokenType { NONE, NUMBER, DELIMITER, VAR, KEYWORD };
+enum TokenType { NONE, NUMBER, STRING, DELIMITER, VAR, KEYWORD };
 
 /**
  * Functions to hold script terms that characterize a line
@@ -32,6 +32,7 @@ public:
     Tokens();
     void addToken(string token, int priortyCode, TokenType tokenType);
     bool isNumber(int index);
+    bool isString(int index);
     bool isDelimiter(int index);
     bool isVar(int index);
     bool isCloseParenthesis(int index);

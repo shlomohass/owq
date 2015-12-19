@@ -48,6 +48,7 @@ bool Tokens::isNumber(int index) {
     }
     return false;
 }
+
 /**
  * Returns true or false indicating if the index is a delimiter
  * @param index of token, bound checking is implemented
@@ -62,6 +63,7 @@ bool Tokens::isDelimiter(int index) {
     }
     return false;
 }
+
 /**
  * Returns true or false indicating if the index is a number
  * @param index of token, bound checking is implemented
@@ -204,11 +206,12 @@ void Tokens::stdError(string msg) {
  * 
  */
 void Tokens::renderTokens() {
-    cout << "{ ";
+    cout << "    TOKENS --> { ";
     for(int i=0; i<getSize(); i++){
         cout << "'" << tokens[i] << "' ";
     }
-    cout << "}"<< endl;
+    cout << "}" << endl << endl;
+    cout << "-------------------------------------------------------------------" << endl << endl;
 }
 
 void Tokens::renderTokenType(){
@@ -217,7 +220,8 @@ void Tokens::renderTokenType(){
     for(int i=0; i<getSize(); i++){
         switch(type[i]) {
             case TokenType::DELIMITER:  str = "DLM"; break;
-            case TokenType::NUMBER:	str = "NUM"; break;
+            case TokenType::NUMBER:	str = "STR"; break;
+            case TokenType::STRING:	str = "NUM"; break;
             case TokenType::VAR:	str = "VAR"; break;
             case TokenType::KEYWORD:	str = "KEY"; break;
             case TokenType::NONE:	str = "NON"; break;
@@ -329,7 +333,22 @@ bool Tokens::isKeyWord(int index) {
         return false;
     }
 }
-
+/** Evaluate a token and check if its a string
+ * 
+ * @param index
+ * @return boolean
+ */
+bool Tokens::isString(int index) {
+    if (index < 0 || index >= getSize()) {
+        stdError("index for keyword check is out of bounds");
+        return false;
+    }
+    if (type[index] == TokenType::STRING) {
+        return true;
+    } else {
+        return false;
+    }
+}
 
 Tokens::~Tokens() {
     clear();

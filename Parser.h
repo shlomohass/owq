@@ -48,20 +48,28 @@ class Parser {
     // Aux- helper functions
     //----------------------------------------------------------
     bool whileNotDelimiter(int currentPos);
+    bool isDelimiter(const string& c);
     bool isDelimiter(const char& c);
     bool isSpace(const char& c);
+    bool isQstring(const char& c);
     bool isLetter(const char& c);
+    bool isLetter(const string& c);
     bool isDigit(const char& c);
     int  getDelimiterPriorty();
     bool isKeyword(string s);
-    bool isDelimiter(const string& c);
     bool hasCommas(Tokens& token);
     
 public:
     Parser();
-    //main work horse
-    int compile(Script* script, string expression);
+    
+    //main work horses
+    int compile(Script* script, string exp);
+    int compile(Script* script, string exp, bool debug);
+    
     virtual ~Parser();
+    //General:
+    string toLowerString(string *s);
+    string toUpperString(string *s);
 };
 
 #endif	/* PARSER_H */
