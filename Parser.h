@@ -7,15 +7,10 @@
 #ifndef PARSER_H
 #define	PARSER_H
 
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
-#include <sstream>
-#include <sstream>
-
 using namespace std;
 
 #include "Tokens.h"
+#include "Lang.h"
 #include "Script.h"
 
 

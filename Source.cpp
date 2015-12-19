@@ -4,7 +4,7 @@
  * 
  * Created on 17 דצמבר 2015, 19:32
  */
-
+#include <sstream>
 #include "Source.h"
 #include "Lang.h"
 

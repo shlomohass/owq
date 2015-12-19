@@ -5,7 +5,7 @@
 
 #include <exception>
 #include "Lang.h"
-#include "Parser.h"
+#include "Script.h"
 
 struct QuitNow: public std::exception
 {

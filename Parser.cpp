@@ -3,8 +3,11 @@
  * Author: shlomo hassid
  *
  */
+#include <iostream>
+#include <stdio.h>
+#include <sstream>
+
 #include "Parser.h"
-#include "Lang.h"
 
 Parser::Parser() {
 

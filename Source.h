@@ -7,10 +7,11 @@
 
 #ifndef SOURCE_H
 #define	SOURCE_H
+
 #include <iostream>
 #include <vector>
 #include <map>
-#include <sstream>
+
 
 using namespace std;
 

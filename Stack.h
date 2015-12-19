@@ -10,11 +10,10 @@
 #include "StackData.h"
 #include "ScriptVariable.h"
 
-
 #include <iostream>
 #include <vector>
-using namespace std;
 
+using namespace std;
 
 /**
  * The stack functions to only contains immediate values, never variable names or reference pointers to variables.

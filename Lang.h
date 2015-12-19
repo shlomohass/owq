@@ -64,7 +64,7 @@ public:
     static char                    LangMacroSetChar;
     virtual ~Lang();
     
-    //Printin stuff:
+    //Printing stuff:
     static void printHeader(string headername);
 private:
 
