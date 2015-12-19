@@ -207,7 +207,9 @@ bool Source::pushChar(char ch) {
     } else
     //Detect Block open | close
     if (!instring && (ch == deli_block_open || ch == deli_block_close)) {
+        buffer += ch;
         prevchar = ch;
+        bufferSize++; 
         return true;
     } else
     //Detect instruction ending for compiler help:
