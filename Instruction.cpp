@@ -79,7 +79,7 @@ Instruction::Instruction(ByteCode inst, string xOperand) {
         operand.erase(0,1);//erase beginning quotation
         operand.erase(operand.size()-1,1);//erase the ending quotation
     } else {
-        containsQuotes =false;
+        containsQuotes = false;
     }
 }
 Instruction::Instruction(ByteCode inst) {
