@@ -260,6 +260,7 @@ void Source::cleanLine() {
         if (buffer[j] == inverted_deli_op || buffer[j] == ' ') {
             buffer.erase(j, 1);
             bufferSize--;
+        } else {
             break;
         }
     }
