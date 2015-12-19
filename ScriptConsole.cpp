@@ -15,7 +15,7 @@ ScriptConsole::ScriptConsole() {
  * @param msg
  */
 void ScriptConsole::print(string msg1) {
-    cout << ">>" << msg1 << endl;
+    cout << "CONSOLE-OUT >> " << msg1 << endl;
 }
 /**
  * Write to the console
