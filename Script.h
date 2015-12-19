@@ -18,6 +18,7 @@
 class Script {
     
     friend class Parser;
+    
     /**
      * The complete listing of instructions that define this script
      */
@@ -49,7 +50,7 @@ class Script {
     int injectScript(Script* script);
 
     bool isSystemCall(string object, string functionName);
-
+    bool validateExtension(string filename);
     ScriptVariable *getVariable(string varName);
     ScriptVariable *getGlobalVariable(string varName);
     
@@ -67,7 +68,9 @@ public:
 
     void execute(string funcCall);
     void run();
-    bool load(string filename);
+    bool loadFile(string filename);
+    bool loadFile(string filename, bool debug);
+
     int getSize();
     virtual ~Script();
 };
