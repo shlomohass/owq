@@ -29,6 +29,7 @@ are executed natively and returns the retrieved dataset of the "Web Query" you p
 * **Macros** - Use the power of Macros in your script `# macroname : value # `
 * **Comments** - Multi line and single line comments `/* multi line comment */   // comment`
 * **Multi-line Expressions**
+* **Case insensitive keyword** - Programming language syntax is CI. ` WHILE = while `
 
 ### Web Bot Scraper Capabilities ###
 * **Virtual web browser** - loads pages with all executed (CSS, Images, JS and other resources)
