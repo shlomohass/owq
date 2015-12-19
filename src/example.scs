@@ -1,11 +1,17 @@
-var app = "My author: "
+#width:456#
+# 
+ shlomi : "hassid"
+#
 
-var j = 1 + 3 + 4 + 6 + app.length()
+var yey = #width#;
+var new = # shlomi #;
+yey = yey * #width#;
 
-print(j)
-app.length()
+var i =0; print(yey);
 
-print(app + Author)
+//Shlomi
+var testme = "ya*ron";
 
-
-
+print(new);
+print(i);
+print(testme);

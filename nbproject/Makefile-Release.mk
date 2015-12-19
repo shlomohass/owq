@@ -36,12 +36,14 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 # Object Files
 OBJECTFILES= \
 	${OBJECTDIR}/Instruction.o \
+	${OBJECTDIR}/Lang.o \
 	${OBJECTDIR}/Method.o \
 	${OBJECTDIR}/Parser.o \
 	${OBJECTDIR}/Script.o \
 	${OBJECTDIR}/ScriptConsole.o \
 	${OBJECTDIR}/ScriptError.o \
 	${OBJECTDIR}/ScriptVariable.o \
+	${OBJECTDIR}/Source.o \
 	${OBJECTDIR}/Stack.o \
 	${OBJECTDIR}/StackData.o \
 	${OBJECTDIR}/Tokens.o \
@@ -77,6 +79,11 @@ ${OBJECTDIR}/Instruction.o: Instruction.cpp
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Instruction.o Instruction.cpp
 
+${OBJECTDIR}/Lang.o: Lang.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Lang.o Lang.cpp
+
 ${OBJECTDIR}/Method.o: Method.cpp 
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
@@ -106,6 +113,11 @@ ${OBJECTDIR}/ScriptVariable.o: ScriptVariable.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ScriptVariable.o ScriptVariable.cpp
+
+${OBJECTDIR}/Source.o: Source.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Source.o Source.cpp
 
 ${OBJECTDIR}/Stack.o: Stack.cpp 
 	${MKDIR} -p ${OBJECTDIR}

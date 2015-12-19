@@ -4,8 +4,8 @@
  */
 
 #include <exception>
+#include "Lang.h"
 #include "Parser.h"
-
 
 struct QuitNow: public std::exception
 {
@@ -25,33 +25,47 @@ using namespace std;
  */
 int main(int argc, char** argv) {
     
+    Lang* lang = new Lang();
     Script s;
+    
+    //bool indicator = s.loadFile("src/example.scs");
+    //Parser parser;
+    
+    string testing1 = "ShlomiHassid1";
+    string testing2 = "ShlomiHassid2";
+    string testing3 = "ShlomiHassid3";
+    string testing4 = "ShlomiHassid4";
+    
+    
+    /*
+    testing1 = parser.toLowerString(&testing1);
+    string testing2 = parser.toUpperString(&testing1);
+    
+    cout << testing1 << endl;
+    cout << testing2 << endl;
+    
     
     //Load defaults GLOBAL APPLICATION VARIABLES:
     double Aflag = 3;
     double Atest = 4;
-    string Aauthor = "Shlomo Hassid";
-    s.registerVariable("Aflag",   RegisteredVariable::REGISTERED_DOUBLE, &Aflag);
-    s.registerVariable("Atest",   RegisteredVariable::REGISTERED_DOUBLE, &Atest);
-    s.registerVariable("Author",  RegisteredVariable::REGISTERED_STRING, &Aauthor);
+    string Aauthor = "the Author";
     
-    s.load("src/example.scs");
+    //Register global system variables to Interpreter:
+    //s.registerVariable("Aflag",   RegisteredVariable::REGISTERED_DOUBLE, &Aflag);
+    //s.registerVariable("Atest",   RegisteredVariable::REGISTERED_DOUBLE, &Atest);
+    //s.registerVariable("Author",  RegisteredVariable::REGISTERED_STRING, &Aauthor);
     
+     */
+    //Load target script:
+    bool indicator = s.loadFile("src/example.scs", true);
     
-    s.render();
+    //Loading success so go and do stuff:
+    if (indicator) {
+        s.render();
+        s.run();
+    }
     
-    s.run();
-    
-    //s.run();
-    
-    //s.execute("print(\"\shlomi\")");
-    /*
-    double offset = 100;
-    s.registerVariable("offset",REGISTERED_DOUBLE,&offset);
-
-    s.execute("equation(60,offset)");
-    s.unregisterVariable("offset");
-    */
+    delete lang;
     
     return 0;
 }
