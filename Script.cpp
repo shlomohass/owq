@@ -4,14 +4,11 @@
  *
  */
 #include "Script.h"
-#include <math.h>
 #include "Parser.h"
-#include "Lang.h"
-#include "Source.h"
+
+#include <math.h>
 #include <fstream>
 #include <streambuf>
-
-using std::ifstream;
 
 Script::Script() {
     code.reserve(100);	//pre-allocate 100 instruction space for byte-codes
@@ -620,6 +617,16 @@ bool Script::validateExtension(string filename) {
     return false;
 }
 
+int  Script::mergeLinesAndCompile(Source *source, Parser *parser, int linenum, bool debug) {
+    //Clean
+    source->cleanLine();
+    //Push to line stack:
+    source->pushLine(linenum);
+    //Debugger -> expose the render source of lines and CODE:
+    if (debug) { source->renderSource(); }
+    //Compile stuff (line of code):
+    return  parser->compile(this, source->getLines(), debug);
+}
 string errors[] = {" ", "1 script object is null",
 		"2 recursive call max out script contains error",
 		"3 syntax error for function definition",
@@ -681,20 +688,15 @@ bool Script::loadFile(string filename, bool debug) {
         
         //We have a line check if its enough for compiling:
         if (source.validateLine()) {
-            //Clean
-            source.cleanLine();
-            //Push to line stack:
-            source.pushLine(linenum);
-            //Debugger -> expose the render source of lines and CODE:
-            if (debug) { source.renderSource(); }
-            //Compile stuff (line of code):
-            ret = parser.compile(this, source.getLines(), debug);
+            //Clean merge and compile block of code:
+            ret = mergeLinesAndCompile(&source, &parser, linenum, debug);
             if (ret != 0) {
                 ScriptError::msg("compile error at line(" + source.getLineNumbers() + ") \"" + source.getLines() + "\" : " + errors[ret]);
                 return false;
             }
             //Clear vectors and allocated memory for new pre-parse
             source.clearLines();
+            
         } else {
             source.cleanLine();
             source.pushLine(linenum);
@@ -703,6 +705,16 @@ bool Script::loadFile(string filename, bool debug) {
             linenum++;
         }
     }
+    
+    //Execute all is left:
+    ret = mergeLinesAndCompile(&source, &parser, linenum, debug);
+    if (ret != 0) {
+        ScriptError::msg("compile error at line(" + source.getLineNumbers() + ") \"" + source.getLines() + "\" : " + errors[ret]);
+        return false;
+    }
+    //Clear vectors and allocated memory for new pre-parse
+    source.clearLines();
+    
     //Finished All show macros used if debugger is requested:
     if (debug) { 
         Lang::printHeader("Macros and usage records");
@@ -710,6 +722,7 @@ bool Script::loadFile(string filename, bool debug) {
     }
     return true;
 }
+
 /** Destructor
  * 
  */

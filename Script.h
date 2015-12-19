@@ -11,10 +11,13 @@
 #include "Method.h"
 #include "Stack.h"
 #include "ScriptConsole.h"
+#include "Source.h"
 #include <map>
 #include <vector>
 
+using namespace std;
 
+class Parser;
 class Script {
     
     friend class Parser;
@@ -51,6 +54,7 @@ class Script {
 
     bool isSystemCall(string object, string functionName);
     bool validateExtension(string filename);
+    int  mergeLinesAndCompile(Source* source, Parser* parser, int linenum, bool debug);
     ScriptVariable *getVariable(string varName);
     ScriptVariable *getGlobalVariable(string varName);
     
