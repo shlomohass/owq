@@ -1,3 +1,5 @@
+![OWQ-250x95.png](https://bitbucket.org/repo/xqadXn/images/516481228-OWQ-250x95.png)
+
 # OWQ - Open Web Query v.1.0.1 (dev) #
 
 OWQ is a dedicated scripting language (bytecode-compiled VM system), written in C++.
