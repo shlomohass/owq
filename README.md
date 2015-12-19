@@ -3,10 +3,10 @@
 # OWQ - Open Web Query v.1.0.1 (dev) #
 
 OWQ is a dedicated scripting language (bytecode-compiled VM system), written in C++.
-It allows execution of `.owq` scripts written with an JS like syntax that exposes a powerful
+It allows execution of `.owq` scripts written with a JS like syntax that exposes a powerful
 Web-Scraping and Web based data extraction API.
 OWQ is a programmable virtual machine that allows to program Scraping and Crawling Tasks that 
-are executed natively and returns the retrieved dataset of the "Web Query" (Scraping) you programmed.
+are executed natively and returns the retrieved dataset of the "Web Query" you programmed.
  
 ### Language Capabilities ###
 
@@ -21,11 +21,16 @@ are executed natively and returns the retrieved dataset of the "Web Query" (Scra
 * **Object Like variables** - All variables has a JS prototype like API such as `length, substr, trim, slice` and many more.
 * **Full target DOM traversal API**
 * **Full Support of JS script execution** against a target web page with return support.
-* **DataSets** - define and build complex data structures to store results.
+* **DataSets** - Define and build complex data structures to store results.
 * **Casting** - `numbers, strings, JSON, XML, CSV`
-* **Imports** - reuse of codes by importing them into your script.
+* **Imports** - Reuse of codes by importing them into your script.
 
-### Web bot capabilities ###
+### Pre-Compilation ###
+* **Macros** - Use the power of Macros in your script `# macroname : value # `
+* **Comments** - Multi line and single line comments `/* multi line comment */   // comment`
+* **Multi-line Expressions**
+
+### Web Bot Scraper Capabilities ###
 * **Virtual web browser** - loads pages with all executed (CSS, Images, JS and other resources)
 * **Realtime JS execution**
 * **Cookies control**
