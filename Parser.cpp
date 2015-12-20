@@ -384,7 +384,26 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
             // recursively evaluate the condition of this if statement
             //-------------------------------------------------------
             compiler(script, token, rCount);	//compile the expression
-            script->addInstruction(Instruction(ByteCode::CMP));
+            script->addInstruction(Instruction(ByteCode::CMP,"if"));
+            return 0;
+        } else if (operatorToken == Lang::LangFindKeyword("cond-else")) {
+            //else (expression){
+            token.pop(0);	//erase the else keyword
+            //(expression){
+            if(token.getToken(token.getSize()-1) != "{") {
+                Tokens::stdError("ELSE statement syntax error, expected a '{' after expression");
+                return 6;
+            } else {
+                token.pop(token.getSize()-1);
+                //(expression)
+                mark(3); // 1- marks ELSE
+            }
+            // (expression)
+            //-------------------------------------------------------
+            // recursively evaluate the condition of this if statement
+            //-------------------------------------------------------
+            compiler(script, token, rCount);	//compile the expression
+            script->addInstruction(Instruction(ByteCode::ELE,"else"));
             return 0;
         } else if (operatorToken == Lang::LangFindKeyword("loop-while")) {
 
@@ -405,7 +424,7 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
             //recursively evaluate the condition of this while loop
             //------------------------------------------------------
             compiler(script, token, rCount); //compile the expression
-            script->addInstruction(Instruction(ByteCode::CMP));
+            script->addInstruction(Instruction(ByteCode::CMP,"while"));
             return 0;
             
         } else if (operatorToken == Lang::LangFindKeyword("return")) {
@@ -436,6 +455,8 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
             script->addInstruction(Instruction(ByteCode::DONE,"while"));
         } else if ( ret == 1 ) {
             script->addInstruction(Instruction(ByteCode::DONE,"if"));
+        } else if ( ret == 3 ) {
+            script->addInstruction(Instruction(ByteCode::DONE,"else"));
         }
         return 0;
     } //end of unmark
@@ -609,6 +630,7 @@ int Parser::getDelimiterPriorty() {
  * 		0 = function marking
  * 		1 = if marking
  * 		2 = while marking
+ *              3 = else
  */
 void Parser::mark(int markType) {
     marks.push_back(markType);

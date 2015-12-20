@@ -21,7 +21,8 @@ enum ByteCode {
     LOOP, 
     DONE,
     EIF,    //end of function
-    CMP,
+    CMP,    //The confition results looks one value back in the stack;
+    ELE,    //The ELSE of a codition;
     PUSH,   //push the value of a variable onto the stack, push immediate string, or push number
     ADD,    //pop two items off stack and perform operation
     SUB,    //pop two items off stack and perform operation
@@ -34,7 +35,7 @@ enum ByteCode {
     ARGC, 
     CALL 
 };
-extern string byteCode[20];
+extern string byteCode[21];
 class Instruction {
     ByteCode code;
     string operand;

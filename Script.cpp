@@ -232,10 +232,12 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer) {
                         break;
                     }
                 }
-            } else if(xcode.getOperand() == "if") {
-                    //do nothing
+            } else if (xcode.getOperand() == "if") {
+                //do nothing
+            } else if (xcode.getOperand() == "else") {
+                //do nothing
             } else {
-                    //do nothing
+                //do nothing
             }
             break;
         case ByteCode::EIF:	//end of function
@@ -251,16 +253,18 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer) {
                     if (a.getNumber() == 1) { //condition is true
                         //continue
                     } else {
-                        int matchCount=0;	//used to match respective cmp and done so we enter or exit the right conditon bodies
+                        int matchCount=0;
+                        string curCode = code[instructionPointer].getOperand();
+                        //used to match respective cmp and done so we enter or exit the right conditon bodies
                         //-----------------------------------------------------------------------------------------------------|
                         //condition is false																				   |
                         //search for the next immediate "DONE" instruction, because it marks the end of the loop & escape	   |
                         //-----------------------------------------------------------------------------------------------------|
-                        for (int j=instructionPointer; j<this->getSize(); j++) {
-                            if (code[j].getCode() == ByteCode::CMP) {
+                        for (int j = instructionPointer; j < this->getSize(); j++) {
+                            if (code[j].getCode() == ByteCode::CMP && code[j].getOperand() == curCode) {
                                 ++matchCount;
                             }
-                            if (code[j].getCode() == ByteCode::DONE) {
+                            if (code[j].getCode() == ByteCode::DONE && code[j].getOperand() == curCode) {
                                 --matchCount;
                             }
                             if (matchCount == 0) {
@@ -268,8 +272,32 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer) {
                                     break;	//stop
                             } //end match case
                         }//end for loop
+                        //Check if there is a else statement:
+                        if (code[instructionPointer].getOperand() == "if") {
+                            if (code[instructionPointer + 1].getCode() == ByteCode::ELE) {
+                                //Jump to after target else
+                                instructionPointer++;
+                            }
+                        }
                     }//end else
                 }//end else not number
+            }
+            break;
+        case ByteCode::ELE:{
+                 //jump the block cause the only way is through the IF and not directly:
+                int matchCount = 0;
+                for (int j = instructionPointer; j < this->getSize(); j++) {
+                    if (code[j].getCode() == ByteCode::ELE) {
+                        ++matchCount;
+                    }
+                    if (code[j].getCode() == ByteCode::DONE && code[j].getOperand() == "else") {
+                        --matchCount;
+                    }
+                    if (matchCount == 0) {
+                        instructionPointer = j; //change instruction pointer to be at this instancce of done instruction
+                        break; //stop
+                    } //end match case
+                }//end for loop
             }
             break;
         case ByteCode::ADD:{
@@ -627,11 +655,15 @@ int  Script::mergeLinesAndCompile(Source *source, Parser *parser, int linenum, b
     //Compile stuff (line of code):
     return  parser->compile(this, source->getLines(), debug);
 }
-string errors[] = {" ", "1 script object is null",
-		"2 recursive call max out script contains error",
-		"3 syntax error for function definition",
-		"4 if-statement syntax error",
-		"5 while-statement syntax error" };
+string errors[] = {
+    " ", 
+    "1 script object is null",
+    "2 recursive call max out script contains error",
+    "3 syntax error for function definition",
+    "4 if-statement syntax error",
+    "5 while-statement syntax error",
+    "6 else - statement syntax error" 
+};
 
 /** Loads and precompiles a script:
  * 

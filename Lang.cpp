@@ -34,7 +34,7 @@ map<string, char> Lang::LangDelimiter = {
 
 //Set Keywords:
 map<string, string> Lang::LangKeywords = {
-    {"variable"     , "var"},
+    {"variable"     , "let"},
     {"cond-if"      , "if"},
     {"cond-else"    , "else"},
     {"loop-while"   , "while"},
