@@ -5,10 +5,10 @@
  */
 
 #include "Tokens.h"
+#include "Lang.h"
 #include <sstream>
 
 Tokens::Tokens() {
-    // TODO Auto-generated constructor stub
     tokens.reserve(30);
     type.reserve(30);
     priorty.reserve(30);
@@ -26,10 +26,10 @@ void Tokens::addToken(string token, int priortyCode, TokenType tokenType) {
     priorty.push_back(priortyCode);
     type.push_back(tokenType);
     if(getSize() > 1){
-        int size=getSize();
+        int size = getSize();
         //if previous token before this one is a variable
-        if(isOpenParenthesis(size-1) && isVar(size-2)){
-            priorty[size-2]= 2;
+        if (isOpenParenthesis(size-1) && isVar(size-2)) {
+            priorty[size-2] = 2;
         }
     }
 }
@@ -40,10 +40,10 @@ void Tokens::addToken(string token, int priortyCode, TokenType tokenType) {
  * @return true or false
  */
 bool Tokens::isNumber(int index) {
-    if(index < 0 || index > getSize()-1){
+    if (index < 0 || index > getSize() - 1){
         return false;
     }
-    if(type[index] == TokenType::NUMBER) {
+    if (type[index] == TokenType::NUMBER) {
         return true;
     }
     return false;
@@ -87,7 +87,7 @@ bool Tokens::isVar(int index) {
 bool Tokens::isCloseParenthesis(int index) {
     bool isDelim = isDelimiter(index);
     if(!isDelim) return false;
-    if(tokens[index] == ")") {
+    if(tokens[index] == Lang::LangFindDelimiter("braketClose")) {
         return true;
     }
     return false;
@@ -100,7 +100,7 @@ bool Tokens::isCloseParenthesis(int index) {
 bool Tokens::isOpenParenthesis(int index) {
     bool isDelim = isDelimiter(index);
     if(!isDelim) return false;
-    if(tokens[index] == "("){
+    if(tokens[index] == Lang::LangFindDelimiter("braketOpen")){
         return true;
     }
     return false;
@@ -124,7 +124,7 @@ bool Tokens::isOpenParenthesis(int index) {
  */
 Tokens Tokens::extractContentOfParenthesis(int startParenthesisIndex, int endParenthesisIndex, int& extractionCount) {
     Tokens newToken;
-    if(startParenthesisIndex < 0 || startParenthesisIndex > getSize()-1) {
+    if(startParenthesisIndex < 0 || startParenthesisIndex > getSize() - 1) {
         stdError("token extraction, startIndex out of bounds");
         return newToken;
     }
@@ -136,7 +136,7 @@ Tokens Tokens::extractContentOfParenthesis(int startParenthesisIndex, int endPar
     int i;
     int count = 0;	//the total count of values to extract
     for (i=startParenthesisIndex+1; i < endParenthesisIndex; i++) {
-        newToken.addToken(tokens[i],priorty[i],type[i]);
+        newToken.addToken(tokens[i], priorty[i], type[i]);
         count++;
     }
     //erase the total number of tokens extracted including what is before and after
@@ -177,15 +177,15 @@ Tokens Tokens::extractInclusive(int startIndex, int endIndex, int& extractionCou
     int i;
     int count=0;	//the total count of values to extract
     for(i=startIndex; i < endIndex+1; i++){
-        newToken.addToken(tokens[i],priorty[i],type[i]);
+        newToken.addToken(tokens[i], priorty[i], type[i]);
         count++;
     }
     //erase
     for(i=0; i<(count); i++){	//erase the total number of tokens extracted including what is before and after
         //the contents extracted
-        tokens.erase	(tokens.begin()	 + startIndex);
-        type.erase		(type.begin()	 + startIndex);
-        priorty.erase	(priorty.begin() + startIndex);
+        tokens.erase(tokens.begin() + startIndex);
+        type.erase(type.begin() + startIndex);
+        priorty.erase (priorty.begin() + startIndex);
     }
     extractionCount = count;
     tokens.insert(tokens.begin()+startIndex, "RST");
@@ -245,7 +245,7 @@ void Tokens::renderTokenPriorty(){
  * @return integer
  */
 int Tokens::getTokenPriorty(int index) {
-    if ( index < 0 || index > getSize()-1 ){
+    if ( index < 0 || index > getSize() - 1 ){
         stdError("getToken priority out of bounds");
         return 0;
     }
@@ -260,8 +260,8 @@ int Tokens::getTokenPriorty(int index) {
 int Tokens::getHighestOperatorPriorityIndex(int& priortyCode) {
     int index = 0;
     int highest = -10;
-    for (int i=0; i<getSize(); i++){
-        if(priorty[i] > highest){
+    for (int i = 0; i < getSize(); i++){
+        if (priorty[i] > highest) {
             highest = priorty[i];
             priortyCode = highest;
             index = i;
@@ -294,8 +294,8 @@ string Tokens::getToken(int index) {
  */
 int Tokens::getMatchingCloseParenthesis(int openIndex) {
     int i;
-    for( i = openIndex; i < getSize(); i++ ){
-        if( tokens[i] == ")" ){
+    for (i = openIndex; i < getSize(); i++ ) {
+        if ( tokens[i] == Lang::LangFindDelimiter("braketClose")) {
             return i;
             break;
         }
@@ -308,7 +308,7 @@ int Tokens::getMatchingCloseParenthesis(int openIndex) {
  * @param integer index
  */
 void Tokens::pop(int index) {
-    if(index < 0 || index > getSize()-1){
+    if (index < 0 || index > getSize()-1) {
         stdError("pop index out of range");
         return;
     }

@@ -28,9 +28,9 @@ public:
     static vector<string>          extensionLib;
     
     //Delimiters Definition and functions:
-    static map<string, char>       LangDelimiter;
-    static map<char, string>       LangInverseDelimiter;
-    static char                    LangFindDelimiter(const string& key);
+    static map<string, string>     LangDelimiter;
+    static map<string, string>     LangInverseDelimiter;
+    static string                  LangFindDelimiter(const string& key);
     static bool                    LangHasKeyDelimiter(const string& key);
     static bool                    LangIsDelimiter(const char& value);
     static bool                    LangIsDelimiter(const string& value);

@@ -18,6 +18,8 @@ string byteCode[] = {
     "DONE",
     "EIF", 
     "CMP",
+    "AND",
+    "POR",
     "ELE",
     "PUSH", 
     "ADD", 

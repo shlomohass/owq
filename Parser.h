@@ -46,10 +46,13 @@ class Parser {
     bool isDelimiter(const string& c);
     bool isDelimiter(const char& c);
     bool isSpace(const char& c);
+    bool isSpace(const string& c);
     bool isQstring(const char& c);
+    bool isQstring(const string& c);
     bool isLetter(const char& c);
     bool isLetter(const string& c);
     bool isDigit(const char& c);
+    bool isDigit(const string& c);
     int  getDelimiterPriorty();
     bool isKeyword(string s);
     bool hasCommas(Tokens& token);

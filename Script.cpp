@@ -225,22 +225,46 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer) {
             //I call the instruction "DONE" a --repeater because it functions to change the instruction pointer to the first                    
             //imediate LOOP instruction by stepping backwards from the current code address
             //when at done, step backwards to first occurance of LOOP
-            if(xcode.getOperand() == "while"){
+            if(xcode.getOperand() == Lang::LangFindKeyword("loop-while")){
                 for(int j=instructionPointer; j > -1; j--){	//step backwards
                     if(code[j].getCode() == ByteCode::LOOP){			//if the instruction has an instruction code that matches LOOP
                         instructionPointer = j;				//set that instruction address to ip and break immediately
                         break;
                     }
                 }
-            } else if (xcode.getOperand() == "if") {
+            } else if (xcode.getOperand() == Lang::LangFindKeyword("cond-if")) {
                 //do nothing
-            } else if (xcode.getOperand() == "else") {
+            } else if (xcode.getOperand() == Lang::LangFindKeyword("cond-else")) {
                 //do nothing
             } else {
                 //do nothing
             }
             break;
         case ByteCode::EIF:	//end of function
+            break;
+        case ByteCode::AND:{
+                StackData b = Stack::pop();
+                StackData a = Stack::pop();
+                if (!a.isNumber() || !b.isNumber()) {  
+                    ScriptError::msg("expected evaluation of boolean expression to be numeric"); 
+                } else if(a.getNumber() == 1 && b.getNumber() == 1) { 
+                    Stack::push(1);
+                } else {  
+                    Stack::push(0);
+                }
+            }
+            break;
+        case ByteCode::POR:{
+                StackData b = Stack::pop();
+                StackData a = Stack::pop();
+                if (!a.isNumber() || !b.isNumber()) {  
+                    ScriptError::msg("expected evaluation of boolean expression to be numeric"); 
+                } else if ( a.getNumber() == 1 || b.getNumber() == 1 ) { 
+                    Stack::push(1);
+                } else {  
+                    Stack::push(0);
+                }
+            }
             break;
         case ByteCode::CMP:{	
                 //I call CMP as the gate keeper because it functions to determine if the body of a condition can be executed or
@@ -273,7 +297,7 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer) {
                             } //end match case
                         }//end for loop
                         //Check if there is a else statement:
-                        if (code[instructionPointer].getOperand() == "if") {
+                        if (code[instructionPointer].getOperand() == Lang::LangFindKeyword("cond-if")) {
                             if (code[instructionPointer + 1].getCode() == ByteCode::ELE) {
                                 //Jump to after target else
                                 instructionPointer++;
@@ -283,14 +307,14 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer) {
                 }//end else not number
             }
             break;
-        case ByteCode::ELE:{
+        case ByteCode::ELE: {
                  //jump the block cause the only way is through the IF and not directly:
                 int matchCount = 0;
                 for (int j = instructionPointer; j < this->getSize(); j++) {
                     if (code[j].getCode() == ByteCode::ELE) {
                         ++matchCount;
                     }
-                    if (code[j].getCode() == ByteCode::DONE && code[j].getOperand() == "else") {
+                    if (code[j].getCode() == ByteCode::DONE && code[j].getOperand() == Lang::LangFindKeyword("cond-else")) {
                         --matchCount;
                     }
                     if (matchCount == 0) {
@@ -412,7 +436,7 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer) {
                 string method = operand;
                 int dotOperator = operand.find_first_of(".");
 
-                if(dotOperator != -1){
+                if(dotOperator != -1) {
                         object = operand.substr(0,dotOperator);
                         method = operand.substr(dotOperator+1);
                 }

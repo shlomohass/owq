@@ -8,28 +8,31 @@
 #include "Lang.h"
 
 //Initialize maps:
-map<char, string> Lang::LangInverseDelimiter = map<char, string>{};
+map<string, string> Lang::LangInverseDelimiter = map<string, string>{};
 map<string, string> Lang::LangInverseKeywords = map<string, string>{};
 
 //Set Delimiters:
-map<string, char> Lang::LangDelimiter = {
-    {"space"             , ' '},
-    {"plus-cast-str"     , '~'},
-    {"plus"              , '+'},
-    {"minus"             , '-'},
-    {"multi"             , '*'},
-    {"divide"            , '/'},
-    {"equal"             , '='},
-    {"braketOpen"        , '('},
-    {"braketClose"       , ')'},
-    {"bracesOpen"        , '{'},
-    {"bracesClose"       , '}'},
-    {"power"             , '^'},
-    {"exclamation"       , '!'},
-    {"greater"           , '>'},
-    {"smaller"           , '<'},
-    {"comma"             , ','},
-    {"semicolon"         , ';'}
+map<string, string> Lang::LangDelimiter = {
+    {"space"             , " "},
+    {"plus-cast-str"     , "~"},
+    {"plus"              , "+"},
+    {"minus"             , "-"},
+    {"multi"             , "*"},
+    {"divide"            , "/"},
+    {"equal"             , "="},
+    {"braketOpen"        , "("},
+    {"braketClose"       , ")"},
+    {"bracesOpen"        , "{"},
+    {"bracesClose"       , "}"},
+    {"power"             , "^"},
+    {"exclamation"       , "!"},
+    {"greater"           , ">"},
+    {"smaller"           , "<"},
+    {"comma"             , ","},
+    {"eval"              , "=="},
+    {"and"               , "&"},
+    {"or"                , "|"},
+    {"semicolon"         , ";"}
 };
 
 //Set Keywords:
@@ -78,7 +81,7 @@ map<string, string> Lang::LangRegexLib = {
 Lang::Lang() {
     //Inverse Delimiter:    
     for(auto const &ent1 : LangDelimiter) {
-        LangInverseDelimiter.insert(pair<char, string>(ent1.second, ent1.first));
+        LangInverseDelimiter.insert(pair<string, string>(ent1.second, ent1.first));
     } 
     //Inverse Keywords:    
     for(auto const &ent2 : LangKeywords) {
@@ -95,11 +98,11 @@ Lang::~Lang() {
  * @param string key
  * @return char
  */
-char Lang::LangFindDelimiter(const string& key) {
+string Lang::LangFindDelimiter(const string& key) {
     if (LangHasKeyDelimiter(key)) {
         return LangDelimiter.at(key);
     }
-    return '\0';
+    return "";
 }
 /** Check whether a key delimiter is set:
  * 
@@ -114,11 +117,11 @@ bool Lang::LangHasKeyDelimiter(const string& key) {
  * @param string key key name
  * @return bool
  */
-bool Lang::LangIsDelimiter(const char& value) {
+bool Lang::LangIsDelimiter(const string& value) {
     return LangInverseDelimiter.count(value) == 1;
 }
-bool Lang::LangIsDelimiter(const string& value) {
-    return LangInverseDelimiter.count(value[0]) == 1;
+bool Lang::LangIsDelimiter(const char& value) {
+    return LangInverseDelimiter.count(string(1, value)) == 1;
 }
 /** Find the string that represent a keyword name (key):
  * 
