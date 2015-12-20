@@ -12,131 +12,107 @@
 Parser::Parser() {
 
 }
-/**
- * Indicate whether or not a char constant c is one of our defined delimiters
- * Note: delimiters are used to separate individual tokens
- * @param c
- * @return return true if it is a delimiter otherwise false
- */
-bool Parser::isDelimiter(const string& c) {
-    return Lang::LangIsDelimiter(c);
-}
-bool Parser::isDelimiter(const char& c) {
-    return Lang::LangIsDelimiter(c);
-}
-/** Check whether a char is space or not
- * 
- * @param char|string c
- * @return bool
- * 
- */
-bool Parser::isSpace(const char& c) {
-    return (string(1, c) == Lang::LangFindDelimiter("space")) ? true : false;
-}
-bool Parser::isSpace(const string& c) {
-    return (c == Lang::LangFindDelimiter("space")) ? true : false;
+Parser::~Parser() {
+
 }
 
-/** Check whether we entering using a string:
- * @param char c
- * @return bool
- */
-bool Parser::isQstring(const char& c) {
-    return c == Lang::LangStringIndicator;
-}
-bool Parser::isQstring(const string& c) {
-    return c[0] == Lang::LangStringIndicator;
-}
-/** Validate naming chars:
+/** The compile takes a parsed expression and tokenize -> colies the tokens. 
  * 
- * @param char|string c
- * @return bool
+ * @param Script script
+ * @param string exp
+ * @param boolean debug
+ * @return int
+ * 
  */
-bool Parser::isLetter(const char& c) {
-    return Lang::LangIsNamingAllowed(c);
+int Parser::compile(Script* script, string exp) {
+    compile(script, exp, false);
 }
-bool Parser::isLetter(const string& c) {
-    return Lang::LangIsNamingAllowed(c);
-}
-
-/**
- * Indicate true of false if a specific character constant, c, is a digit or not
- * @param c
- * @return
- */
-bool Parser::isDigit(const char& c) {
-	bool ret = false;
-	switch(c){
-	case '0':
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-	case '7':
-	case '8':
-	case '9':
-            ret = true;
-            break;
-	default:
-            ret = false;
-            break;
-	}
-	return ret;
-}
-bool Parser::isDigit(const string& c) {
-	bool ret = false;
-	switch(c[0]){
-	case '0':
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-	case '7':
-	case '8':
-	case '9':
-            ret = true;
-            break;
-	default:
-            ret = false;
-            break;
-	}
-	return ret;
-}
-/**
- * Indicate if supplied string, s, is a keyword
- * @param s
- * @return
- */
-bool Parser::isKeyword(string s) {
-    if (Lang::LangIsKeyword(s)) {
-        currentTokenType = TokenType::KEYWORD;
-        return true;
+int Parser::compile(Script* script, string exp, bool debug) { 
+    if (script == NULL) {
+        Tokens::stdError("compile expression, script pointer is null");
+        return 1;
     }
-    return false;
+    Tokens token;
+    //generate our tokens
+    tokenize(exp, token);
+
+    //For debugging:
+    if (debug) { token.renderTokens(); }
+    //compile our tokens
+    return compiler(script, token, 0);
 }
-/** Parse any string to lower ASCII chars
- * 
- * @param s
- * @return 
+/**
+ *
+ * Repeatedly call getToken as a means to populate the container class Tokens.
+ *
+ * Will create all the possible tokens contained in exp
+ * @param exp
+ * @param token
  */
-string Parser::toLowerString(string *s) {
-    string outBuffer = *s;
-    transform(s->begin(), s->end(), outBuffer.begin(), ::tolower);
-    return outBuffer;
-}
-/** Parse any string to lower ASCII chars
- * 
- * @param s
- * @return 
- */
-string Parser::toUpperString(string *s) {
-    string outBuffer = *s;
-    transform(s->begin(), s->end(), outBuffer.begin(), ::toupper);
-    return outBuffer;
+void Parser::tokenize(string& exp, Tokens& token) {
+
+    expression = exp;
+    expressionIndex = 0;
+    int parenthesisScaler = 0;
+
+    //NOTE: after call to getToken
+    //	    the token just created will be stored in 'currentToken'
+    getToken();
+
+    int priortyValue = 0;
+    while (currentToken != "") {
+        priortyValue = getDelimiterPriorty(); //get the current tokens priortyValue as a function of its evaluation hierarchy
+        //this serves to ensure that multiple parenthetical grouping will be evaluated in a manner such that the deepest
+        //grouping is evaluated first
+        if (currentToken == string(1, Lang::LangFunctionOpenArguChar)) {
+            priortyValue += parenthesisScaler;
+            parenthesisScaler += 1;
+        }
+        
+        //clean up the escaped characters of string :
+        bool isEscaped = false;
+        string buffToken = "";
+        if (currentTokenType == TokenType::STRING) {
+            for (int i=0; i<(int)currentToken.length(); i++) {
+                if(currentToken[i] == Lang::LangStringEscape && !isEscaped) {
+                    isEscaped = true;
+                } else if (isEscaped) {
+                    switch (currentToken[i]) {
+                        case 'n':
+                            buffToken += '\n';
+                            break;
+                        case 't':
+                            buffToken += '\t';
+                            break;
+                        case 'r':
+                            buffToken += '\r';
+                            break;
+                        case '0':
+                            buffToken += '\0';
+                            break;
+                        case 'b':
+                            buffToken += '\b';
+                            break;
+                        case 'a':
+                            buffToken += '\a';
+                            break;
+                        default:
+                            buffToken += currentToken[i];
+                    }
+                    isEscaped = false;
+                } else {
+                    buffToken += currentToken[i];
+                }
+            }
+            currentToken = buffToken;
+        }
+        
+        token.addToken(currentToken, priortyValue, currentTokenType);
+        //increase parenthesis scaler if current token was was a parenthesis
+
+        getToken();	
+        //move to next iteration of this loop
+    }
 }
 /**
  * Return the next token contain in the expression passed to function <b>compile(Script, string</b>
@@ -243,81 +219,13 @@ string Parser::getToken() {
     }
     return currentToken;
 }
-
-/**
- *
- * Repeatedly call getToken as a means to populate the container class Tokens.
- *
- * Will create all the possible tokens contained in exp
- * @param exp
- * @param token
+/** Generates the byte code of agiven Token set
+ * 
+ * @param Script script
+ * @param Tokens token
+ * @param integer rCount -> the recursion counter for limits
+ * @return integer
  */
-void Parser::tokenize(string& exp, Tokens& token) {
-
-    expression = exp;
-    expressionIndex = 0;
-    int parenthesisScaler = 0;
-
-    //NOTE: after call to getToken
-    //	    the token just created will be stored in 'currentToken'
-    getToken();
-
-    int priortyValue = 0;
-    while (currentToken != "") {
-        priortyValue = getDelimiterPriorty(); //get the current tokens priortyValue as a function of its evaluation hierarchy
-        //this serves to ensure that multiple parenthetical grouping will be evaluated in a manner such that the deepest
-        //grouping is evaluated first
-        if (currentToken == string(1, Lang::LangFunctionOpenArguChar)) {
-            priortyValue += parenthesisScaler;
-            parenthesisScaler += 1;
-        }
-        
-        //clean up the escaped characters of string :
-        bool isEscaped = false;
-        string buffToken = "";
-        if (currentTokenType == TokenType::STRING) {
-            for (int i=0; i<(int)currentToken.length(); i++) {
-                if(currentToken[i] == Lang::LangStringEscape && !isEscaped) {
-                    isEscaped = true;
-                } else if (isEscaped) {
-                    switch (currentToken[i]) {
-                        case 'n':
-                            buffToken += '\n';
-                            break;
-                        case 't':
-                            buffToken += '\t';
-                            break;
-                        case 'r':
-                            buffToken += '\r';
-                            break;
-                        case '0':
-                            buffToken += '\0';
-                            break;
-                        case 'b':
-                            buffToken += '\b';
-                            break;
-                        case 'a':
-                            buffToken += '\a';
-                            break;
-                        default:
-                            buffToken += currentToken[i];
-                    }
-                    isEscaped = false;
-                } else {
-                    buffToken += currentToken[i];
-                }
-            }
-            currentToken = buffToken;
-        }
-        
-        token.addToken(currentToken, priortyValue, currentTokenType);
-        //increase parenthesis scaler if current token was was a parenthesis
-
-        getToken();	
-        //move to next iteration of this loop
-    }
-}
-
 int Parser::compiler(Script* script, Tokens& token, int rCount){
     
     if(!script) return 1;
@@ -345,6 +253,7 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
     string leftToken = ""; //Look behind
     string rightToken = ""; //Look front
     string rightRightToken = "";
+    
     if ( operatorIndex > 0 ) {
         leftToken = token.getToken( operatorIndex - 1 );
     }
@@ -529,7 +438,7 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
     //		x , 32 + y , z
     //
     //-----------------------------------------------------------
-    if(hasCommas(token)){
+    if (hasCommas(token)) {
         for (int i = 0; i<token.getSize(); i++) {
             if (token.getToken(i) == Lang::LangFindDelimiter("comma")) {
                 Tokens sub = token.extractInclusive(0, i - 1, eraseCount);
@@ -555,7 +464,7 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
         }
         token.extractInclusive(operatorIndex - 1, operatorIndex + 1, eraseCount);
         operatorIndex -= eraseCount;
-    } else if(priortyCode == 80) {	//multi and division * /
+    } else if (priortyCode == 80) {	//multi and division * /
         script->addInstruction(Instruction(ByteCode::PUSH, leftToken));
         script->addInstruction(Instruction(ByteCode::PUSH, rightToken));
         if (token.getToken(operatorIndex)== Lang::LangFindDelimiter("multi")) {
@@ -582,6 +491,14 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
             script->addInstruction(Instruction(ByteCode::GTR));
         } else {
             script->addInstruction(Instruction(ByteCode::LSR));
+        }
+        token.extractInclusive(operatorIndex-1, operatorIndex+1, eraseCount);
+        operatorIndex -= eraseCount;
+    } else if (priortyCode == 59) {	//c-equals ==
+        script->addInstruction(Instruction(ByteCode::PUSH, leftToken));
+        script->addInstruction(Instruction(ByteCode::PUSH, rightToken));
+        if (token.getToken(operatorIndex) == Lang::LangFindDelimiter("c-equal")) {
+            script->addInstruction(Instruction(ByteCode::CVE));
         }
         token.extractInclusive(operatorIndex-1, operatorIndex+1, eraseCount);
         operatorIndex -= eraseCount;
@@ -615,37 +532,144 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
     }
     return 0;
 }
-
-/** The compile takes a parsed expression and tokenize -> colies the tokens. 
- * 
- * @param Script script
- * @param string exp
- * @param boolean debug
- * @return int
- * 
+/**
+ * Used to describes the body of a function, conditional branches, or looping seqeunce
+ *
+ * markType is used to delineate between the different types of markings
+ * @param markType
+ * 		0 = function marking
+ * 		1 = if marking
+ * 		2 = while marking
+ *              3 = else
  */
-int Parser::compile(Script* script, string exp) {
-    compile(script, exp, false);
+void Parser::mark(int markType) {
+    marks.push_back(markType);
 }
-int Parser::compile(Script* script, string exp, bool debug) { 
-    if (script == NULL) {
-        Tokens::stdError("compile expression, script pointer is null");
-        return 1;
+int Parser::unmark() {
+    if (marks.size() == 0) {
+        Tokens::stdError("marking stack is zero unable to unmark");
+        return -1;
     }
-    Tokens token;
-    //generate our tokens
-    tokenize(exp, token);
-
-    //For debugging:
-    if (debug) { token.renderTokens(); }
-    //compile our tokens
-    return compiler(script, token, 0);
+    int t = marks.back();
+    marks.pop_back();
+    return t;
 }
 
+/** loop condition to find all until delimiter
+ * @param integer currentPos
+ * @return bool
+ */
 bool Parser::whileNotDelimiter(int currentPos) {
     return currentPos < (int)expression.length() && !isDelimiter(expression[currentPos]);
 }
-
+/**
+ * Indicate whether or not a char constant c is one of our defined delimiters
+ * Note: delimiters are used to separate individual tokens
+ * @param c
+ * @return return true if it is a delimiter otherwise false
+ */
+bool Parser::isDelimiter(const string& c) {
+    return Lang::LangIsDelimiter(c);
+}
+bool Parser::isDelimiter(const char& c) {
+    return Lang::LangIsDelimiter(c);
+}
+/** Check whether a char is space or not
+ * 
+ * @param char|string c
+ * @return bool
+ * 
+ */
+bool Parser::isSpace(const char& c) {
+    return (string(1, c) == Lang::LangFindDelimiter("space")) ? true : false;
+}
+bool Parser::isSpace(const string& c) {
+    return (c == Lang::LangFindDelimiter("space")) ? true : false;
+}
+/** Check whether we entering using a string:
+ * @param char c
+ * @return bool
+ */
+bool Parser::isQstring(const char& c) {
+    return c == Lang::LangStringIndicator;
+}
+bool Parser::isQstring(const string& c) {
+    return c[0] == Lang::LangStringIndicator;
+}
+/** Validate naming chars:
+ * 
+ * @param char|string c
+ * @return bool
+ */
+bool Parser::isLetter(const char& c) {
+    return Lang::LangIsNamingAllowed(c);
+}
+bool Parser::isLetter(const string& c) {
+    return Lang::LangIsNamingAllowed(c);
+}
+/**
+ * Indicate true of false if a specific character constant, c, is a digit or not
+ * @param c
+ * @return
+ */
+bool Parser::isDigit(const char& c) {
+	bool ret = false;
+	switch(c){
+	case '0':
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+	case '7':
+	case '8':
+	case '9':
+            ret = true;
+            break;
+	default:
+            ret = false;
+            break;
+	}
+	return ret;
+}
+bool Parser::isDigit(const string& c) {
+	bool ret = false;
+	switch(c[0]){
+	case '0':
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+	case '7':
+	case '8':
+	case '9':
+            ret = true;
+            break;
+	default:
+            ret = false;
+            break;
+	}
+	return ret;
+}
+/**
+ * Indicate if supplied string, s, is a keyword
+ * @param s
+ * @return
+ */
+bool Parser::isKeyword(string s) {
+    if (Lang::LangIsKeyword(s)) {
+        currentTokenType = TokenType::KEYWORD;
+        return true;
+    }
+    return false;
+}
+/** Translates an delimiter string to a Precedence Priority
+ * 
+ * @return integer
+ */
 int Parser::getDelimiterPriorty() {
     if(currentTokenType == KEYWORD) {
         return 140;
@@ -661,6 +685,8 @@ int Parser::getDelimiterPriorty() {
         return 70;
     } else if (currentToken == Lang::LangFindDelimiter("smaller") || currentToken == Lang::LangFindDelimiter("greater")) {
         return 60;
+    } else if (currentToken == Lang::LangFindDelimiter("c-equal")) {
+        return 59;
     } else if (currentToken == Lang::LangFindDelimiter("and")) {
         return 50;
     } else if (currentToken == Lang::LangFindDelimiter("or")) {
@@ -673,31 +699,11 @@ int Parser::getDelimiterPriorty() {
         return 0;
     }
 }
-
-/**
- * Used to describes the body of a function, conditional branches, or looping seqeunce
- *
- * markType is used to delineate between the different types of markings
- * @param markType
- * 		0 = function marking
- * 		1 = if marking
- * 		2 = while marking
- *              3 = else
+/** Check to see if a token group has commas in it 
+ * 
+ * @param Tokens token  -> the entire Token Group
+ * @return boolean
  */
-void Parser::mark(int markType) {
-    marks.push_back(markType);
-}
-
-int Parser::unmark() {
-    if (marks.size() == 0) {
-        Tokens::stdError("marking stack is zero unable to unmark");
-        return -1;
-    }
-    int t = marks.back();
-    marks.pop_back();
-    return t;
-}
-
 bool Parser::hasCommas(Tokens& token) {
     for (int i = 0; i<token.getSize(); i++){
         if(token.getToken(i) == Lang::LangFindDelimiter("comma")){
@@ -707,7 +713,23 @@ bool Parser::hasCommas(Tokens& token) {
     return false;
 }
 
-Parser::~Parser() {
-
+/** Parse any string to lower ASCII chars
+ * 
+ * @param s
+ * @return 
+ */
+string Parser::toLowerString(string *s) {
+    string outBuffer = *s;
+    transform(s->begin(), s->end(), outBuffer.begin(), ::tolower);
+    return outBuffer;
 }
-
+/** Parse any string to lower ASCII chars
+ * 
+ * @param s
+ * @return 
+ */
+string Parser::toUpperString(string *s) {
+    string outBuffer = *s;
+    transform(s->begin(), s->end(), outBuffer.begin(), ::toupper);
+    return outBuffer;
+}
