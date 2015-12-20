@@ -25,9 +25,7 @@ class Parser {
     string expression;		//expression to evaluate and compile
     int expressionIndex;	//the index into the expression; i.e expression[expressionIndex]
     string currentToken;	//the currentToken as a function of expression
-
     vector<int> marks;		//helps to group related code branches: functions, if, while
-
     TokenType currentTokenType;	//describes the current token type
 
     //---------------------------------------------------------
@@ -53,21 +51,27 @@ class Parser {
     bool isLetter(const string& c);
     bool isDigit(const char& c);
     bool isDigit(const string& c);
-    int  getDelimiterPriorty();
     bool isKeyword(string s);
     bool hasCommas(Tokens& token);
+    int  getDelimiterPriorty();
     
+    //----------------------------------------------------------
+    // Compiler - Methods
+    //----------------------------------------------------------
+    bool compile_plus(Script* script, Tokens* token, string leftToken, string rightToken);
+
 public:
     Parser();
+    virtual ~Parser();
     
-    //main work horses
+    //main work horses entry point compile -> tokenize -> compiler
     int compile(Script* script, string exp);
     int compile(Script* script, string exp, bool debug);
-    
-    virtual ~Parser();
+
     //General:
     string toLowerString(string *s);
     string toUpperString(string *s);
+    
 };
 
 #endif	/* PARSER_H */
