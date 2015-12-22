@@ -1,14 +1,14 @@
 /* 
  * File:   main.cpp
  * Author: shlomi
- */
+ */ 
 
 #include <exception>
 #include "Lang.h"
 #include "Script.h"
 
 struct QuitNow: public exception
-{
+{ 
     QuitNow() { }
     virtual ~QuitNow() throw() { }
     virtual const char* what() throw()
