@@ -58,8 +58,7 @@ class Parser {
     //----------------------------------------------------------
     // Compiler - Methods
     //----------------------------------------------------------
-    bool compile_plus(Script* script, Tokens* token, string leftToken, string rightToken);
-
+    bool compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, Tokens* token, int &operatorIndex, int &eraseCount, string &leftToken, string &rightToken);
 public:
     Parser();
     virtual ~Parser();

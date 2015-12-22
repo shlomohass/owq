@@ -1,17 +1,9 @@
-#width:456#
-# 
- shlomi : "hassid"
-#
 
-var yey = #width#;
-var new = # shlomi #;
-yey = yey * #width#;
+let t = 10 < 9
+let a = 4 < 8
+let b = 2 < 9 * 6;
+let test1 = b - a * t - a;
+let test2 = t < t + 1;
 
-var i =0; print(yey);
-
-//Shlomi
-var testme = "ya*ron";
-
-print(new);
-print(i);
-print(testme);
+print(test1);
+print(test2);

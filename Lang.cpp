@@ -29,7 +29,7 @@ map<string, string> Lang::LangDelimiter = {
     {"greater"           , ">"},
     {"smaller"           , "<"},
     {"comma"             , ","},
-    {"eval"              , "=="},
+    {"c-equal"           , "=="},
     {"and"               , "&"},
     {"or"                , "|"},
     {"semicolon"         , ";"}

@@ -196,28 +196,49 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer) {
                 StackData a = Stack::pop();
                 if (a.isNumber() && b.isNumber()) {                           //a = number AND b = number
                     Stack::push(a.getNumber() > b.getNumber());
-                } else if (a.isNumber() && !b.isNumber()) {                  //a = number AND b = string
+                } else if (a.isNumber() && b.isString()) {                  //a = number AND b = string
                     Stack::push(a.getNumber() > b.getString().length());
-                } else if (!a.isNumber() && b.isNumber()) {                  //a = string AND b = number
+                } else if (a.isString() && b.isNumber()) {                  //a = string AND b = number
                     Stack::push(a.getString().length() > b.getNumber());
-                } else {                                                    //a = string AND b = string
+                } else if (a.isString() && b.isString()) {                  //a = string AND b = string
                     Stack::push(a.getString().length() > b.getString().length());
+                } else {
+                    Stack::push(0);
                 }
             }
-        break;
+            break;
         case ByteCode::LSR:{
                 StackData b = Stack::pop();
                 StackData a = Stack::pop();
-                if(a.isNumber() && b.isNumber()){                                   //a = number AND b = number
+                if(a.isNumber() && b.isNumber()) {                                   //a = number AND b = number
                     Stack::push(a.getNumber() < b.getNumber());
-                }else if(a.isNumber() && !b.isNumber()){                            //a = number AND b = string
+                } else if(a.isNumber() && b.isString()) {                            //a = number AND b = string
                     Stack::push(a.getNumber() < b.getString().length());
-                }else if(!a.isNumber() && b.isNumber()){                            //a = string AND b = number
+                } else if(a.isString() && b.isNumber()) {                            //a = string AND b = number
                     Stack::push(a.getString().length() < b.getNumber());
-                }else {                                                             //a = string AND b = string
+                } else if (a.isString() && b.isString()) {                           //a = string AND b = string
                     Stack::push(a.getString().length() < b.getString().length());
+                } else {
+                    Stack::push(0);
                 }
-            }break;
+            } 
+            break;
+        case ByteCode::CVE:{
+                StackData b = Stack::pop();
+                StackData a = Stack::pop();
+                if(a.isNumber() && b.isNumber()) {                                    //a = number AND b = number
+                    Stack::push(a.getNumber() == b.getNumber());
+                } else if (a.isNumber() && b.isString()) {                            //a = string AND b = string
+                    Stack::push(a.getNumber() == b.getString().length());
+                } else if (a.isString() && b.isNumber()) {                            //a = string AND b = number
+                    Stack::push(a.getString().length() == b.getNumber());
+                } else if (a.isString() && b.isString()){                             //a = string AND b = string
+                    Stack::push(a.getString() == b.getString());
+                } else {
+                    Stack::push(0);
+                }
+            }
+            break;
         case ByteCode::LOOP:	
             //just acts as a marker
             break;

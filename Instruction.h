@@ -24,6 +24,7 @@ enum ByteCode {
     CMP,    //The conditions results looks one value back in the stack for Boolean result;
     AND,    //Both are positive;
     POR,    //One OF Two are positive;
+    CVE,    //Does the values match! ==
     ELE,    //The ELSE of a conditions;
     PUSH,   //push the value of a variable onto the stack, push immediate string, or push number
     ADD,    //pop two items off stack and perform operation
@@ -37,7 +38,7 @@ enum ByteCode {
     ARGC, 
     CALL 
 };
-extern string byteCode[23];
+extern string byteCode[24];
 class Instruction {
     ByteCode code;
     string operand;

@@ -7,7 +7,7 @@
 #include "Lang.h"
 #include "Script.h"
 
-struct QuitNow: public std::exception
+struct QuitNow: public exception
 {
     QuitNow() { }
     virtual ~QuitNow() throw() { }
@@ -20,9 +20,6 @@ struct QuitNow: public std::exception
 
 using namespace std;
 
-/*
- * 
- */
 int main(int argc, char** argv) {
     
     Lang* lang = new Lang();
@@ -62,7 +59,7 @@ int main(int argc, char** argv) {
     //Loading success so go and do stuff:
     if (indicator) {
         s.render();
-        s.run();
+        //s.run();
     }
     
     delete lang;

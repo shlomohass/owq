@@ -20,6 +20,7 @@ string byteCode[] = {
     "CMP",
     "AND",
     "POR",
+    "CVE",
     "ELE",
     "PUSH", 
     "ADD", 

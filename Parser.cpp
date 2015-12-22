@@ -239,7 +239,7 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
     // func/parenthetical groups have a priority of 2 -
     
     //rCount is the nesting recursive calls limit:
-    //token.renderTokens();
+    token.renderTokens();
     
     rCount++;
     if (rCount > 20) return 2;
@@ -454,75 +454,73 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
         return 0; //return do not do anything else
     }
     //---------------------------------------------------------------------------------
-    //		Handle math operations in accordance with order of operations				|
+    //		Handle math operations in accordance with order of operations
     //---------------------------------------------------------------------------------
-    if (priortyCode == 90) { //exponent ^
-        script->addInstruction(Instruction(ByteCode::PUSH, leftToken));
-        script->addInstruction(Instruction(ByteCode::PUSH, rightToken));
-        if(token.getToken(operatorIndex)== Lang::LangFindDelimiter("power")) {
-            script->addInstruction(Instruction(ByteCode::EXPON));
+    
+    //exponent ^
+    if (priortyCode == 90) { 
+        
+        compile_LR_mathLogigBaseOperations(ByteCode::EXPON, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
+    
+    //multi and division 
+    } else if (priortyCode == 80) {	
+    
+        if (token.getToken(operatorIndex)== Lang::LangFindDelimiter("multi")) { //Multiple
+            compile_LR_mathLogigBaseOperations(ByteCode::MULT, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
+        } else { //Divide
+            compile_LR_mathLogigBaseOperations(ByteCode::DIV, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
         }
-        token.extractInclusive(operatorIndex - 1, operatorIndex + 1, eraseCount);
-        operatorIndex -= eraseCount;
-    } else if (priortyCode == 80) {	//multi and division * /
-        script->addInstruction(Instruction(ByteCode::PUSH, leftToken));
-        script->addInstruction(Instruction(ByteCode::PUSH, rightToken));
-        if (token.getToken(operatorIndex)== Lang::LangFindDelimiter("multi")) {
-            script->addInstruction(Instruction(ByteCode::MULT));
-        } else {
-            script->addInstruction(Instruction(ByteCode::DIV));
+        
+    //add and subtract
+    } else if (priortyCode == 70) { 
+    
+        if (token.getToken(operatorIndex)== Lang::LangFindDelimiter("plus")) { // ADD values 
+            compile_LR_mathLogigBaseOperations(ByteCode::ADD, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
+        } else { // Subtract values
+            compile_LR_mathLogigBaseOperations(ByteCode::SUB, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
         }
-        token.extractInclusive(operatorIndex-1,operatorIndex+1,eraseCount);
-        operatorIndex -= eraseCount;
-    } else if (priortyCode == 70) {	//add and subtract
-        script->addInstruction(Instruction(ByteCode::PUSH, leftToken));
-        script->addInstruction(Instruction(ByteCode::PUSH, rightToken));
-        if (token.getToken(operatorIndex)== Lang::LangFindDelimiter("plus")) {
-            script->addInstruction(Instruction(ByteCode::ADD));
-        } else {
-            script->addInstruction(Instruction(ByteCode::SUB));
+    //greater lesser
+    } else if (priortyCode == 60) { 
+        
+        if (token.getToken(operatorIndex)== Lang::LangFindDelimiter("greater")) { // Is greater than
+            compile_LR_mathLogigBaseOperations(ByteCode::GTR, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
+        } else { // Is smaller than
+            compile_LR_mathLogigBaseOperations(ByteCode::LSR, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
         }
-        token.extractInclusive(operatorIndex-1,operatorIndex+1,eraseCount);
-        operatorIndex -= eraseCount;
-    } else if (priortyCode == 60) {	//greater lesser
-        script->addInstruction(Instruction(ByteCode::PUSH, leftToken));
-        script->addInstruction(Instruction(ByteCode::PUSH, rightToken));
-        if (token.getToken(operatorIndex) == Lang::LangFindDelimiter("greater")) {
-            script->addInstruction(Instruction(ByteCode::GTR));
-        } else {
-            script->addInstruction(Instruction(ByteCode::LSR));
+        
+    //c-equals ==
+    } else if (priortyCode == 59) {
+        
+        if (token.getToken(operatorIndex)== Lang::LangFindDelimiter("c-equal")) { // Is Equal to
+            compile_LR_mathLogigBaseOperations(ByteCode::CVE, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
+        } else { //
+            
         }
-        token.extractInclusive(operatorIndex-1, operatorIndex+1, eraseCount);
-        operatorIndex -= eraseCount;
-    } else if (priortyCode == 59) {	//c-equals ==
-        script->addInstruction(Instruction(ByteCode::PUSH, leftToken));
-        script->addInstruction(Instruction(ByteCode::PUSH, rightToken));
-        if (token.getToken(operatorIndex) == Lang::LangFindDelimiter("c-equal")) {
-            script->addInstruction(Instruction(ByteCode::CVE));
+        
+    // matching signs logics
+    } else if (priortyCode == 50 || priortyCode == 49) {
+        
+        if (token.getToken(operatorIndex)== Lang::LangFindDelimiter("and")) { // Is LOGIC AND
+            compile_LR_mathLogigBaseOperations(ByteCode::AND, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
+        } else { // Is LOGIC OR
+            compile_LR_mathLogigBaseOperations(ByteCode::POR, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
         }
-        token.extractInclusive(operatorIndex-1, operatorIndex+1, eraseCount);
-        operatorIndex -= eraseCount;
-    } else if (priortyCode == 50 || priortyCode == 49) { // matching signs logics
-        script->addInstruction(Instruction(ByteCode::PUSH, leftToken));
-        script->addInstruction(Instruction(ByteCode::PUSH, rightToken));
-        if (token.getToken(operatorIndex) == Lang::LangFindDelimiter("and")) {
-            script->addInstruction(Instruction(ByteCode::AND));
-        } else {
-            script->addInstruction(Instruction(ByteCode::POR));
-        }
-        token.extractInclusive(operatorIndex - 1, operatorIndex + 1, eraseCount);
-        operatorIndex -= eraseCount;
+        
     } else if (priortyCode == 40) { //equal sign
+        
             //extract from 1 past the equal sign to the end of the tokens
             Tokens sub = token.extractInclusive(operatorIndex+1,token.getSize()-1,eraseCount);
             compiler(script, sub, rCount);
             script->addInstruction(Instruction(ByteCode::ASN,leftToken));
             token.extractInclusive(operatorIndex-1,operatorIndex+1,eraseCount);
             operatorIndex -= eraseCount;
+            
     } else if (priortyCode == 0 || priortyCode == 1) {
+        
             script->addInstruction(Instruction(ByteCode::PUSH, token.getToken(operatorIndex)));
             token.extractInclusive(operatorIndex,operatorIndex,eraseCount);
             operatorIndex -= eraseCount;
+            
     }
     //--------------------------------------------------------
     // Recursive compilation of whatever is not yet compiled
@@ -530,6 +528,7 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
     if (token.getSize() > 1) {
         return compiler(script, token, rCount);
     }
+    
     return 0;
 }
 /**
@@ -553,6 +552,24 @@ int Parser::unmark() {
     int t = marks.back();
     marks.pop_back();
     return t;
+}
+
+/** Generate bytecode for Math and logic based operations
+ * 
+ * @param script
+ * @param token
+ * @param operatorIndex
+ * @param eraseCount
+ * @param leftToken
+ * @param rightToken
+ * @return boolean
+ */
+bool Parser::compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, Tokens* token, int &operatorIndex, int &eraseCount, string &leftToken, string &rightToken) {
+    script->addInstruction(Instruction(ByteCode::PUSH, leftToken));
+    script->addInstruction(Instruction(ByteCode::PUSH, rightToken));
+    script->addInstruction(Instruction(bc));
+    token->extractInclusive(operatorIndex - 1, operatorIndex + 1, eraseCount);
+    operatorIndex -= eraseCount;
 }
 
 /** loop condition to find all until delimiter
@@ -654,6 +671,7 @@ bool Parser::isDigit(const string& c) {
 	}
 	return ret;
 }
+
 /**
  * Indicate if supplied string, s, is a keyword
  * @param s
@@ -666,6 +684,7 @@ bool Parser::isKeyword(string s) {
     }
     return false;
 }
+
 /** Translates an delimiter string to a Precedence Priority
  * 
  * @return integer
