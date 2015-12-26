@@ -25,7 +25,7 @@ Parser::~Parser() {
  * 
  */
 int Parser::compile(Script* script, string exp) {
-    compile(script, exp, false);
+    return compile(script, exp, false);
 }
 int Parser::compile(Script* script, string exp, bool debug) { 
     if (script == NULL) {
@@ -233,6 +233,9 @@ string Parser::getToken() {
  * 
  */
 void Parser::evaluateGroups(Tokens& token, TokenFlag flagToGroup) {
+    this->evaluateGroups(token, flagToGroup, 0);
+}
+void Parser::evaluateGroups(Tokens& token, TokenFlag flagToGroup, int startFrom) {
     if (!token.setHasComparison() && !token.setHasCondition()) {
         return;
     }  
@@ -240,90 +243,103 @@ void Parser::evaluateGroups(Tokens& token, TokenFlag flagToGroup) {
     int minPriorityCheck;
     int nestBrackets;
     int addAtPosition;
+    int i;
     string braketClose = Lang::LangFindDelimiter("braketClose");
     string braketOpen = Lang::LangFindDelimiter("braketOpen");
     int bracketPriority = getDelimiterPriorty(braketOpen, TokenType::DELIMITER);
     string checkToken;
         
     //Group flags:
-    if (token.setHasComparison()) {
-        for (int i = 0; i < setSize; i++) {
-            if (token.getTokenFlag(i) == flagToGroup) {
-                minPriorityCheck = token.getTokenPriorty(i);
-                token.pushBefore(i, braketClose, bracketPriority, TokenType::DELIMITER);
-                i++;
-                token.pushAfter(i, braketOpen, bracketPriority, TokenType::DELIMITER);
-                //Scan backwards i = bracket close
-                nestBrackets = 0;
-                addAtPosition = 0;
-                for (int l = i - 2; l >= 0; l--) {
-                    checkToken = token.getToken(l);
-                    if (checkToken == braketClose) {
-                        nestBrackets++;
-                    } else if (checkToken == braketOpen) {
-                        if (nestBrackets > 0) {
-                            nestBrackets--;
-                        } else {
-                            //should close
-                            addAtPosition = l;
-                            break;
-                        }
-                    } else if (nestBrackets == 0 && token.getTokenPriorty(l) <= minPriorityCheck && token.isDelimiter(l)) {
+    for (i = startFrom; i < setSize; i++) {
+        if (token.getTokenFlag(i) == flagToGroup) {
+            minPriorityCheck = token.getTokenPriorty(i);
+            token.pushBefore(i, braketClose, bracketPriority, TokenType::DELIMITER);
+            i++;
+            token.pushAfter(i, braketOpen, bracketPriority, TokenType::DELIMITER);
+            //Scan backwards i = bracket close
+            nestBrackets = 0;
+            addAtPosition = 0;
+            for (int l = i - 2; l >= 0; l--) {
+                checkToken = token.getToken(l);
+                if (checkToken == braketClose) {
+                    nestBrackets++;
+                } else if (checkToken == braketOpen) {
+                    if (nestBrackets > 0) {
+                        nestBrackets--;
+                    } else {
                         //should close
                         addAtPosition = l;
                         break;
                     }
+                } else if (
+                        (
+                                nestBrackets == 0 
+                            && token.getTokenPriorty(l) <= minPriorityCheck 
+                            && token.isDelimiter(l)
+                            && token.getTokenFlag(l) != flagToGroup
+                        ) || (
+                               nestBrackets == 0
+                            && token.getTokenFlag(l) == flagToGroup
+                            && token.getTokenPriorty(l) < minPriorityCheck
+                        )
+                ) {
+                    //should close
+                    addAtPosition = l;
+                    break;
                 }
-                //close it:
-                if (addAtPosition == 0) {
-                    token.pushBefore(addAtPosition, braketOpen, bracketPriority, TokenType::DELIMITER);
-                } else {
-                    token.pushAfter(addAtPosition, braketOpen, bracketPriority, TokenType::DELIMITER);
-                }
-                //Reset pointer 
-                i += 3;
-                setSize += 3;
-                token.renderTokensJoined();
-                //scan forward
-                nestBrackets = 0;
-                addAtPosition = setSize;
-                for (int r = i; r < setSize; r++) {
-                    checkToken = token.getToken(r);
-                    if (checkToken == braketOpen) {
-                        nestBrackets++;
-                    } else if (checkToken == braketClose) {
-                        if (nestBrackets > 0) {
-                            nestBrackets--;
-                        } else {
-                            //should close
-                            addAtPosition = r;
-                            break;
-                        }
-                    } else if (nestBrackets == 0 && token.getTokenPriorty(r) <= minPriorityCheck && token.isDelimiter(r)) {
+            }
+            //close it:
+            if (addAtPosition == 0) {
+                token.pushBefore(addAtPosition, braketOpen, bracketPriority, TokenType::DELIMITER);
+            } else {
+                token.pushAfter(addAtPosition, braketOpen, bracketPriority, TokenType::DELIMITER);
+            }
+            //Reset pointer 
+            i += 3;
+            setSize += 3;
+            token.renderTokensJoined();
+            //scan forward
+            nestBrackets = 0;
+            addAtPosition = setSize;
+            for (int r = i; r < setSize; r++) {
+                checkToken = token.getToken(r);
+                if (checkToken == braketOpen) {
+                    nestBrackets++;
+                } else if (checkToken == braketClose) {
+                    if (nestBrackets > 0) {
+                        nestBrackets--;
+                    } else {
                         //should close
                         addAtPosition = r;
                         break;
                     }
+                } else if (
+                        (
+                               nestBrackets == 0 
+                            && token.getTokenPriorty(r) <= minPriorityCheck 
+                            && token.isDelimiter(r)
+                            && token.getTokenFlag(r) != flagToGroup
+                        ) || (
+                               nestBrackets == 0
+                            && token.getTokenFlag(r) == flagToGroup
+                            && token.getTokenPriorty(r) <= minPriorityCheck
+                        )
+                ) {
+                    //should close
+                    addAtPosition = r;
+                    break;
                 }
-                //close it:
+            }
+            //close it:
+            if (addAtPosition == setSize) {
                 token.pushAfter(addAtPosition, braketClose, bracketPriority, TokenType::DELIMITER);
-                token.renderTokensJoined();
-                i = addAtPosition;
-                setSize += 1;
+            } else {
+                token.pushBefore(addAtPosition, braketClose, bracketPriority, TokenType::DELIMITER);
             }
+            token.renderTokensJoined();
+            setSize += 1;
         }
-        //Reset the set size
-        setSize = token.getSize();
-    }
-    //Group conditions operators:
-    if (token.setHasCondition())  {
-        for (int i = 0; i < setSize; i++) {
-            if (token.getTokenFlag(i) == TokenFlag::CONDITION) {
-                //Scan backwards 
-                //scan forward
-            }
-        }
-    }
+    } //Loop next
 }
 /** Generates the byte code of agiven Token set
  * 
@@ -675,6 +691,7 @@ bool Parser::compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, To
     script->addInstruction(Instruction(bc));
     token->extractInclusive(operatorIndex - 1, operatorIndex + 1, eraseCount);
     operatorIndex -= eraseCount;
+    return true;
 }
 /** loop condition to find all until delimiter
  * @param integer currentPos
