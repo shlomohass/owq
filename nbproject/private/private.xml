@@ -7,23 +7,11 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/S:/proj/c++/OpenWebQuery/Tokens.h</file>
-            <file>file:/S:/proj/c++/OpenWebQuery/Script.h</file>
-            <file>file:/S:/proj/c++/OpenWebQuery/Lang.h</file>
-            <file>file:/S:/proj/c++/OpenWebQuery/Source.cpp</file>
-            <file>file:/S:/proj/c++/OpenWebQuery/Parser.cpp</file>
-            <file>file:/S:/proj/c++/OpenWebQuery/ScriptConsole.cpp</file>
-            <file>file:/S:/proj/c++/OpenWebQuery/Tokens.cpp</file>
-            <file>file:/S:/proj/c++/OpenWebQuery/Instruction.h</file>
-            <file>file:/S:/proj/c++/OpenWebQuery/StackData.cpp</file>
-            <file>file:/S:/proj/c++/OpenWebQuery/main.cpp</file>
-            <file>file:/S:/proj/c++/OpenWebQuery/Lang.cpp</file>
-            <file>file:/S:/proj/c++/OpenWebQuery/src/example.scs</file>
-            <file>file:/S:/proj/c++/OpenWebQuery/Source.h</file>
-            <file>file:/S:/proj/c++/OpenWebQuery/Parser.h</file>
-            <file>file:/S:/proj/c++/OpenWebQuery/Instruction.cpp</file>
-            <file>file:/S:/proj/c++/OpenWebQuery/Script.cpp</file>
-            <file>file:/S:/proj/c++/OpenWebQuery/Stack.h</file>
+            <file>file:/Users/shlomohassid/Desktop/openwebquery/src/example.scs</file>
+            <file>file:/Users/shlomohassid/Desktop/openwebquery/Parser.h</file>
+            <file>file:/Users/shlomohassid/Desktop/openwebquery/Script.h</file>
+            <file>file:/Users/shlomohassid/Desktop/openwebquery/Parser.cpp</file>
+            <file>file:/Users/shlomohassid/Desktop/openwebquery/Script.cpp</file>
         </group>
     </open-files>
 </project-private>
