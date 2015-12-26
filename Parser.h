@@ -33,6 +33,7 @@ class Parser {
     //---------------------------------------------------------
     void 	tokenize(string& exp, Tokens& token);
     void 	evaluateGroups(Tokens& token, TokenFlag flagToGroup);
+    void 	evaluateGroups(Tokens& token, TokenFlag flagToGroup, int startFrom);
     int   	compiler(Script* script, Tokens& token, int rCount);
     string 	getToken();
     void 	mark(int markType);
