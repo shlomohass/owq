@@ -12,6 +12,9 @@ Tokens::Tokens() {
     tokens.reserve(30);
     type.reserve(30);
     priorty.reserve(30);
+    flags.reserve(30);
+    comparisonFlag = false;
+    conditionFlag  =  false;
 }
 
 /**
@@ -22,10 +25,26 @@ Tokens::Tokens() {
  * @param tokenType
  */
 void Tokens::addToken(string token, int priortyCode, TokenType tokenType) {
+    addToken(token, priortyCode, tokenType, false);
+}
+void Tokens::addToken(string token, int priortyCode, TokenType tokenType, bool useFlags) {
     tokens.push_back(token);
     priorty.push_back(priortyCode);
     type.push_back(tokenType);
-    if(getSize() > 1){
+    if (useFlags && tokenType == TokenType::DELIMITER) {
+        if (Lang::LangIsComparison(token)) {
+            flags.push_back(TokenFlag::COMPARISON);
+            comparisonFlag = true;
+        } else if (Lang::LangIsOfCondition(token)) {
+            flags.push_back(TokenFlag::CONDITION);
+            conditionFlag = true;
+        } else {
+            flags.push_back(TokenFlag::NORMAL);
+        }
+    } else {
+        flags.push_back(TokenFlag::NORMAL);
+    }
+    if(getSize() > 1) {
         int size = getSize();
         //if previous token before this one is a variable
         if (isOpenParenthesis(size-1) && isVar(size-2)) {
@@ -210,10 +229,17 @@ void Tokens::renderTokens() {
     for(int i=0; i<getSize(); i++){
         cout << "'" << tokens[i] << "' ";
     }
-    cout << "}" << endl << endl;
-    cout << "-------------------------------------------------------------------" << endl << endl;
+    cout << "}" << endl;
 }
 
+void Tokens::renderTokensJoined() {
+    cout << "    TOKENS-JOINED --> ";
+    for(int i=0; i<getSize(); i++) {
+        cout << tokens[i] << " ";
+    }
+    cout << endl << endl;
+    cout << "-------------------------------------------------------------------" << endl << endl;
+}
 void Tokens::renderTokenType(){
     string str;
     cout << "{ ";
@@ -286,7 +312,20 @@ string Tokens::getToken(int index) {
     }
     return tokens[index];
 }
-
+/** Check if a grouping flag is true or not
+ * 
+ * @param openIndex
+ * @return 
+ */
+bool Tokens::setHasComparison() {
+    return comparisonFlag;
+}
+bool Tokens::setHasCondition() {
+    return conditionFlag;
+}
+TokenFlag Tokens::getTokenFlag(int index) {
+    return flags.at(index);
+}
 /** Find closing Parenthesis token of open index
  * 
  * @param integer openIndex
@@ -317,6 +356,59 @@ void Tokens::pop(int index) {
     priorty.erase(priorty.begin() + index);
 }
 
+/** Push a token before a index:
+ * 
+ * @param string token
+ * @param int pri
+ * @param TokenType type
+ * @param int index
+ * @return boolean
+ * 
+ */
+bool Tokens::pushBefore(int index, string token, int pri, TokenType type) {
+    auto pos_tokens = this->tokens.begin();
+    auto pos_priorty = this->priorty.begin();
+    auto pos_type = this->type.begin();
+    auto pos_flags = this->flags.begin();
+    if (index >= this->tokens.size() || index < 0) { return false; }
+    this->tokens.insert(pos_tokens + index, token);
+    this->priorty.insert(pos_priorty + index, pri);
+    this->type.insert(pos_type + index, type);
+    this->flags.insert(pos_flags + index, TokenFlag::NORMAL);
+    return true;
+}
+/** Push a token after a index:
+ * 
+ * @param int index
+ * @param string token
+ * @param int pri
+ * @param TokenType type
+ * @return boolean
+ * 
+ */
+bool Tokens::pushAfter(int index, string token, int pri, TokenType type) {
+    if (index + 1 >= this->tokens.size()) {
+        this->tokens.push_back(token);
+        this->priorty.push_back(pri);
+        this->type.push_back(type);
+        this->flags.push_back(TokenFlag::NORMAL);
+    } else {
+        auto pos_tokens = this->tokens.begin();
+        auto pos_priorty = this->priorty.begin();
+        auto pos_type = this->type.begin();
+        auto pos_flags = this->flags.begin();
+        advance(pos_tokens, index + 1);
+        advance(pos_priorty, index + 1);
+        advance(pos_type, index + 1);
+        advance(pos_flags, index + 1);
+        this->tokens.insert(pos_tokens, token);
+        this->priorty.insert(pos_priorty, pri);
+        this->type.insert(pos_type, type);
+        this->flags.insert(pos_flags, TokenFlag::NORMAL);
+    }
+    return true;
+}
+    
 /** Evaluate a token and check if its a keyword
  * 
  * @param index
@@ -349,17 +441,26 @@ bool Tokens::isString(int index) {
         return false;
     }
 }
-
-Tokens::~Tokens() {
-    clear();
-}
+/** clear vectors
+ * 
+ */
 void Tokens::clear() {
     type.clear();
     priorty.clear();
     tokens.clear();
+    flags.clear();
+    comparisonFlag = false;
+    conditionFlag = false;
 }
-
+/** get tokens count 
+ * 
+ * @return int
+ * 
+ */
 int Tokens::getSize() {
     return (int)tokens.size();
 }
 
+Tokens::~Tokens() {
+    clear();
+}

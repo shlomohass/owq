@@ -13,6 +13,7 @@
 using namespace std;
 
 enum TokenType { NONE, NUMBER, STRING, DELIMITER, VAR, KEYWORD };
+enum TokenFlag { NORMAL, COMPARISON, CONDITION };
 
 /**
  * Functions to hold script terms that characterize a line
@@ -27,9 +28,14 @@ private:
     vector<int>	priorty;
     //! describe what the token is: string/variable, number, delimiter
     vector<TokenType> type;
-    
+    // Hold tokens flags for grouping indicators
+    vector<TokenFlag> flags;
+    //Flags which indicates if the set of tokens has special token which needs grouping
+    bool comparisonFlag;
+    bool conditionFlag;
 public:
     Tokens();
+    void addToken(string token, int priortyCode, TokenType tokenType, bool useFlags);
     void addToken(string token, int priortyCode, TokenType tokenType);
     bool isNumber(int index);
     bool isString(int index);
@@ -45,10 +51,16 @@ public:
     int getHighestOperatorPriorityIndex(int& priortyCod);
     int getMatchingCloseParenthesis(int openIndex);
     string getToken(int index);
+    bool setHasComparison();
+    bool setHasCondition();
+    TokenFlag getTokenFlag(int index);
     void renderTokens();
+    void renderTokensJoined();
     void renderTokenType();
     void renderTokenPriorty();
     void pop(int index);
+    bool pushBefore(int index, string token, int pri, TokenType type);
+    bool pushAfter(int index, string token, int pri, TokenType type);
     static void stdError(string msg);
     int getSize();
     virtual ~Tokens();

@@ -123,6 +123,42 @@ bool Lang::LangIsDelimiter(const string& value) {
 bool Lang::LangIsDelimiter(const char& value) {
     return LangInverseDelimiter.count(string(1, value)) == 1;
 }
+/** Checks if a char|string is a delimiter of comparison:
+ *  
+ * @param char|string value
+ * @return boolean
+ *  
+ */
+bool Lang::LangIsComparison(const char& value) {
+    return LangIsComparison(string(1, value));
+}
+bool Lang::LangIsComparison(const string& value) {
+    if (value == LangFindDelimiter("greater")) {
+        return true;
+    } else if ( value == LangFindDelimiter("smaller")) {
+        return true;
+    } else if ( value == LangFindDelimiter("c-equal")) {
+        return true;
+    }
+    return false;
+}
+/** Checks if a char|string is a delimiter of a condition such as AND OR etc:
+ *  
+ * @param char|string value
+ * @return boolean
+ *  
+ */
+bool Lang::LangIsOfCondition(const char& value) {
+    return LangIsOfCondition(string(1, value));
+}
+bool Lang::LangIsOfCondition(const string& value) {
+    if (value == LangFindDelimiter("and")) {
+        return true;
+    } else if ( value == LangFindDelimiter("or")) {
+        return true;
+    }
+    return false;
+}
 /** Find the string that represent a keyword name (key):
  * 
  * @param string key

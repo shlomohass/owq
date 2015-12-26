@@ -32,6 +32,7 @@ class Parser {
     // vital workers
     //---------------------------------------------------------
     void 	tokenize(string& exp, Tokens& token);
+    void 	evaluateGroups(Tokens& token, TokenFlag flagToGroup);
     int   	compiler(Script* script, Tokens& token, int rCount);
     string 	getToken();
     void 	mark(int markType);
@@ -54,6 +55,7 @@ class Parser {
     bool isKeyword(string s);
     bool hasCommas(Tokens& token);
     int  getDelimiterPriorty();
+    int  getDelimiterPriorty(string toCheckToken, TokenType toCheckType);
     
     //----------------------------------------------------------
     // Compiler - Methods

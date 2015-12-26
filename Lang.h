@@ -34,7 +34,10 @@ public:
     static bool                    LangHasKeyDelimiter(const string& key);
     static bool                    LangIsDelimiter(const char& value);
     static bool                    LangIsDelimiter(const string& value);
-    
+    static bool                    LangIsComparison(const char& value);
+    static bool                    LangIsComparison(const string& value);
+    static bool                    LangIsOfCondition(const char& value);
+    static bool                    LangIsOfCondition(const string& value);
     //Digits Definition and functions:
     static map<int, char>          LangDigits;
     

@@ -35,9 +35,17 @@ int Parser::compile(Script* script, string exp, bool debug) {
     Tokens token;
     //generate our tokens
     tokenize(exp, token);
-
+    
+    //Evaluate groups:
+    evaluateGroups(token, TokenFlag::CONDITION);
+    evaluateGroups(token, TokenFlag::COMPARISON);
+    
+    
     //For debugging:
-    if (debug) { token.renderTokens(); }
+    if (debug) { 
+        token.renderTokens();
+        token.renderTokensJoined();
+    }
     //compile our tokens
     return compiler(script, token, 0);
 }
@@ -107,7 +115,7 @@ void Parser::tokenize(string& exp, Tokens& token) {
             currentToken = buffToken;
         }
         
-        token.addToken(currentToken, priortyValue, currentTokenType);
+        token.addToken(currentToken, priortyValue, currentTokenType, true);
         //increase parenthesis scaler if current token was was a parenthesis
 
         getToken();	
@@ -218,6 +226,104 @@ string Parser::getToken() {
         return currentToken;
     }
     return currentToken;
+}
+/** Evaluate groups in expressions mostly used to separate comparison expressions:
+ * 
+ * @param Tokens token
+ * 
+ */
+void Parser::evaluateGroups(Tokens& token, TokenFlag flagToGroup) {
+    if (!token.setHasComparison() && !token.setHasCondition()) {
+        return;
+    }  
+    int setSize = token.getSize();
+    int minPriorityCheck;
+    int nestBrackets;
+    int addAtPosition;
+    string braketClose = Lang::LangFindDelimiter("braketClose");
+    string braketOpen = Lang::LangFindDelimiter("braketOpen");
+    int bracketPriority = getDelimiterPriorty(braketOpen, TokenType::DELIMITER);
+    string checkToken;
+        
+    //Group flags:
+    if (token.setHasComparison()) {
+        for (int i = 0; i < setSize; i++) {
+            if (token.getTokenFlag(i) == flagToGroup) {
+                minPriorityCheck = token.getTokenPriorty(i);
+                token.pushBefore(i, braketClose, bracketPriority, TokenType::DELIMITER);
+                i++;
+                token.pushAfter(i, braketOpen, bracketPriority, TokenType::DELIMITER);
+                //Scan backwards i = bracket close
+                nestBrackets = 0;
+                addAtPosition = 0;
+                for (int l = i - 2; l >= 0; l--) {
+                    checkToken = token.getToken(l);
+                    if (checkToken == braketClose) {
+                        nestBrackets++;
+                    } else if (checkToken == braketOpen) {
+                        if (nestBrackets > 0) {
+                            nestBrackets--;
+                        } else {
+                            //should close
+                            addAtPosition = l;
+                            break;
+                        }
+                    } else if (nestBrackets == 0 && token.getTokenPriorty(l) <= minPriorityCheck && token.isDelimiter(l)) {
+                        //should close
+                        addAtPosition = l;
+                        break;
+                    }
+                }
+                //close it:
+                if (addAtPosition == 0) {
+                    token.pushBefore(addAtPosition, braketOpen, bracketPriority, TokenType::DELIMITER);
+                } else {
+                    token.pushAfter(addAtPosition, braketOpen, bracketPriority, TokenType::DELIMITER);
+                }
+                //Reset pointer 
+                i += 3;
+                setSize += 3;
+                token.renderTokensJoined();
+                //scan forward
+                nestBrackets = 0;
+                addAtPosition = setSize;
+                for (int r = i; r < setSize; r++) {
+                    checkToken = token.getToken(r);
+                    if (checkToken == braketOpen) {
+                        nestBrackets++;
+                    } else if (checkToken == braketClose) {
+                        if (nestBrackets > 0) {
+                            nestBrackets--;
+                        } else {
+                            //should close
+                            addAtPosition = r;
+                            break;
+                        }
+                    } else if (nestBrackets == 0 && token.getTokenPriorty(r) <= minPriorityCheck && token.isDelimiter(r)) {
+                        //should close
+                        addAtPosition = r;
+                        break;
+                    }
+                }
+                //close it:
+                token.pushAfter(addAtPosition, braketClose, bracketPriority, TokenType::DELIMITER);
+                token.renderTokensJoined();
+                i = addAtPosition;
+                setSize += 1;
+            }
+        }
+        //Reset the set size
+        setSize = token.getSize();
+    }
+    //Group conditions operators:
+    if (token.setHasCondition())  {
+        for (int i = 0; i < setSize; i++) {
+            if (token.getTokenFlag(i) == TokenFlag::CONDITION) {
+                //Scan backwards 
+                //scan forward
+            }
+        }
+    }
 }
 /** Generates the byte code of agiven Token set
  * 
@@ -553,7 +659,6 @@ int Parser::unmark() {
     marks.pop_back();
     return t;
 }
-
 /** Generate bytecode for Math and logic based operations
  * 
  * @param script
@@ -571,7 +676,6 @@ bool Parser::compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, To
     token->extractInclusive(operatorIndex - 1, operatorIndex + 1, eraseCount);
     operatorIndex -= eraseCount;
 }
-
 /** loop condition to find all until delimiter
  * @param integer currentPos
  * @return bool
@@ -671,7 +775,6 @@ bool Parser::isDigit(const string& c) {
 	}
 	return ret;
 }
-
 /**
  * Indicate if supplied string, s, is a keyword
  * @param s
@@ -684,10 +787,10 @@ bool Parser::isKeyword(string s) {
     }
     return false;
 }
-
 /** Translates an delimiter string to a Precedence Priority
  * 
  * @return integer
+ * 
  */
 int Parser::getDelimiterPriorty() {
     if(currentTokenType == KEYWORD) {
@@ -700,7 +803,7 @@ int Parser::getDelimiterPriorty() {
         return 90;
     } else if (currentToken == Lang::LangFindDelimiter("multi") || currentToken == Lang::LangFindDelimiter("divide")) {
         return 80;
-    } else if (currentToken == Lang::LangFindDelimiter("plus") || currentToken== Lang::LangFindDelimiter("minus")) {
+    } else if (currentToken == Lang::LangFindDelimiter("plus") || currentToken == Lang::LangFindDelimiter("minus")) {
         return 70;
     } else if (currentToken == Lang::LangFindDelimiter("smaller") || currentToken == Lang::LangFindDelimiter("greater")) {
         return 60;
@@ -713,6 +816,42 @@ int Parser::getDelimiterPriorty() {
     } else if (currentToken == Lang::LangFindDelimiter("equal")) {
         return 40;
     }  else if (currentToken == Lang::LangFindDelimiter("comma")) {
+        return -100;
+    } else {
+        return 0;
+    }
+}
+/** Translates an delimiter string to a Precedence Priority
+ * 
+ * @param string toCheckToken
+ * @param TokenType toCheckType
+ * @return integer
+ * 
+ */
+int Parser::getDelimiterPriorty(string toCheckToken, TokenType toCheckType) {
+    if(toCheckType == KEYWORD) {
+        return 140;
+    } else if (toCheckToken == Lang::LangFindDelimiter("bracesClose")) {
+        return 130;
+    } else if (toCheckToken == Lang::LangFindDelimiter("braketOpen")) {
+        return 110;
+    } else if (toCheckToken == Lang::LangFindDelimiter("power")) {
+        return 90;
+    } else if (toCheckToken == Lang::LangFindDelimiter("multi") || toCheckToken == Lang::LangFindDelimiter("divide")) {
+        return 80;
+    } else if (toCheckToken == Lang::LangFindDelimiter("plus") || toCheckToken == Lang::LangFindDelimiter("minus")) {
+        return 70;
+    } else if (toCheckToken == Lang::LangFindDelimiter("smaller") || toCheckToken == Lang::LangFindDelimiter("greater")) {
+        return 60;
+    } else if (toCheckToken == Lang::LangFindDelimiter("c-equal")) {
+        return 59;
+    } else if (toCheckToken == Lang::LangFindDelimiter("and")) {
+        return 50;
+    } else if (toCheckToken == Lang::LangFindDelimiter("or")) {
+        return 49;
+    } else if (toCheckToken == Lang::LangFindDelimiter("equal")) {
+        return 40;
+    }  else if (toCheckToken == Lang::LangFindDelimiter("comma")) {
         return -100;
     } else {
         return 0;
@@ -731,7 +870,6 @@ bool Parser::hasCommas(Tokens& token) {
     }
     return false;
 }
-
 /** Parse any string to lower ASCII chars
  * 
  * @param s

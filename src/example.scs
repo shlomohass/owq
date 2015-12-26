@@ -1,9 +1,2 @@
 
-let t = 10 < 9
-let a = 4 < 8
-let b = 2 < 9 * 6;
-let test1 = b - a * t - a;
-let test2 = t < t + 1;
-
-print(test1);
-print(test2);
+4 < 3 | 3 < 4 & 3 < 10
