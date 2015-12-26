@@ -24,7 +24,7 @@ CLEAN_SUBPROJECTS=${CLEAN_SUBPROJECTS_${SUBPROJECTS}}
 
 
 # Project Name
-PROJECTNAME=openwebquery
+PROJECTNAME=OpenWebQuery
 
 # Active Configuration
 DEFAULTCONF=Debug

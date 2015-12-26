@@ -750,30 +750,12 @@ bool Parser::isLetter(const string& c) {
  * @param c
  * @return
  */
+bool Parser::isDigit(const string& c) {
+	return isDigit(c[0]);
+}
 bool Parser::isDigit(const char& c) {
 	bool ret = false;
 	switch(c){
-	case '0':
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-	case '7':
-	case '8':
-	case '9':
-            ret = true;
-            break;
-	default:
-            ret = false;
-            break;
-	}
-	return ret;
-}
-bool Parser::isDigit(const string& c) {
-	bool ret = false;
-	switch(c[0]){
 	case '0':
 	case '1':
 	case '2':
