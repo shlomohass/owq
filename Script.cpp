@@ -130,6 +130,12 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer) {
     switch (xcode.getCode()) {
         case ByteCode::NOP:
             break;
+        case ByteCode::SWA:
+            Stack::Swap();
+            break;
+        case ByteCode::SHT:
+            Stack::ShiftTop();
+            break;
         case ByteCode::PUSH:	
             //push always pushes immediate values onto the stack- if variable name appears, instead of pushing that variable
             //name, it pushes the variables **value***
