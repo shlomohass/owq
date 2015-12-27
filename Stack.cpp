@@ -47,6 +47,32 @@ StackData Stack::pop() {
     return sd;			//return that data
 }
 
+void Stack::Swap() {
+    if (stack.size() > 1) {
+        StackData top1 = pop();
+        StackData top2 = pop();
+        stack.push_back(top1);
+        stack.push_back(top2);
+    }
+}
+
+void Stack::ShiftTop() {
+    if (stack.size() > 0) {
+        StackData top = pop();
+        stack.insert(stack.begin(), top);
+    }
+}
+
+StackData Stack::Shift() {
+    if (stack.empty()) {
+        ScriptError::msg("stack is zero as vm is instructed to Shift value off the stack");
+        return StackData("NULL");
+    }
+    StackData sd = stack[0];	//the the first item on the stack
+    stack.erase(stack.begin());	//remove the item on first place of the stack
+    return sd;			//return that data
+}
+
 void Stack::render() {
     cout << "  Stack("<< stack.size() << "):\n";
     for (int i=(int)stack.size()-1; i > -1; i--) {

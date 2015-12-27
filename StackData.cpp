@@ -8,6 +8,7 @@
 #include "StackData.h"
 
 #define NAN -3231307.6790
+
 StackData::StackData(string value) {
     svalue = value;
     dvalue = NAN;

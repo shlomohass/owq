@@ -22,6 +22,7 @@ using namespace std;
  */
 class Stack {
     static vector<StackData> stack;
+    
 public:
     Stack();
 
@@ -30,9 +31,11 @@ public:
     static void push(StackData data);
     static void push(ScriptVariable& data);
     static int  size();;
-
-    static void render();
     static StackData pop();
+    static void Swap();
+    static void ShiftTop();
+    static StackData Shift();
+    static void render();
     virtual ~Stack();
 };
 
