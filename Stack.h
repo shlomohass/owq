@@ -30,7 +30,7 @@ public:
     static void push(string data);
     static void push(StackData data);
     static void push(ScriptVariable& data);
-    static int  size();;
+    static int  size();
     static StackData pop();
     static void Swap();
     static void ShiftTop();
