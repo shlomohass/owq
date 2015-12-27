@@ -25,7 +25,7 @@ class Stack {
     
 public:
     Stack();
-
+    
     static void push(double data);
     static void push(string data);
     static void push(StackData data);
