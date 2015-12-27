@@ -115,6 +115,22 @@ void Parser::tokenize(string& exp, Tokens& token) {
             currentToken = buffToken;
         }
         
+        //Handle negative number grouping:
+        if (currentTokenType == TokenType::NUMBER && token.getSize() > 0) {
+            //Look behind for -
+            int stackTempSize = token.getSize();
+            string behindCheck1 = token.getToken(stackTempSize - 1);
+            if ( behindCheck1 == "-" ) {
+                string behindCheck2 = token.getToken(stackTempSize - 2);
+                bool isDelCheck2   = token.isDelimiter(stackTempSize - 2);
+                if ((behindCheck2 != ".none" && isDelCheck2) || behindCheck2 == ".none.") {
+                    //Merge with last its negative number:
+                    token.pop(stackTempSize - 1);
+                    currentToken = behindCheck1 + currentToken;
+                }
+            }            
+        }
+        
         token.addToken(currentToken, priortyValue, currentTokenType, true);
         //increase parenthesis scaler if current token was was a parenthesis
 
@@ -393,7 +409,8 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
     //Keyword has the highest priority so execute immediately
     //--------------------------------------------------------------------
     if (token.isKeyWord(operatorIndex)) {
-            
+        
+        token.prevCalc = false;
         //Execute functions:
         if (operatorToken == Lang::LangFindKeyword("function")) {
             
@@ -458,6 +475,7 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
             compiler(script, token, rCount);	//compile the expression
             script->addInstruction(Instruction(ByteCode::CMP, operatorToken));
             return 0;
+            
         } else if (operatorToken == Lang::LangFindKeyword("cond-else")) {
             //else (expression){
             token.pop(0);	//erase the else keyword
@@ -538,6 +556,7 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
     //----------------------------------------------------------
     //if operator is an open parenthesis then extract the content
     if (operatorToken == Lang::LangFindDelimiter("braketOpen")) { //  bracket (
+        token.prevCalc = false;
         //get the close of this parenthesis
         int closeOfParenthesis = token.getMatchingCloseParenthesis(operatorIndex);
         //extract the content and replace with RST
@@ -583,39 +602,39 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
     //exponent ^
     if (priortyCode == 90) { 
         
-        compile_LR_mathLogigBaseOperations(ByteCode::EXPON, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
+        compile_LR_mathLogigBaseOperations(ByteCode::EXPON, script, &token, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
     
     //multi and division 
     } else if (priortyCode == 80) {	
     
         if (token.getToken(operatorIndex)== Lang::LangFindDelimiter("multi")) { //Multiple
-            compile_LR_mathLogigBaseOperations(ByteCode::MULT, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::MULT, script, &token, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
         } else { //Divide
-            compile_LR_mathLogigBaseOperations(ByteCode::DIV, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::DIV, script, &token, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
         }
         
     //add and subtract
     } else if (priortyCode == 70) { 
     
         if (token.getToken(operatorIndex)== Lang::LangFindDelimiter("plus")) { // ADD values 
-            compile_LR_mathLogigBaseOperations(ByteCode::ADD, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::ADD, script, &token, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
         } else { // Subtract values
-            compile_LR_mathLogigBaseOperations(ByteCode::SUB, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::SUB, script, &token, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
         }
     //greater lesser
     } else if (priortyCode == 60) { 
         
         if (token.getToken(operatorIndex)== Lang::LangFindDelimiter("greater")) { // Is greater than
-            compile_LR_mathLogigBaseOperations(ByteCode::GTR, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::GTR, script, &token, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
         } else { // Is smaller than
-            compile_LR_mathLogigBaseOperations(ByteCode::LSR, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::LSR, script, &token, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
         }
         
     //c-equals ==
     } else if (priortyCode == 59) {
         
         if (token.getToken(operatorIndex)== Lang::LangFindDelimiter("c-equal")) { // Is Equal to
-            compile_LR_mathLogigBaseOperations(ByteCode::CVE, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::CVE, script, &token, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
         } else { //
             
         }
@@ -624,9 +643,9 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
     } else if (priortyCode == 50 || priortyCode == 49) {
         
         if (token.getToken(operatorIndex)== Lang::LangFindDelimiter("and")) { // Is LOGIC AND
-            compile_LR_mathLogigBaseOperations(ByteCode::AND, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::AND, script, &token, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
         } else { // Is LOGIC OR
-            compile_LR_mathLogigBaseOperations(ByteCode::POR, script, &token, operatorIndex, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::POR, script, &token, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
         }
         
     } else if (priortyCode == 40) { //equal sign
@@ -686,12 +705,51 @@ int Parser::unmark() {
  * @param rightToken
  * @return boolean
  */
-bool Parser::compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, Tokens* token, int &operatorIndex, int &eraseCount, string &leftToken, string &rightToken) {
-    script->addInstruction(Instruction(ByteCode::PUSH, leftToken));
-    script->addInstruction(Instruction(ByteCode::PUSH, rightToken));
-    script->addInstruction(Instruction(bc));
+bool Parser::compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, Tokens* token, int &operatorIndex, int &priority, int &eraseCount, string &leftToken, string &rightToken) {
+    
+    if (token->prevCalc && priority == 80 && rightToken == "RST" && leftToken != "RST") {  //80 -> OPERAND, RST
+        script->addInstruction(Instruction(ByteCode::PUSH, leftToken));
+        script->addInstruction(Instruction(bc));
+    } else if (token->prevCalc && priority == 80 && rightToken != "RST" && leftToken == "RST") { //80 -> RST, OPERAND
+        script->addInstruction(Instruction(ByteCode::PUSH, rightToken));
+        script->addInstruction(Instruction(bc));
+        script->addInstruction(ByteCode::SHT);
+    } else if (token->prevCalc && priority == 80 && rightToken != "RST" && leftToken != "RST") { //80 -> OPERAND, OPERAND
+        script->addInstruction(Instruction(ByteCode::PUSH, leftToken));
+        script->addInstruction(Instruction(ByteCode::PUSH, rightToken));
+        script->addInstruction(Instruction(bc));
+        script->addInstruction(ByteCode::SHT);
+    } else if (token->prevCalc && priority == 80 && rightToken == "RST" && leftToken == "RST") { //80 -> RST, RST
+        script->addInstruction(Instruction(bc));
+        
+        
+    } else if (token->prevCalc && priority == 70 && rightToken == "RST" && leftToken != "RST") {  //70 -> OPERAND, RST
+        script->addInstruction(Instruction(ByteCode::PUSH, leftToken));
+        script->addInstruction(ByteCode::SWA);
+        script->addInstruction(Instruction(bc));
+    } else if (token->prevCalc && priority == 70 && rightToken != "RST" && leftToken == "RST") { //70 -> RST, OPERAND
+        script->addInstruction(Instruction(ByteCode::PUSH, rightToken));
+        script->addInstruction(Instruction(bc));
+    } else if (token->prevCalc && priority == 70 && rightToken != "RST" && leftToken != "RST") { //70 -> OPERAND, OPERAND
+        script->addInstruction(Instruction(ByteCode::PUSH, leftToken));
+        script->addInstruction(Instruction(ByteCode::PUSH, rightToken));
+        script->addInstruction(Instruction(bc));
+        script->addInstruction(ByteCode::SWA);
+    } else if (token->prevCalc && priority == 70 && rightToken == "RST" && leftToken == "RST") { //70 -> RST, RST
+        script->addInstruction(ByteCode::SWA);
+        script->addInstruction(Instruction(bc));
+
+    } else {
+        script->addInstruction(Instruction(ByteCode::PUSH, leftToken));
+        script->addInstruction(Instruction(ByteCode::PUSH, rightToken));
+        script->addInstruction(Instruction(bc));
+        token->prevCalc = true;
+    }
+    
+    //Clean up:
     token->extractInclusive(operatorIndex - 1, operatorIndex + 1, eraseCount);
     operatorIndex -= eraseCount;
+    
     return true;
 }
 /** loop condition to find all until delimiter
