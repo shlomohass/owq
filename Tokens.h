@@ -35,6 +35,7 @@ private:
     bool conditionFlag;
 public:
     Tokens();
+    bool prevCalc;
     void addToken(string token, int priortyCode, TokenType tokenType, bool useFlags);
     void addToken(string token, int priortyCode, TokenType tokenType);
     bool isNumber(int index);

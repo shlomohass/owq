@@ -15,6 +15,7 @@ Tokens::Tokens() {
     flags.reserve(30);
     comparisonFlag = false;
     conditionFlag  =  false;
+    prevCalc = false;
 }
 
 /**
@@ -302,12 +303,6 @@ int Tokens::getHighestOperatorPriorityIndex(int& priortyCode) {
  */
 string Tokens::getToken(int index) {
     if (index < 0 || index >= getSize()) {
-        cout << index << "/" << getSize()-1 << endl;
-        stringstream s;
-        s << index;
-        stringstream ss;
-        ss << getSize();
-        stdError("get token, index(" + s.str() + ") is out of range, token size currently " + ss.str());
         return ".none.";
     }
     return tokens[index];
@@ -458,7 +453,8 @@ void Tokens::clear() {
     tokens.clear();
     flags.clear();
     comparisonFlag = false;
-    conditionFlag = false;
+    conditionFlag  = false;
+    prevCalc       = false;
 }
 /** get tokens count 
  * 
