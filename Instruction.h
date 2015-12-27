@@ -36,9 +36,12 @@ enum ByteCode {
     DEF,    // Define a variable
     ARG,    //define a variable and assign it a value from the stack
     ARGC, 
-    CALL 
+    CALL,
+    
+    SWA,    //Swap stack
+    SHT     //Shift top on stack.
 };
-extern string byteCode[24];
+extern string byteCode[26];
 class Instruction {
     ByteCode code;
     string operand;

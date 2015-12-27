@@ -32,7 +32,9 @@ string byteCode[] = {
     "DEF", 
     "ARG", 
     "ARGC_CHECK", 
-    "CALL"
+    "CALL",
+    "SWA",
+    "SHT"
 };
 
 Instruction::Instruction() {
