@@ -65,7 +65,7 @@ void Stack::ShiftTop() {
 
 StackData Stack::Shift() {
     if (stack.empty()) {
-        ScriptError::msg("stack is zero as vm is instructed to Shift value off the stack");
+        ScriptError::msg("stack is zero as vm is instructed to Shift a value off the stack");
         return StackData("NULL");
     }
     StackData sd = stack[0];	//the the first item on the stack
