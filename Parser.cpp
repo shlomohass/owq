@@ -238,7 +238,7 @@ void Parser::evaluateGroups(Tokens& token, TokenFlag flagToGroup) {
 void Parser::evaluateGroups(Tokens& token, TokenFlag flagToGroup, int startFrom) {
     if (!token.setHasComparison() && !token.setHasCondition()) {
         return;
-    }  
+    }
     int setSize = token.getSize();
     int minPriorityCheck;
     int nestBrackets;
@@ -297,7 +297,7 @@ void Parser::evaluateGroups(Tokens& token, TokenFlag flagToGroup, int startFrom)
             //Reset pointer 
             i += 3;
             setSize += 3;
-            token.renderTokensJoined();
+            //token.renderTokensJoined();
             //scan forward
             nestBrackets = 0;
             addAtPosition = setSize;
@@ -336,7 +336,7 @@ void Parser::evaluateGroups(Tokens& token, TokenFlag flagToGroup, int startFrom)
             } else {
                 token.pushBefore(addAtPosition, braketClose, bracketPriority, TokenType::DELIMITER);
             }
-            token.renderTokensJoined();
+            //token.renderTokensJoined();
             setSize += 1;
         }
     } //Loop next
@@ -369,7 +369,7 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
     int eraseCount = 0; //used to readjust the operation index after there is any extraction of the tokens
                         //otherwise after we extract a set of tokens, may not point to the correct location of the operator
                         //we are interested in
-    int priortyCode = 0; //Lowest def.
+    int priortyCode = 0; //Lowest definition.
     int operatorIndex = token.getHighestOperatorPriorityIndex(priortyCode);
 
     string leftToken = ""; //Look behind
@@ -439,13 +439,14 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
         } else if (operatorToken == Lang::LangFindKeyword("cond-if")) {
 
             //if(expression){
-            token.pop(0);	//erase the if keyword
+            token.pop(operatorIndex);	//erase the if keyword
             
             //(expression){
             if(token.getToken(token.getSize()-1) != Lang::LangFindDelimiter("bracesOpen")) {
                 Tokens::stdError("IF statement syntax error, expected a " + Lang::LangFindDelimiter("bracesOpen"));
                 return 4;
             } else {
+                //Erase block open == brace open:
                 token.pop(token.getSize()-1);
                 //(expression)
                 mark(1); // 1- marks IF
@@ -541,10 +542,10 @@ int Parser::compiler(Script* script, Tokens& token, int rCount){
         int closeOfParenthesis = token.getMatchingCloseParenthesis(operatorIndex);
         //extract the content and replace with RST
         Tokens sub = token.extractContentOfParenthesis(operatorIndex,closeOfParenthesis,eraseCount);
-        operatorIndex -= 1;	//we extract content of parenthesis just adjust by only 1,
-        compiler(script, sub,rCount);
+        operatorIndex -= 1;	//Just in case its a function call set next block to parse the call name,
+        compiler(script, sub, rCount);
         //Make appropriate function Call
-        if (token.getSize() > 1) {	//two or more
+        if (token.getSize() > 1 && operatorIndex >= 0) { //two or more
             //if previous token before the parenthesis has a non zero priority of 2 then make function call
             if (token.getTokenPriorty(operatorIndex) && !isKeyword(leftToken) && !isDelimiter(leftToken)) {
                 string funcName = leftToken;

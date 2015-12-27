@@ -6,7 +6,7 @@
 
 #include "Tokens.h"
 #include "Lang.h"
-#include <sstream>
+#include <sstream> 
 
 Tokens::Tokens() {
     tokens.reserve(30);
@@ -333,8 +333,15 @@ TokenFlag Tokens::getTokenFlag(int index) {
  */
 int Tokens::getMatchingCloseParenthesis(int openIndex) {
     int i;
-    for (i = openIndex; i < getSize(); i++ ) {
-        if ( tokens[i] == Lang::LangFindDelimiter("braketClose")) {
+    int nested = 0;
+    string bracketOpen = Lang::LangFindDelimiter("braketOpen");
+    string bracketClose = Lang::LangFindDelimiter("braketClose");
+    for (i = openIndex + 1; i < getSize(); i++ ) {
+        if (tokens[i] == bracketOpen) {
+            nested++;
+        } else if (tokens[i] == bracketClose && nested > 0) {
+            nested--;
+        } else if ( tokens[i] == bracketClose && nested == 0 ) {
             return i;
             break;
         }
@@ -354,6 +361,7 @@ void Tokens::pop(int index) {
     tokens.erase(tokens.begin() + index);
     type.erase(type.begin() + index);
     priorty.erase(priorty.begin() + index);
+    flags.erase(flags.begin() + index);
 }
 
 /** Push a token before a index:
