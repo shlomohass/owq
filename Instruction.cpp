@@ -4,9 +4,10 @@
  * 
  */
 
+#include <stdlib.h>
 #include "Instruction.h"
 #include <math.h>
-#include <stdlib.h>
+
 
 string byteCode[] = { 
     "NOP", 
@@ -115,13 +116,53 @@ bool Instruction::isOperandNumber() {
     if (operand.length() == 0) {
         return false;
     }
+    bool valid     = true;
+    bool dotFlag   = false;
+    bool eFlag     = false;
+    bool minCount  = 0;
+    bool plusCount = 0;
     if (operand[0] == '-' || isNumberic(operand[0])) {
-        for(int i=1; i< operand.length(); i++){
-            if (!isNumberic(operand[i])) {
-                return false;
+        for(int i = 1; i< operand.length(); i++){
+            if (operand[i] == '.' && !dotFlag) {
+                dotFlag = true;
+                continue;
             }
+            if (operand[i] == '.' && dotFlag) {
+                valid = false;
+                break;
+            }
+            if (operand[i] == 'e' && !eFlag) {
+                eFlag = true;
+                continue;
+            }
+            if (operand[i] == 'e' && eFlag) {
+                valid = false;
+                break;
+            }
+            if (operand[i] == '-') {
+                if (minCount == 0 && i > 0 && operand[i-1] == 'e') {
+                    minCount++;
+                    continue;
+                } else {
+                    valid = false;
+                    break;
+                }
+            }
+            if (operand[i] == '+') {
+                if (plusCount == 0 && i > 0 && operand[i-1] == 'e') {
+                    plusCount++;
+                    continue;
+                } else {
+                    valid = false;
+                    break;
+                }
+            }
+            if (!isNumberic(operand[i])) {
+                valid = false;
+                break;
+            } 
         }
-        return true;
+        return valid;
     } else {
         return false;
     }

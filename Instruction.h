@@ -40,6 +40,7 @@ enum ByteCode {
     
     SWA,    //Swap stack
     SHT     //Shift top on stack.
+    
 };
 extern string byteCode[26];
 class Instruction {
