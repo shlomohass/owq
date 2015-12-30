@@ -15,17 +15,11 @@
 
 using namespace std;
 
-/**
- * The stack functions to only contains immediate values, never variable names or reference pointers to variables.
- *
- * Therefore, any string contained on the stack is a value only, not an alais for some variable.
- */
 class Stack {
     static vector<StackData> stack;
     
 public:
     Stack();
-    
     static void push(double data);
     static void push(string data);
     static void push(StackData data);
@@ -34,6 +28,7 @@ public:
     static StackData pop();
     static void Swap();
     static void ShiftTop();
+    static void ShiftTop(int index);
     static StackData Shift();
     static void render();
     virtual ~Stack();

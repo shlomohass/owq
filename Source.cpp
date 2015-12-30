@@ -335,11 +335,11 @@ string Source::getLineNumbers() {
 /** Render a debugger source pre parsed
  */
 void Source::renderSource() {
-    cout << " * From Original Line scope --> " << getLineNumbers() << endl << endl;
+    cout << " * From Original Line Scope --> " << getLineNumbers() << endl << endl;
     for (int i=0; i < lines.size(); i++) {
         cout << "\t[" << i << "] -> " << lines[i] << endl;
     }
-    cout << endl << "    CODE --> " << getLines() << endl;
+    cout << endl << "   CODE --> " << getLines() << endl;
 }
 void Source::renderMacros() {
     cout << " * Total registered Macros --> " << macros.size() << endl;

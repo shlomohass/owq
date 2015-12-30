@@ -94,7 +94,7 @@ Instruction::Instruction(ByteCode inst) {
 	operand = ".none.";
 	containsQuotes =false;
 }
-bool isNumberic(char c){
+bool isNumberic(char c) {
     bool ret = false;
     switch(c) {
         case '0':

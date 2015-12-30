@@ -12,9 +12,11 @@
       <itemPath>ScriptConsole.h</itemPath>
       <itemPath>ScriptError.h</itemPath>
       <itemPath>ScriptVariable.h</itemPath>
+      <itemPath>Setowq.h</itemPath>
       <itemPath>Source.h</itemPath>
       <itemPath>Stack.h</itemPath>
       <itemPath>StackData.h</itemPath>
+      <itemPath>Token.h</itemPath>
       <itemPath>Tokens.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ResourceFiles"
@@ -35,6 +37,7 @@
       <itemPath>Source.cpp</itemPath>
       <itemPath>Stack.cpp</itemPath>
       <itemPath>StackData.cpp</itemPath>
+      <itemPath>Token.cpp</itemPath>
       <itemPath>Tokens.cpp</itemPath>
       <itemPath>main.cpp</itemPath>
     </logicalFolder>
@@ -107,6 +110,8 @@
       </item>
       <item path="ScriptVariable.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="Setowq.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Source.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Source.h" ex="false" tool="3" flavor2="0">
@@ -118,6 +123,10 @@
       <item path="StackData.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="StackData.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Token.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Token.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Tokens.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -178,6 +187,8 @@
       </item>
       <item path="ScriptVariable.h" ex="false" tool="3" flavor2="0">
       </item>
+      <item path="Setowq.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="Source.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="Source.h" ex="false" tool="3" flavor2="0">
@@ -189,6 +200,10 @@
       <item path="StackData.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="StackData.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="Token.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="Token.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="Tokens.cpp" ex="false" tool="1" flavor2="0">
       </item>

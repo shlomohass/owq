@@ -10,12 +10,8 @@
 
 Tokens::Tokens() {
     tokens.reserve(30);
-    type.reserve(30);
-    priorty.reserve(30);
-    flags.reserve(30);
     comparisonFlag = false;
     conditionFlag  =  false;
-    prevCalc = false;
 }
 
 /**
@@ -25,31 +21,29 @@ Tokens::Tokens() {
  * @param priortyCode
  * @param tokenType
  */
-void Tokens::addToken(string token, int priortyCode, TokenType tokenType) {
-    addToken(token, priortyCode, tokenType, false);
+void Tokens::addToken(Token _token) {
+    tokens.push_back(_token);
 }
-void Tokens::addToken(string token, int priortyCode, TokenType tokenType, bool useFlags) {
-    tokens.push_back(token);
-    priorty.push_back(priortyCode);
-    type.push_back(tokenType);
+void Tokens::addToken(string _token, int priortyCode, TokenType tokenType) {
+    addToken(_token, priortyCode, tokenType, false);
+}
+void Tokens::addToken(string _token, int priortyCode, TokenType tokenType, bool useFlags) {
+    Token token(_token, priortyCode, tokenType, TokenFlag::NORMAL); 
     if (useFlags && tokenType == TokenType::DELIMITER) {
-        if (Lang::LangIsComparison(token)) {
-            flags.push_back(TokenFlag::COMPARISON);
+        if (Lang::LangIsComparison(_token)) {
+            token.setFlag(TokenFlag::COMPARISON);
             comparisonFlag = true;
-        } else if (Lang::LangIsOfCondition(token)) {
-            flags.push_back(TokenFlag::CONDITION);
+        } else if (Lang::LangIsOfCondition(_token)) {
+            token.setFlag(TokenFlag::CONDITION);
             conditionFlag = true;
-        } else {
-            flags.push_back(TokenFlag::NORMAL);
         }
-    } else {
-        flags.push_back(TokenFlag::NORMAL);
     }
+    tokens.push_back(token);
     if(getSize() > 1) {
         int size = getSize();
         //if previous token before this one is a variable
         if (isOpenParenthesis(size-1) && isVar(size-2)) {
-            priorty[size-2] = 2;
+            tokens[size-2].priority = 2;
         }
     }
 }
@@ -63,7 +57,7 @@ bool Tokens::isNumber(int index) {
     if (index < 0 || index > getSize() - 1){
         return false;
     }
-    if (type[index] == TokenType::NUMBER) {
+    if (tokens[index].type == TokenType::NUMBER) {
         return true;
     }
     return false;
@@ -78,7 +72,7 @@ bool Tokens::isDelimiter(int index) {
     if(index < 0 || index > getSize()-1){
         return false;
     }
-    if(type[index] == TokenType::DELIMITER) {
+    if(tokens[index].type == TokenType::DELIMITER) {
         return true;
     }
     return false;
@@ -93,7 +87,7 @@ bool Tokens::isVar(int index) {
     if (index < 0 || index > getSize()-1) {
         return false;
     }
-    if (type[index] == TokenType::VAR) {
+    if (tokens[index].type == TokenType::VAR) {
         return true;
     }
     return false;
@@ -107,7 +101,7 @@ bool Tokens::isVar(int index) {
 bool Tokens::isCloseParenthesis(int index) {
     bool isDelim = isDelimiter(index);
     if(!isDelim) return false;
-    if(tokens[index] == Lang::LangFindDelimiter("braketClose")) {
+    if(tokens[index].token == Lang::LangFindDelimiter("braketClose")) {
         return true;
     }
     return false;
@@ -120,7 +114,7 @@ bool Tokens::isCloseParenthesis(int index) {
 bool Tokens::isOpenParenthesis(int index) {
     bool isDelim = isDelimiter(index);
     if(!isDelim) return false;
-    if(tokens[index] == Lang::LangFindDelimiter("braketOpen")){
+    if(tokens[index].token == Lang::LangFindDelimiter("braketOpen")){
         return true;
     }
     return false;
@@ -142,35 +136,33 @@ bool Tokens::isOpenParenthesis(int index) {
  * @param extractionCount		place the store the total number of items extracted from this token set
  * @return
  */
-Tokens Tokens::extractContentOfParenthesis(int startParenthesisIndex, int endParenthesisIndex, int& extractionCount) {
-    Tokens newToken;
+Tokens Tokens::extractContentOfParenthesis(int startParenthesisIndex, int endParenthesisIndex, int& extractionCount, int* rstNest) {
+    Tokens newTokenSet;
     if(startParenthesisIndex < 0 || startParenthesisIndex > getSize() - 1) {
         stdError("token extraction, startIndex out of bounds");
-        return newToken;
+        return newTokenSet;
     }
     if(endParenthesisIndex < startParenthesisIndex || endParenthesisIndex > getSize()-1) {
         stdError("token extraction, endIndex out of bounds");
-        return newToken;
+        return newTokenSet;
     }
     //copy from current token-set to new token-set
     int i;
     int count = 0;	//the total count of values to extract
-    for (i=startParenthesisIndex+1; i < endParenthesisIndex; i++) {
-        newToken.addToken(tokens[i], priorty[i], type[i]);
+    for (i = startParenthesisIndex + 1; i < endParenthesisIndex; i++) {
+        newTokenSet.addToken(tokens[i]);
         count++;
     }
     //erase the total number of tokens extracted including what is before and after
     for (i=0; i<(count+2); i++) {
         //the contents extracted
-        tokens.erase    (tokens.begin()	 + startParenthesisIndex);
-        type.erase      (type.begin()	 + startParenthesisIndex);
-        priorty.erase   (priorty.begin() + startParenthesisIndex);
+        tokens.erase(tokens.begin() + startParenthesisIndex);
     }
     extractionCount = count + 2;
-    tokens.insert(tokens.begin()+startParenthesisIndex, "RST");
-    type.insert(type.begin()+startParenthesisIndex, TokenType::NONE);
-    priorty.insert(priorty.begin()+startParenthesisIndex, 0);
-    return newToken;
+    *rstNest += 1;
+    Token rstToken("RST",0,TokenType::RST,TokenFlag::NORMAL, *rstNest);
+    tokens.insert(tokens.begin()+startParenthesisIndex, rstToken);
+    return newTokenSet;
 }
 
 /**
@@ -183,35 +175,33 @@ Tokens Tokens::extractContentOfParenthesis(int startParenthesisIndex, int endPar
  * @param extractionCount
  * @return
  */
-Tokens Tokens::extractInclusive(int startIndex, int endIndex, int& extractionCount) {
-    Tokens newToken;
+Tokens Tokens::extractInclusive(int startIndex, int endIndex, int& extractionCount, int* rstNest) {
+    Tokens newTokenSet;
     if(startIndex < 0 || startIndex > getSize()-1){
         stdError("token extraction, startIndex out of bounds");
-        return newToken;
+        return newTokenSet;
     }
     if(endIndex < startIndex || endIndex > getSize()-1){
         stdError("token extraction, endIndex out of bounds");
-        return newToken;
+        return newTokenSet;
     }
     //copy from current token-set to new token-set
     int i;
-    int count=0;	//the total count of values to extract
+    int count=0; //the total count of values to extract
     for(i=startIndex; i < endIndex+1; i++){
-        newToken.addToken(tokens[i], priorty[i], type[i]);
+        newTokenSet.addToken(tokens[i]);
         count++;
     }
     //erase
-    for(i=0; i<(count); i++){	//erase the total number of tokens extracted including what is before and after
+    for (i=0; i<(count); i++){ //erase the total number of tokens extracted including what is before and after
         //the contents extracted
         tokens.erase(tokens.begin() + startIndex);
-        type.erase(type.begin() + startIndex);
-        priorty.erase (priorty.begin() + startIndex);
     }
     extractionCount = count;
-    tokens.insert(tokens.begin()+startIndex, "RST");
-    type.insert(type.begin()+startIndex, TokenType::NONE);
-    priorty.insert(priorty.begin()+startIndex,0);
-    return newToken;
+    *rstNest += 1;
+    Token rstToken("RST",0,TokenType::RST,TokenFlag::NORMAL, *rstNest);
+    tokens.insert(tokens.begin()+startIndex, rstToken);
+    return newTokenSet;
 }
 
 /** Report error to user
@@ -226,32 +216,34 @@ void Tokens::stdError(string msg) {
  * 
  */
 void Tokens::renderTokens() {
-    cout << "    TOKENS --> { ";
+    cout << "   TOKENS        --> { ";
     for(int i=0; i<getSize(); i++){
-        cout << "'" << tokens[i] << "' ";
+        cout << "'" << tokens[i].token << "' ";
     }
     cout << "}" << endl;
 }
 
 void Tokens::renderTokensJoined() {
-    cout << "    TOKENS-JOINED --> ";
+    cout << "   TOKENS-JOINED   --> ";
     for(int i=0; i<getSize(); i++) {
-        cout << tokens[i] << " ";
+        cout << tokens[i].token << " ";
     }
     cout << endl << endl;
-    cout << "-------------------------------------------------------------------" << endl << endl;
 }
-void Tokens::renderTokenType(){
+void Tokens::renderTokenType() {
     string str;
-    cout << "{ ";
+    cout << "   TOKENS-TYPE   --> { ";
     for(int i=0; i<getSize(); i++){
-        switch(type[i]) {
+        switch(tokens[i].type) {
             case TokenType::DELIMITER:  str = "DLM"; break;
-            case TokenType::NUMBER:	str = "STR"; break;
-            case TokenType::STRING:	str = "NUM"; break;
+            case TokenType::NUMBER:	str = "NUM"; break;
+            case TokenType::STRING:	str = "STR"; break;
             case TokenType::VAR:	str = "VAR"; break;
             case TokenType::KEYWORD:	str = "KEY"; break;
             case TokenType::NONE:	str = "NON"; break;
+            case TokenType::RST:        str = "RST"; break;
+            default:
+                str = "UNKNOWN";
         }
         cout << "'" << str << "' ";
     }
@@ -259,9 +251,9 @@ void Tokens::renderTokenType(){
 }
 
 void Tokens::renderTokenPriorty(){
-    cout << "{ ";
+    cout << "   TOKENS-PRIORITY --> ";
     for(int i=0; i<getSize(); i++){
-        cout << "[" << priorty[i] << "] ";
+        cout << "[" << tokens[i].priority << "] ";
     }
     cout << "}" << endl;
 }
@@ -276,7 +268,7 @@ int Tokens::getTokenPriorty(int index) {
         stdError("getToken priority out of bounds");
         return 0;
     }
-    return priorty[index];
+    return tokens[index].priority;
 }
 
 /**
@@ -287,17 +279,18 @@ int Tokens::getTokenPriorty(int index) {
 int Tokens::getHighestOperatorPriorityIndex(int& priortyCode) {
     int index = 0;
     int highest = -10;
-    for (int i = 0; i < getSize(); i++){
-        if (priorty[i] > highest) {
-            highest = priorty[i];
+    int size = getSize();
+    for (int i = 0; i < size; i++){
+        if (tokens[i].priority > highest) {
+            highest = tokens[i].priority;
             priortyCode = highest;
             index = i;
         }
     }
     return index;
 }
-/**
- * Get a specific token at index
+/** Get a specific token at index
+ * 
  * @param int index
  * @return string
  */
@@ -305,7 +298,18 @@ string Tokens::getToken(int index) {
     if (index < 0 || index >= getSize()) {
         return ".none.";
     }
-    return tokens[index];
+    return tokens[index].token;
+}
+/** Get a specific token object at index
+ * 
+ * @param int index
+ * @return Token
+ */
+Token* Tokens::getTokenObject(int index) {
+    if (index < 0 || index >= getSize()) {
+        return nullptr;
+    }
+    return &tokens[index];
 }
 /** Check if a grouping flag is true or not
  * 
@@ -319,7 +323,10 @@ bool Tokens::setHasCondition() {
     return conditionFlag;
 }
 TokenFlag Tokens::getTokenFlag(int index) {
-    return flags.at(index);
+    if (index < 0 || index >= getSize()) {
+        return TokenFlag::UNFLAG;
+    }
+    return tokens[index].flag;
 }
 /** Find closing Parenthesis token of open index
  * 
@@ -329,34 +336,31 @@ TokenFlag Tokens::getTokenFlag(int index) {
 int Tokens::getMatchingCloseParenthesis(int openIndex) {
     int i;
     int nested = 0;
+    int size = getSize();
     string bracketOpen = Lang::LangFindDelimiter("braketOpen");
     string bracketClose = Lang::LangFindDelimiter("braketClose");
-    for (i = openIndex + 1; i < getSize(); i++ ) {
-        if (tokens[i] == bracketOpen) {
+    for (i = openIndex + 1; i < size; i++ ) {
+        if (tokens[i].token == bracketOpen) {
             nested++;
-        } else if (tokens[i] == bracketClose && nested > 0) {
+        } else if (tokens[i].token == bracketClose && nested > 0) {
             nested--;
-        } else if ( tokens[i] == bracketClose && nested == 0 ) {
+        } else if (tokens[i].token == bracketClose && nested == 0 ) {
             return i;
             break;
         }
     }
     return openIndex;
 }
-
 /** Remove token at index
  * 
  * @param integer index
  */
 void Tokens::pop(int index) {
     if (index < 0 || index > getSize()-1) {
-        stdError("pop index out of range");
+        stdError("pop token index out of range");
         return;
     }
     tokens.erase(tokens.begin() + index);
-    type.erase(type.begin() + index);
-    priorty.erase(priorty.begin() + index);
-    flags.erase(flags.begin() + index);
 }
 
 /** Push a token before a index:
@@ -368,16 +372,11 @@ void Tokens::pop(int index) {
  * @return boolean
  * 
  */
-bool Tokens::pushBefore(int index, string token, int pri, TokenType type) {
-    auto pos_tokens = this->tokens.begin();
-    auto pos_priorty = this->priorty.begin();
-    auto pos_type = this->type.begin();
-    auto pos_flags = this->flags.begin();
-    if (index >= this->tokens.size() || index < 0) { return false; }
-    this->tokens.insert(pos_tokens + index, token);
-    this->priorty.insert(pos_priorty + index, pri);
-    this->type.insert(pos_type + index, type);
-    this->flags.insert(pos_flags + index, TokenFlag::NORMAL);
+bool Tokens::pushBefore(int index, string _token, int pri, TokenType type) {
+    auto pos_tokens = tokens.begin();
+    if (index >= tokens.size() || index < 0) { return false; }
+    Token token(_token, pri, type, TokenFlag::NORMAL);
+    tokens.insert(pos_tokens + index, token);
     return true;
 }
 /** Push a token after a index:
@@ -389,25 +388,14 @@ bool Tokens::pushBefore(int index, string token, int pri, TokenType type) {
  * @return boolean
  * 
  */
-bool Tokens::pushAfter(int index, string token, int pri, TokenType type) {
+bool Tokens::pushAfter(int index, string _token, int pri, TokenType type) {
+    Token token(_token, pri, type, TokenFlag::NORMAL);
     if (index + 1 >= this->tokens.size()) {
         this->tokens.push_back(token);
-        this->priorty.push_back(pri);
-        this->type.push_back(type);
-        this->flags.push_back(TokenFlag::NORMAL);
     } else {
         auto pos_tokens = this->tokens.begin();
-        auto pos_priorty = this->priorty.begin();
-        auto pos_type = this->type.begin();
-        auto pos_flags = this->flags.begin();
         advance(pos_tokens, index + 1);
-        advance(pos_priorty, index + 1);
-        advance(pos_type, index + 1);
-        advance(pos_flags, index + 1);
         this->tokens.insert(pos_tokens, token);
-        this->priorty.insert(pos_priorty, pri);
-        this->type.insert(pos_type, type);
-        this->flags.insert(pos_flags, TokenFlag::NORMAL);
     }
     return true;
 }
@@ -422,11 +410,10 @@ bool Tokens::isKeyWord(int index) {
         stdError("index for keyword check is out of bounds");
         return false;
     }
-    if (type[index] == TokenType::KEYWORD) {
+    if (tokens[index].type == TokenType::KEYWORD) {
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
 /** Evaluate a token and check if its a string
  * 
@@ -438,23 +425,18 @@ bool Tokens::isString(int index) {
         stdError("index for keyword check is out of bounds");
         return false;
     }
-    if (type[index] == TokenType::STRING) {
+    if (tokens[index].type == TokenType::STRING) {
         return true;
-    } else {
-        return false;
     }
+    return false;
 }
-/** clear vectors
+/** clear tokens
  * 
  */
 void Tokens::clear() {
-    type.clear();
-    priorty.clear();
     tokens.clear();
-    flags.clear();
     comparisonFlag = false;
     conditionFlag  = false;
-    prevCalc       = false;
 }
 /** get tokens count 
  * 

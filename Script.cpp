@@ -13,6 +13,7 @@
 Script::Script() {
     code.reserve(100);	//pre-allocate 100 instruction space for byte-codes
     functions.reserve(50);	//pre allocate 50 spaces for functions
+    internalStaticPointer = 0;
 }
 
 void Script::addInstruction(Instruction I) {
@@ -134,9 +135,10 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer) {
             Stack::Swap();
             break;
         case ByteCode::SHT:
-            Stack::ShiftTop();
+            Stack::ShiftTop(true);
             break;
-        case ByteCode::PUSH:	
+        case ByteCode::PUSH:
+            
             //push always pushes immediate values onto the stack- if variable name appears, instead of pushing that variable
             //name, it pushes the variables **value***
             //this way there is no checking of if items pop off the stack is a variable or string, because all is assummmed
@@ -702,7 +704,7 @@ int  Script::mergeLinesAndCompile(Source *source, Parser *parser, int linenum, b
     //Push to line stack:
     source->pushLine(linenum);
     //Debugger -> expose the render source of lines and CODE:
-    if (debug) { source->renderSource(); }
+    if (debug && OWQ_DEBUG_LEVEL > 0 && OWQ_DEBUG_EXPOSE_COMPILER_PARSE) { source->renderSource(); }
     //Compile stuff (line of code):
     return  parser->compile(this, source->getLines(), debug);
 }
@@ -758,7 +760,7 @@ bool Script::loadFile(string filename, bool debug) {
     bool flag = false;   //Whether to try validate the line or merge several lines.
 
     //Expose debugger output of pre compiling:
-    if (debug) { Lang::printHeader("Pre-compiler and script parse"); }
+    if (debug && OWQ_DEBUG_LEVEL > 0 && OWQ_DEBUG_EXPOSE_COMPILER_PARSE) { Lang::printHeader("Compiler script parse and tokenize"); }
 
     //Render lines:
     while (input.get(cbuffer)) {
@@ -773,6 +775,9 @@ bool Script::loadFile(string filename, bool debug) {
         if (source.validateLine()) {
             //Clean merge and compile block of code:
             ret = mergeLinesAndCompile(&source, &parser, linenum, debug);
+            if (debug && OWQ_DEBUG_LEVEL > 0 && OWQ_DEBUG_EXPOSE_COMPILER_PARSE) {
+                Lang::printSepLine(2);
+            }
             if (ret != 0) {
                 ScriptError::msg("compile error at line(" + source.getLineNumbers() + ") \"" + source.getLines() + "\" : " + errors[ret]);
                 return false;
@@ -799,9 +804,10 @@ bool Script::loadFile(string filename, bool debug) {
     source.clearLines();
     
     //Finished All show macros used if debugger is requested:
-    if (debug) { 
+    if (debug && OWQ_DEBUG_LEVEL > 0 && OWQ_DEBUG_EXPOSE_COMPILER_MACRO_USE) { 
         Lang::printHeader("Macros and usage records");
         source.renderMacros();
+        Lang::printSepLine(2);
     }
     return true;
 }

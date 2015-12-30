@@ -46,6 +46,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/Source.o \
 	${OBJECTDIR}/Stack.o \
 	${OBJECTDIR}/StackData.o \
+	${OBJECTDIR}/Token.o \
 	${OBJECTDIR}/Tokens.o \
 	${OBJECTDIR}/main.o
 
@@ -128,6 +129,11 @@ ${OBJECTDIR}/StackData.o: StackData.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/StackData.o StackData.cpp
+
+${OBJECTDIR}/Token.o: Token.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/Token.o Token.cpp
 
 ${OBJECTDIR}/Tokens.o: Tokens.cpp 
 	${MKDIR} -p ${OBJECTDIR}

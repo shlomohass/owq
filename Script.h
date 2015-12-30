@@ -44,6 +44,9 @@ class Script {
      * Helpful when exiting a function, so we can clean up variables defined in that function
      */
     string currentExecutingMethod;
+    
+    int internalStaticPointer;
+    
     void popActiveMethod();
     void pushMethod( int retAddress, string name);
     int	executeInstruction(Instruction code, int& instructionPointer);

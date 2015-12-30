@@ -9,11 +9,9 @@
 
 #include <iostream>
 #include <vector>
+#include "Token.h"
 
 using namespace std;
-
-enum TokenType { NONE, NUMBER, STRING, DELIMITER, VAR, KEYWORD };
-enum TokenFlag { NORMAL, COMPARISON, CONDITION };
 
 /**
  * Functions to hold script terms that characterize a line
@@ -21,23 +19,15 @@ enum TokenFlag { NORMAL, COMPARISON, CONDITION };
 class Tokens {
     
 private:
-    //! contains the dynamic array of individual string tokens
-    vector<string> tokens;
-    //! contains priority values for each token; purpose is to allow for faster compilation
-    //! functions as a weighting system for each token
-    vector<int>	priorty;
-    //! describe what the token is: string/variable, number, delimiter
-    vector<TokenType> type;
-    // Hold tokens flags for grouping indicators
-    vector<TokenFlag> flags;
+    vector<Token> tokens;
     //Flags which indicates if the set of tokens has special token which needs grouping
     bool comparisonFlag;
     bool conditionFlag;
 public:
     Tokens();
-    bool prevCalc;
-    void addToken(string token, int priortyCode, TokenType tokenType, bool useFlags);
-    void addToken(string token, int priortyCode, TokenType tokenType);
+    void addToken(string _token, int priortyCode, TokenType tokenType, bool useFlags);
+    void addToken(string _token, int priortyCode, TokenType tokenType);
+    void addToken(Token _token);
     bool isNumber(int index);
     bool isString(int index);
     bool isDelimiter(int index);
@@ -47,11 +37,12 @@ public:
     bool isKeyWord(int index);
     int  getTokenPriorty(int index);
     void clear();
-    Tokens extractContentOfParenthesis(int startIndex, int endIndex, int& extractionCount);
-    Tokens extractInclusive(int startIndex, int endIndex,int& extractionCount);
+    Tokens extractContentOfParenthesis(int startIndex, int endIndex, int& extractionCount, int* rstNest);
+    Tokens extractInclusive(int startIndex, int endIndex,int& extractionCount, int* rstNest);
     int getHighestOperatorPriorityIndex(int& priortyCod);
     int getMatchingCloseParenthesis(int openIndex);
     string getToken(int index);
+    Token* getTokenObject(int index);
     bool setHasComparison();
     bool setHasCondition();
     TokenFlag getTokenFlag(int index);
@@ -60,8 +51,8 @@ public:
     void renderTokenType();
     void renderTokenPriorty();
     void pop(int index);
-    bool pushBefore(int index, string token, int pri, TokenType type);
-    bool pushAfter(int index, string token, int pri, TokenType type);
+    bool pushBefore(int index, string _token, int pri, TokenType type);
+    bool pushAfter(int index, string _token, int pri, TokenType type);
     static void stdError(string msg);
     int getSize();
     virtual ~Tokens();

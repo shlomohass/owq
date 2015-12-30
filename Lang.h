@@ -69,6 +69,8 @@ public:
     
     //Printing stuff:
     static void printHeader(string headername);
+    static void printSepLine(int breaks);
+    static void printEmpLine(int breaks);
 private:
 
 };

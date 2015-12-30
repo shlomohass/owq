@@ -211,6 +211,17 @@ bool Lang::LangIsNamingAllowed(const string& value) {
 void Lang::printHeader(string headername) {
     cout << endl << "-------------------------------------------------------------------" << endl;
     cout << "| OWQ Debugger -> " << headername << endl;
-    cout << "-------------------------------------------------------------------" << endl;
+    printSepLine(2);
+}
+void Lang::printSepLine(int breaks) {
+    cout << "-------------------------------------------------------------------";
+    for (int i = 0; i < breaks; i++) {
+        cout << endl;
+    }
+}
+void Lang::printEmpLine(int breaks) {
+    for (int i = 0; i < breaks; i++) {
+        cout << endl;
+    }
 }
 

@@ -7,6 +7,8 @@
 #ifndef PARSER_H
 #define	PARSER_H
 
+#include "Setowq.h"
+
 using namespace std;
 
 #include "Tokens.h"
@@ -20,14 +22,16 @@ using namespace std;
  *
  * It takes an expression and determines meaning
  */
+enum ParseMark { UNMARK, FUNCTION, IF, WHILE, ELSE };
+
 class Parser {
     
     string expression;		//expression to evaluate and compile
     int expressionIndex;	//the index into the expression; i.e expression[expressionIndex]
     string currentToken;	//the currentToken as a function of expression
-    vector<int> marks;		//helps to group related code branches: functions, if, while
+    vector<ParseMark> marks;		//helps to group related code branches: functions, if, while
     TokenType currentTokenType;	//describes the current token type
-
+    
     //---------------------------------------------------------
     // vital workers
     //---------------------------------------------------------
@@ -36,8 +40,8 @@ class Parser {
     void 	evaluateGroups(Tokens& token, TokenFlag flagToGroup, int startFrom);
     int   	compiler(Script* script, Tokens& token, int rCount);
     string 	getToken();
-    void 	mark(int markType);
-    int  	unmark();
+    void 	mark(ParseMark markType);
+    ParseMark  	unmark();
     
     //----------------------------------------------------------
     // Aux- helper functions
@@ -61,7 +65,7 @@ class Parser {
     //----------------------------------------------------------
     // Compiler - Methods
     //----------------------------------------------------------
-    bool compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, Tokens* token, int &operatorIndex, int &priority, int &eraseCount, string &leftToken, string &rightToken);
+    bool compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, Tokens* token, int &operatorIndex, int &priority, int &eraseCount, Token* leftToken, Token* rightToken);
 public:
     Parser();
     virtual ~Parser();
