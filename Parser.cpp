@@ -415,9 +415,9 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
         if (operatorToken->token == Lang::LangFindKeyword("function")) {
             
             //add the operation opcode
-            script->addInstruction( Instruction(ByteCode::FUNC, rightToken->token) );
+            script->addInstruction(Instruction(ByteCode::FUNC, rightToken->token));
             //extract what we just worked with[ functionKeyword funcName ]
-            tokens.extractInclusive( operatorIndex, operatorIndex + 1, eraseCount, &script->internalStaticPointer);
+            tokens.extractInclusive( operatorIndex, operatorIndex + 1, eraseCount, script);
             tokens.pop(operatorIndex);	//erase the RST that is placed in place of 'Function funcName'
             operatorIndex -= eraseCount;
 
@@ -520,7 +520,7 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
 
             //extract the return value and evaluate it recursively
             if (tokens.getSize() > 1) {
-                Tokens sub = tokens.extractInclusive(1, tokens.getSize()-1, eraseCount, &script->internalStaticPointer);
+                Tokens sub = tokens.extractInclusive(1, tokens.getSize()-1, eraseCount, script);
                 operatorIndex -= eraseCount;
                 compiler(script,sub,rCount);
             }
@@ -557,9 +557,16 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
         //get the close of this parenthesis
         int closeOfParenthesis = tokens.getMatchingCloseParenthesis(operatorIndex);
         //extract the content and replace with RST
-        Tokens sub = tokens.extractContentOfParenthesis(operatorIndex, closeOfParenthesis, eraseCount, &script->internalStaticPointer);
+        Tokens sub = tokens.extractContentOfParenthesis(operatorIndex, closeOfParenthesis, eraseCount, script);
         operatorIndex -= 1;	//Just in case its a function call set next block to parse the call name,
+        int prevRstPos = script->internalStaticPointer; //just in case the group won't do anything but push
         compiler(script, sub, rCount);
+        
+        //Set the correct Static Pointer of the brackets group since we set it to zero by default:
+        if (tokens.getSize() > operatorIndex + 1) {
+            tokens.tokens[operatorIndex + 1].rstPos = script->internalStaticPointer;
+        }
+        
         //Make appropriate function Call
         if (tokens.getSize() > 1 && operatorIndex >= 0) { //two or more
             //if previous token before the parenthesis has a non zero priority of 2 then make function call
@@ -580,7 +587,7 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
     if (hasCommas(tokens)) {
         for (int i = 0; i<tokens.getSize(); i++) {
             if (tokens.getToken(i) == Lang::LangFindDelimiter("comma")) {
-                Tokens sub = tokens.extractInclusive(0, i - 1, eraseCount, &script->internalStaticPointer);
+                Tokens sub = tokens.extractInclusive(0, i - 1, eraseCount, script);
                 operatorIndex -= eraseCount;
                 compiler(script, sub, rCount);
                 tokens.pop(0);	//remove RST
@@ -648,16 +655,20 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
     } else if (priortyCode == 40) { //equal sign
         
             //extract from 1 past the equal sign to the end of the tokens
-            Tokens sub = tokens.extractInclusive(operatorIndex+1, tokens.getSize()-1, eraseCount, &script->internalStaticPointer);
+            Tokens sub = tokens.extractInclusive(operatorIndex+1, tokens.getSize()-1, eraseCount, script);
             compiler(script, sub, rCount);
             script->addInstruction(Instruction(ByteCode::ASN, leftToken->token));
-            tokens.extractInclusive(operatorIndex-1, operatorIndex+1, eraseCount, &script->internalStaticPointer);
+            tokens.extractInclusive(operatorIndex-1, operatorIndex+1, eraseCount, script);
             operatorIndex -= eraseCount;
             
     } else if (priortyCode == 0 || priortyCode == 1) {
         
             script->addInstruction(Instruction(ByteCode::PUSH, tokens.getToken(operatorIndex)));
-            tokens.extractInclusive(operatorIndex, operatorIndex, eraseCount, &script->internalStaticPointer);
+            if (operatorIndex == tokens.getSize() -1) {
+                tokens.extractInclusive(operatorIndex, operatorIndex, eraseCount, script, true);
+            } else {
+                tokens.extractInclusive(operatorIndex, operatorIndex, eraseCount, script);
+            }
             operatorIndex -= eraseCount;
             
     }
@@ -704,10 +715,10 @@ ParseMark Parser::unmark() {
  */
 bool Parser::compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, Tokens* tokens, int &operatorIndex, int &priority, int &eraseCount, Token* leftToken, Token* rightToken) {
 
-    script->addInstruction(Instruction(ByteCode::PUSH, leftToken->token));
-    script->addInstruction(Instruction(ByteCode::PUSH, rightToken->token));
+    script->addInstruction(Instruction(ByteCode::PUSH, leftToken->token, leftToken->rstPos), true);
+    script->addInstruction(Instruction(ByteCode::PUSH, rightToken->token, rightToken->rstPos), true);
     script->addInstruction(Instruction(bc));
-    tokens->extractInclusive(operatorIndex - 1, operatorIndex + 1, eraseCount, &script->internalStaticPointer);
+    tokens->extractInclusive(operatorIndex - 1, operatorIndex + 1, eraseCount, script, true);
     operatorIndex -= eraseCount;
     return true;
 }

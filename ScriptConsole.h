@@ -6,6 +6,7 @@
 #ifndef SCRIPTCONSOLE_H
 #define	SCRIPTCONSOLE_H
 
+#include "Setowq.h"
 #include <iostream>
 #include <sstream>
 

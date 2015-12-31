@@ -21,6 +21,7 @@ class StackData {
 
 public:
     
+    StackData();
     StackData(string value);
     StackData(double value);
     StackData(bool _rst, int _pos);

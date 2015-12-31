@@ -6,6 +6,7 @@
 
 #include "Tokens.h"
 #include "Lang.h"
+#include "Script.h"
 #include <sstream> 
 
 Tokens::Tokens() {
@@ -136,7 +137,10 @@ bool Tokens::isOpenParenthesis(int index) {
  * @param extractionCount		place the store the total number of items extracted from this token set
  * @return
  */
-Tokens Tokens::extractContentOfParenthesis(int startParenthesisIndex, int endParenthesisIndex, int& extractionCount, int* rstNest) {
+Tokens Tokens::extractContentOfParenthesis(int startParenthesisIndex, int endParenthesisIndex, int& extractionCount, Script* script) {
+    return extractContentOfParenthesis(startParenthesisIndex, endParenthesisIndex, extractionCount, script, false);
+}
+Tokens Tokens::extractContentOfParenthesis(int startParenthesisIndex, int endParenthesisIndex, int& extractionCount, Script* script, bool setPointer) {
     Tokens newTokenSet;
     if(startParenthesisIndex < 0 || startParenthesisIndex > getSize() - 1) {
         stdError("token extraction, startIndex out of bounds");
@@ -159,9 +163,17 @@ Tokens Tokens::extractContentOfParenthesis(int startParenthesisIndex, int endPar
         tokens.erase(tokens.begin() + startParenthesisIndex);
     }
     extractionCount = count + 2;
-    *rstNest += 1;
-    Token rstToken("RST",0,TokenType::RST,TokenFlag::NORMAL, *rstNest);
-    tokens.insert(tokens.begin()+startParenthesisIndex, rstToken);
+    if (setPointer && script->code.size() > 0) {
+        script->internalStaticPointer += 1;
+        Token rstToken("RST",0,TokenType::RST,TokenFlag::NORMAL, script->internalStaticPointer);
+        tokens.insert(tokens.begin()+startParenthesisIndex, rstToken);
+        //Mark the last operation to set result with pointer:
+        script->code.back().setPointer(script->internalStaticPointer);
+        
+    } else {
+        Token rstToken("RST",0,TokenType::RST,TokenFlag::NORMAL, 0);
+        tokens.insert(tokens.begin() + startParenthesisIndex, rstToken);
+    }
     return newTokenSet;
 }
 
@@ -175,7 +187,10 @@ Tokens Tokens::extractContentOfParenthesis(int startParenthesisIndex, int endPar
  * @param extractionCount
  * @return
  */
-Tokens Tokens::extractInclusive(int startIndex, int endIndex, int& extractionCount, int* rstNest) {
+Tokens Tokens::extractInclusive(int startIndex, int endIndex, int& extractionCount, Script* script) {
+    return extractInclusive(startIndex, endIndex, extractionCount, script, false);
+}
+Tokens Tokens::extractInclusive(int startIndex, int endIndex, int& extractionCount, Script* script, bool setPointer) {
     Tokens newTokenSet;
     if(startIndex < 0 || startIndex > getSize()-1){
         stdError("token extraction, startIndex out of bounds");
@@ -197,10 +212,19 @@ Tokens Tokens::extractInclusive(int startIndex, int endIndex, int& extractionCou
         //the contents extracted
         tokens.erase(tokens.begin() + startIndex);
     }
+    //Set a RST:
     extractionCount = count;
-    *rstNest += 1;
-    Token rstToken("RST",0,TokenType::RST,TokenFlag::NORMAL, *rstNest);
-    tokens.insert(tokens.begin()+startIndex, rstToken);
+    if (setPointer && script->code.size() > 0) {
+        script->internalStaticPointer += 1;
+        Token rstToken("RST",0,TokenType::RST, TokenFlag::NORMAL, script->internalStaticPointer);
+        tokens.insert(tokens.begin()+startIndex, rstToken);
+        //Mark the last operation to set result with pointer:
+        script->code.back().setPointer(script->internalStaticPointer);
+    } else {
+        Token rstToken("RST",0,TokenType::RST,TokenFlag::NORMAL, 0);
+        tokens.insert(tokens.begin() + startIndex, rstToken);
+    }
+           
     return newTokenSet;
 }
 
@@ -245,7 +269,11 @@ void Tokens::renderTokenType() {
             default:
                 str = "UNKNOWN";
         }
-        cout << "'" << str << "' ";
+        if (str == "RST") {
+            cout << "'" << str << ":" << tokens[i].rstPos << "' ";
+        } else {
+            cout << "'" << str << "' ";
+        }
     }
     cout << "}" << endl;
 }

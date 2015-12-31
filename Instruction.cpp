@@ -42,22 +42,28 @@ Instruction::Instruction() {
     code = ByteCode::NOP;
     operand = ".none.";
     containsQuotes = false;
+    staticPointer = 0;
+    isRST = false;
 }
 
 string Instruction::toString() {
-    string display = byteCodeToShort() + "\t ->  ";
-    cout.precision(4);
-    if (operand != ".none.") {
-        //display properly
-        if(operandHasQuote()) {
-            display += "\"";
-        }
-        display += operand;
-        //display properly
-        if(operandHasQuote()) { 
-            display += "\"";
-        }
+    string display = byteCodeToShort() + "           ";
+    display = display.substr(0, 5) + " ->  ";
+    //display properly
+    if(operandHasQuote()) {
+        display += "\"";
     }
+    display += (operand == ".none.") ? " " : operand;
+    //display properly
+    if(operandHasQuote()) { 
+        display += "\"";
+    }
+    display += "                ";
+    display = display.substr(0,20);
+    //display instruction set static pointer:
+    ostringstream convert;   // stream used for the conversion
+    convert << staticPointer;
+    display += "  :  SP[ " + convert.str() + " ]";
     return display;
 }
 
@@ -80,6 +86,8 @@ string Instruction::byteCodeToShort() {
 Instruction::Instruction(ByteCode inst, string xOperand) {
     code = inst;
     operand = xOperand;
+    staticPointer = 0;
+    isRST = false;
     if (operand[0] == '"' && operand[operand.size()-1]== '"') {
         containsQuotes =true;
         //remove the quotes now
@@ -89,10 +97,37 @@ Instruction::Instruction(ByteCode inst, string xOperand) {
         containsQuotes = false;
     }
 }
+Instruction::Instruction(ByteCode inst, string xOperand, int pointer) {
+    code = inst;
+    operand = xOperand;
+    staticPointer = pointer;
+    if (operand[0] == '"' && operand[operand.size()-1]== '"') {
+        containsQuotes =true;
+        //remove the quotes now
+        operand.erase(0,1);//erase beginning quotation
+        operand.erase(operand.size()-1,1);//erase the ending quotation
+    } else {
+        containsQuotes = false;
+        if (operand == "RST") {
+            isRST = true;
+        }
+    }
+}
 Instruction::Instruction(ByteCode inst) {
-	code = inst;
-	operand = ".none.";
-	containsQuotes =false;
+    code = inst;
+    operand = ".none.";
+    containsQuotes =false;
+    staticPointer = 0;
+    isRST = true;
+}
+void Instruction::setPointer(int pointer) {
+    staticPointer = pointer;
+}
+int Instruction::getPointer() {
+    return staticPointer;
+}
+bool Instruction::isRstPointer() {
+    return isRST;
 }
 bool isNumberic(char c) {
     bool ret = false;
@@ -182,6 +217,9 @@ ByteCode Instruction::getCode() {
 }
 double Instruction::getNumber() {
     return atof(operand.c_str());
+}
+string Instruction::getString() {
+    return operand;
 }
 Instruction::~Instruction() {
 	// TODO Auto-generated destructor stub

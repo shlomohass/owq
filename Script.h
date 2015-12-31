@@ -21,7 +21,7 @@ class Parser;
 class Script {
     
     friend class Parser;
-    
+    friend class Tokens;
     /**
      * The complete listing of instructions that define this script
      */
@@ -50,6 +50,7 @@ class Script {
     void popActiveMethod();
     void pushMethod( int retAddress, string name);
     int	executeInstruction(Instruction code, int& instructionPointer);
+    int	executeInstruction(Instruction code, int& instructionPointer, bool debug);
     int getFunctionAddress(string funcName);
     Method* getActiveMethod();
 
@@ -62,7 +63,7 @@ class Script {
     ScriptVariable *getGlobalVariable(string varName);
     
     void addInstruction(Instruction I);
-
+    void addInstruction(Instruction I, bool allowRST);
 public:
     Script();
     //Register variable to global scope from Application layer:
@@ -74,7 +75,10 @@ public:
     void render();
 
     void execute(string funcCall);
+    
     void run();
+    void run(bool debug);
+    
     bool loadFile(string filename);
     bool loadFile(string filename, bool debug);
 

@@ -11,6 +11,16 @@
  * 
  */
 #define NAN -3231307.6790
+/** Construct a Stack Data that is undefined
+ * 
+ * @param string|double value
+ */
+StackData::StackData() {
+    dvalue = NAN;
+    svalue = "null";
+    rstPos = -1;
+    rst    = false;
+}
 /** Construct a Stack Data
  * 
  * @param string|double value
@@ -85,6 +95,9 @@ bool StackData::isRst() {
  */
 bool StackData::isRstPos(int pos) {
     return pos == rstPos ? true : false;
+}
+int StackData::getRstPos() {
+    return rstPos;
 }
 /** Returns the Stack Data number value
  * 

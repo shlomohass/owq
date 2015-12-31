@@ -60,7 +60,32 @@ StackData Stack::pop() {
     }
     StackData sd = stack[stack.size()-1];	//the the last item on the stack
     stack.pop_back();	//remove the item on the stack
+    if (sd.isRst()) {
+        sd = extract(sd.getRstPos());
+    }
     return sd;			//return that data
+}
+void Stack::setTopPointer(int pointer) {
+    if (stack.size() > 0) {
+        stack.back().setRstPos(pointer);
+        return;
+    } 
+    cout << endl << "Error: tried to set pointer in empty stack" << endl; 
+}
+StackData Stack::extract(int pointer) {
+    StackData stackdata;
+    for (int i=(int)stack.size()-1; i > -1; i--) {
+        if (stack[i].getRstPos() == pointer) {
+            stackdata = stack[i];
+            stack.erase(stack.begin() + i);
+            if (stackdata.isRst()) {
+                stackdata = extract(stackdata.getRstPos());
+            }
+            return stackdata;
+        }
+    }
+    cout << endl << "Error: stack pointer did not found nothing!" << endl; 
+    return stackdata;
 }
 /** Swap top 2 value on the stack
  * 
@@ -108,9 +133,9 @@ StackData Stack::Shift() {
  *  
  */
 void Stack::render() {
-    cout << "  Stack("<< stack.size() << "):\n";
+    cout << "     Stack("<< stack.size() << "):\n";
     for (int i=(int)stack.size()-1; i > -1; i--) {
-        cout << "    tStack [" << i << "] = ";
+        cout << "           [" << i << "] = ";
         stack[i].render();
         cout << endl;
     }

@@ -16,13 +16,17 @@ using namespace std;
 /**
  * Functions to hold script terms that characterize a line
  */
+class Script;
 class Tokens {
+    
+    friend class Parser;
     
 private:
     vector<Token> tokens;
     //Flags which indicates if the set of tokens has special token which needs grouping
     bool comparisonFlag;
     bool conditionFlag;
+    
 public:
     Tokens();
     void addToken(string _token, int priortyCode, TokenType tokenType, bool useFlags);
@@ -37,8 +41,10 @@ public:
     bool isKeyWord(int index);
     int  getTokenPriorty(int index);
     void clear();
-    Tokens extractContentOfParenthesis(int startIndex, int endIndex, int& extractionCount, int* rstNest);
-    Tokens extractInclusive(int startIndex, int endIndex,int& extractionCount, int* rstNest);
+    Tokens extractContentOfParenthesis(int startIndex, int endIndex, int& extractionCount, Script* script);
+    Tokens extractContentOfParenthesis(int startIndex, int endIndex, int& extractionCount, Script* script, bool setPointer);
+    Tokens extractInclusive(int startIndex, int endIndex,int& extractionCount, Script* script);
+    Tokens extractInclusive(int startIndex, int endIndex,int& extractionCount, Script* script, bool setPointer);
     int getHighestOperatorPriorityIndex(int& priortyCod);
     int getMatchingCloseParenthesis(int openIndex);
     string getToken(int index);

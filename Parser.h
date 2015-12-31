@@ -8,6 +8,7 @@
 #define	PARSER_H
 
 #include "Setowq.h"
+#include <iomanip>
 
 using namespace std;
 

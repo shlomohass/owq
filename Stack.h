@@ -26,6 +26,8 @@ public:
     static void push(ScriptVariable& data);
     static int  size();
     static StackData pop();
+    static StackData extract(int pointer);
+    static void setTopPointer(int pointer);
     static void Swap();
     static void ShiftTop();
     static void ShiftTop(int index);

@@ -65,7 +65,7 @@ FFLAGS=
 ASFLAGS=
 
 # Link Libraries and Options
-LDLIBSOPTIONS=
+LDLIBSOPTIONS=-lawesomium
 
 # Build Targets
 .build-conf: ${BUILD_SUBPROJECTS}
