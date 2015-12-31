@@ -13,5 +13,104 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Header Files\OWQcompiler">
+      <UniqueIdentifier>{7e3c84f2-a93c-4da5-a3d0-505350350048}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\OWQcompiler">
+      <UniqueIdentifier>{dbf5232d-cb24-4385-9a2a-ad9412d12a23}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\example.scs">
+      <Filter>Resource Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="OWQcompiler\Instruction.h">
+      <Filter>Header Files\OWQcompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="OWQcompiler\Lang.h">
+      <Filter>Header Files\OWQcompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="OWQcompiler\Method.h">
+      <Filter>Header Files\OWQcompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="OWQcompiler\Parser.h">
+      <Filter>Header Files\OWQcompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="OWQcompiler\Script.h">
+      <Filter>Header Files\OWQcompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="OWQcompiler\ScriptConsole.h">
+      <Filter>Header Files\OWQcompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="OWQcompiler\ScriptError.h">
+      <Filter>Header Files\OWQcompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="OWQcompiler\ScriptVariable.h">
+      <Filter>Header Files\OWQcompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="OWQcompiler\Setowq.h">
+      <Filter>Header Files\OWQcompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="OWQcompiler\Source.h">
+      <Filter>Header Files\OWQcompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="OWQcompiler\Stack.h">
+      <Filter>Header Files\OWQcompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="OWQcompiler\StackData.h">
+      <Filter>Header Files\OWQcompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="OWQcompiler\Token.h">
+      <Filter>Header Files\OWQcompiler</Filter>
+    </ClInclude>
+    <ClInclude Include="OWQcompiler\Tokens.h">
+      <Filter>Header Files\OWQcompiler</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="OWQcompiler\Instruction.cpp">
+      <Filter>Source Files\OWQcompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="OWQcompiler\Lang.cpp">
+      <Filter>Source Files\OWQcompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="OWQcompiler\Method.cpp">
+      <Filter>Source Files\OWQcompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="OWQcompiler\Parser.cpp">
+      <Filter>Source Files\OWQcompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="OWQcompiler\Script.cpp">
+      <Filter>Source Files\OWQcompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="OWQcompiler\ScriptConsole.cpp">
+      <Filter>Source Files\OWQcompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="OWQcompiler\ScriptError.cpp">
+      <Filter>Source Files\OWQcompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="OWQcompiler\ScriptVariable.cpp">
+      <Filter>Source Files\OWQcompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="OWQcompiler\Source.cpp">
+      <Filter>Source Files\OWQcompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="OWQcompiler\Stack.cpp">
+      <Filter>Source Files\OWQcompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="OWQcompiler\StackData.cpp">
+      <Filter>Source Files\OWQcompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="OWQcompiler\Token.cpp">
+      <Filter>Source Files\OWQcompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="OWQcompiler\Tokens.cpp">
+      <Filter>Source Files\OWQcompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
