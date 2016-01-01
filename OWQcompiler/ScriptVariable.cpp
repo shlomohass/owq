@@ -8,7 +8,7 @@
 
 ScriptVariable::ScriptVariable() {
     svalue          = "NaN";
-    dvalue          = NAN;
+    dvalue          = OWQ_NAN;
     name            = ".invalid.null.initialize.";
     isRegistered    = false;
     address         = NULL;
@@ -26,7 +26,7 @@ ScriptVariable::ScriptVariable(string xName, double value) {
 
 ScriptVariable::ScriptVariable(string xName, string value) {
     svalue       = value;
-    dvalue       = NAN;
+    dvalue       = OWQ_NAN;
     name         = xName;
     isRegistered = false;
     address      = NULL;
@@ -34,7 +34,7 @@ ScriptVariable::ScriptVariable(string xName, string value) {
 }
 ScriptVariable::ScriptVariable(string xName, bool reg) {
     svalue       = "NaN";
-    dvalue       = NAN;
+    dvalue       = OWQ_NAN;
     name         = xName;
     isRegistered = reg;
     address      = NULL;
@@ -42,7 +42,7 @@ ScriptVariable::ScriptVariable(string xName, bool reg) {
 }
 ScriptVariable::ScriptVariable(string xName, RegisteredVariable xType, void* xAddress) {
     svalue       = "NaN";
-    dvalue       = NAN;
+    dvalue       = OWQ_NAN;
     name         = xName;
     isRegistered = true;
     address      = xAddress;
@@ -51,7 +51,7 @@ ScriptVariable::ScriptVariable(string xName, RegisteredVariable xType, void* xAd
 
 ScriptVariable::ScriptVariable(string xName) {
     svalue       = "NaN";
-    dvalue       = NAN;
+    dvalue       = OWQ_NAN;
     name         = xName;
     isRegistered = false;
     address      = NULL;
@@ -108,7 +108,7 @@ bool ScriptVariable::isString() {
 
 bool ScriptVariable::isNumber() {
     if (!isRegistered || (isRegistered && type == RegisteredVariable::GLOBAL_FLEX)) {
-        if (dvalue != NAN) {
+        if (dvalue != OWQ_NAN) {
             return true;
         } else {
             return false;
@@ -137,7 +137,7 @@ void ScriptVariable::setNumberValue(double xValue) {
 }
 
 void ScriptVariable::setStringValue(string xValue) {
-    dvalue = NAN;
+    dvalue = OWQ_NAN;
     if (!isRegistered || (isRegistered && type == RegisteredVariable::GLOBAL_FLEX)) {
         svalue = xValue;
     } else {

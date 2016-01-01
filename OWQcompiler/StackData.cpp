@@ -12,7 +12,7 @@
  * @param string|double value
  */
 StackData::StackData() {
-    dvalue = NAN;
+    dvalue = OWQ_NAN;
     svalue = "null";
     rstPos = -1;
     rst    = false;
@@ -22,7 +22,7 @@ StackData::StackData() {
  * @param string|double value
  */
 StackData::StackData(string value) {
-    dvalue = NAN;
+    dvalue = OWQ_NAN;
     svalue = value;
     rstPos = -1;
     rst    = false;
@@ -39,7 +39,7 @@ StackData::StackData(double value) {
  * @param integer _rstPos
  */
 StackData::StackData(bool _rst, int _rstPos) {
-    dvalue = NAN;
+    dvalue = OWQ_NAN;
     svalue = "null";
     rst = _rst;
     setRstPos(_rstPos);
@@ -62,7 +62,7 @@ void StackData::setRstPos(int _rstPos) {
  * @return boolean 
  */
 bool StackData::isNumber() {
-    if(dvalue != NAN){
+    if(dvalue != OWQ_NAN){
         return true;
     }
     return false;

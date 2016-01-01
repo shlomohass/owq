@@ -15,6 +15,8 @@
 #include <vector>
 #include <map>
 
+//Important Language Macros:
+
 using namespace std;
 
 class Lang {

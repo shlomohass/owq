@@ -9,6 +9,11 @@
 #include "Lang.h"
 #include "Script.h"
 
+#ifndef OWQ_NAN
+#define OWQ_NAN -3231307.6790
+#endif
+
+
 using namespace std;
 
 int main(int argc, char** argv) {

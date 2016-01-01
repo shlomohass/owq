@@ -13,6 +13,10 @@
 #include "ScriptError.h"
 #include "StackData.h"
 
+#ifndef OWQ_NAN
+#define OWQ_NAN -3231307.6790
+#endif
+
 using namespace std;
 
 enum RegisteredVariable { 

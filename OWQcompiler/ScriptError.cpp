@@ -7,12 +7,11 @@
 #include "ScriptError.h"
 
 ScriptError::ScriptError() {
-    // TODO Auto-generated constructor stub
 
 }
 
 void ScriptError::msg(string event) {
-    cout << "ScriptRuntimeError: " << event << endl;
+    cout << "Compilation ERROR: " << event << endl;
 }
 
 void ScriptError::render(string msg) {
@@ -20,5 +19,5 @@ void ScriptError::render(string msg) {
 }
 
 ScriptError::~ScriptError() {
-    // TODO Auto-generated destructor stub
+
 }

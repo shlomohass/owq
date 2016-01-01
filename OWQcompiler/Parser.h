@@ -23,7 +23,7 @@ using namespace std;
  *
  * It takes an expression and determines meaning
  */
-enum ParseMark { UNMARK, FUNCTION, IF, WHILE, ELSE };
+enum ParseMark { UNMARK, FUNCTION, IF, WHILE, ELSE, GROUPDEFINE };
 
 class Parser {
     
@@ -42,8 +42,15 @@ class Parser {
     int   	compiler(Script* script, Tokens& token, int rCount);
     string 	getToken();
     void 	mark(ParseMark markType);
-    ParseMark  	unmark();
+    ParseMark unmark();
+	ParseMark getMark();
     
+	//----------------------------------------------------------
+	// Evaluation functions at compilation time:
+	//----------------------------------------------------------
+	int    evaluateDeclarationSub(Tokens &sub, bool andTypes);
+	bool   evaluateSetIncludeType(Tokens &sub, TokenType type);
+
     //----------------------------------------------------------
     // Aux- helper functions
     //----------------------------------------------------------
@@ -67,6 +74,7 @@ class Parser {
     // Compiler - Methods
     //----------------------------------------------------------
     bool compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, Tokens* token, int &operatorIndex, int &priority, int &eraseCount, Token* leftToken, Token* rightToken);
+
 public:
     Parser();
     virtual ~Parser();

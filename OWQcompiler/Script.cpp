@@ -767,9 +767,14 @@ string errors[] = {
     "1 script object is null",
     "2 recursive call max out script contains error",
     "3 syntax error for function definition",
-    "4 if-statement syntax error",
-    "5 while-statement syntax error",
-    "6 else - statement syntax error" 
+    "4 if - statement syntax error",
+    "5 while - statement syntax error",
+    "6 else - statement syntax error",
+	"7 definition - expected definition of valriable name",
+	"8 misuse of Braces",
+	"9 declaration variable should be followed by an assignment delimiter or by end of statement",
+	"10 found two commas in variable declaration",
+	"11 declaraion expression cannot contain keywords"
 };
 
 /** Loads and precompiles a script:

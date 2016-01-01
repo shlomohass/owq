@@ -13,8 +13,8 @@
  /** the NULL value we use.
  *
  */
-#ifndef NAN
-#define NAN -3231307.6790
+#ifndef OWQ_NAN
+#define OWQ_NAN -3231307.6790
 #endif
 
 using namespace std;
