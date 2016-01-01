@@ -1,8 +1,6 @@
-
-let b = 7 * 5,
-    t = "Shlomi",
-	s = " Hassid",
-	y = " Age " + b,
-	n = t + s,
-	f = n + " " + y + ".";
-print(f);
+let t = 0;
+//let t = 8;
+while (t < 3) {
+	print("WHILE LOOP --->>> " + t);
+	t = t + 1;
+}

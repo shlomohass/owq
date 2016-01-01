@@ -356,7 +356,7 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
                             } //end match case
                         }//end for loop
                         //Check if there is a else statement:
-                        if (code[instructionPointer].getOperand() == Lang::LangFindKeyword("cond-if")) {
+                        if (curCode == Lang::LangFindKeyword("cond-if") && instructionPointer + 1 < (int)code.size()) {
                             if (code[instructionPointer + 1].getCode() == ByteCode::ELE) {
                                 //Jump to after target else
                                 instructionPointer++;
