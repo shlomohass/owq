@@ -28,7 +28,7 @@ int main(int argc, char** argv) {
 	bool indicator = s.loadFile("assets\\example.scs", OWQ_DEBUG);
 	//Loading success so go and do stuff:
 	if (indicator) {
-		s.run(OWQ_DEBUG);
+		//s.run(OWQ_DEBUG);
 	}
 
 	delete lang;

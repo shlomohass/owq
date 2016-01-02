@@ -9,7 +9,7 @@
 #define	SETOWQ_H
 
 #ifndef OWQ_DEBUG
-    #define OWQ_DEBUG false
+    #define OWQ_DEBUG true
 #endif
 
 #ifndef OWQ_DEBUG_LEVEL

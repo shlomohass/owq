@@ -564,16 +564,24 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
 			bool avoidEvaluation = false;
 			if (hasCommas(tokens)) {
 				//TODO avoid BRACKETS!
-				//TODO make sure sub doesn't have any key word only numbers strings delimiters and varibales!
 				//Scan to Define all recursivly:
 				string t;
+				string langCommas = Lang::LangFindDelimiter("comma");
+				string langOpenBracket = Lang::LangFindDelimiter("braketOpen");
+				string langCloseBracket = Lang::LangFindDelimiter("braketClose");
 				int tokenSetSize = (int)tokens.getSize();
+				int nestedBrackets = 0;
 				for (int i = operatorIndex + 1; i < tokenSetSize - 1; i++) {
 					t = tokens.getToken(i);
-					if (t == Lang::LangFindDelimiter("comma")) {
+					if (t == langOpenBracket) {
+						nestedBrackets++;
+					} else if (t == langCloseBracket) {
+						nestedBrackets--;
+					} else if (t == langCommas && nestedBrackets == 0) {
 						Tokens sub = tokens.extractInclusive(operatorIndex + 1, i - 1, eraseCount, script);
 						i -= eraseCount;
 						tokenSetSize -= eraseCount;
+						sub.renderTokens();
 						//If the sub is just one token avoid anything elese and continue:
 						if (sub.getSize() > 1) {
 							//Evaluate:
