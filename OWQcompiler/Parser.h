@@ -67,6 +67,7 @@ class Parser {
     bool isDigit(const string& c);
     bool isKeyword(string s);
     bool hasCommas(Tokens& token);
+	bool hasCommasNotNested(Tokens& token);
     int  getDelimiterPriorty();
     int  getDelimiterPriorty(string toCheckToken, TokenType toCheckType);
     

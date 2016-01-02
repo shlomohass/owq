@@ -1,3 +1,1 @@
-let j = 6,
-    k = print(5,3),
-	a = 89;
+let j = print(5,3);

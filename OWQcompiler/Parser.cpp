@@ -562,7 +562,7 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
 			}
 			//Check for several defines: note that define key word is still in the token set.
 			bool avoidEvaluation = false;
-			if (hasCommas(tokens)) {
+			if (hasCommasNotNested(tokens)) {
 				//TODO avoid BRACKETS!
 				//Scan to Define all recursivly:
 				string t;
@@ -1024,12 +1024,38 @@ int Parser::getDelimiterPriorty(string toCheckToken, TokenType toCheckType) {
  */
 bool Parser::hasCommas(Tokens& tokens) {
     int size = tokens.getSize();
+	string comma = Lang::LangFindDelimiter("comma");
     for (int i = 0; i < size; i++){
-        if(tokens.getToken(i) == Lang::LangFindDelimiter("comma")){
+        if(tokens.getToken(i) == comma){
             return true;
         }
     }
     return false;
+}
+/** Check to see if a token group has commas in it but avoid nested (, , ,)
+*
+* @param Tokens token  -> the entire Token set
+* @return boolean
+*/
+bool Parser::hasCommasNotNested(Tokens& tokens) {
+	int size = tokens.getSize();
+	string comma = Lang::LangFindDelimiter("comma");
+	string langOpenBracket = Lang::LangFindDelimiter("braketOpen");
+	string langCloseBracket = Lang::LangFindDelimiter("braketClose");
+	int nested = 0;
+	for (int i = 0; i < size; i++) {
+		string t = tokens.getToken(i);
+		if (t == langOpenBracket) {
+			nested++;
+		}
+		else if (t == langCloseBracket && nested > 0) {
+			nested--;
+		}
+		if (nested < 1 && t == comma) {
+			return true;
+		}
+	}
+	return false;
 }
 /** Parse any string to lower ASCII chars
  * 
