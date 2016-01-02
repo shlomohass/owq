@@ -23,7 +23,7 @@ using namespace std;
  *
  * It takes an expression and determines meaning
  */
-enum ParseMark { UNMARK, FUNCTION, IF, WHILE, ELSE, GROUPDEFINE };
+enum ParseMark { UNMARK, FUNCTION, IF, WHILE, ELSE, GROUPDEFINE, BREAKEXP };
 
 class Parser {
     

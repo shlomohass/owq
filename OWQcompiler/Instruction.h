@@ -18,8 +18,9 @@ enum ByteCode {
     ASN,    //assign value to variable
     GTR,    //greater
     LSR,    //lesser
-    LOOP, 
-    DONE,
+    LOOP,
+	BRE,    //break loop
+    DONE,   //End of block
     EIF,    //end of function
     CMP,    //The conditions results looks one value back in the stack for Boolean result;
     AND,    //Both are positive;
@@ -42,7 +43,7 @@ enum ByteCode {
     SHT     //Shift top on stack.
     
 };
-extern string byteCode[26];
+extern string byteCode[27];
 class Instruction {
     ByteCode code;
     string operand;

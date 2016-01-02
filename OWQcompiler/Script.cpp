@@ -325,6 +325,45 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
                 }
             }
             break;
+		case ByteCode::BRE: {
+			StackData a = Stack::pop();
+			if (!a.isNumber() || a.getNumber() < 1) {
+				ScriptError::msg("break expected positive numeric value - skiped loop break");
+			} else {
+				int nestedLoops = 0;
+				int numberOfBreaks = (int)a.getNumber();
+				int j = instructionPointer + 1;
+				for (j; j < (int)code.size(); j++) {	//scan for next Done
+					ByteCode curBC = code[j].getCode();
+					string cupOPr = code[j].getOperand();
+					string langIf = Lang::LangFindKeyword("cond-if");
+					string langElse = Lang::LangFindKeyword("cond-else");
+					if (curBC == ByteCode::CMP || curBC == ByteCode::ELE) { //if the instruction has an instruction code that matches LOOP OR IF BLOCKS AFTER the BLOCK avoid
+						nestedLoops++;
+					} else if (nestedLoops > 0 && curBC == ByteCode::DONE) {
+						nestedLoops--;
+					} else if (
+						nestedLoops == 0 
+						&& curBC == ByteCode::DONE
+						&& cupOPr != langIf
+						&& cupOPr != langElse
+					) {
+						numberOfBreaks--;
+					}
+					if (numberOfBreaks == 0) {
+						break;
+					}
+				}
+				if (numberOfBreaks == 0) {
+					instructionPointer = j;
+				}
+				else {
+					ScriptError::msg("wrong break number used!");
+					ret = 0;
+				}
+			}
+		}
+		break;
         case ByteCode::CMP:{	
                 //I call CMP as the gate keeper because it functions to determine if the body of a condition can be executed or
                 //not depending of the value on the stack
@@ -462,7 +501,8 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
                 if (xcode.getPointer() > 0) {
                     Stack::setTopPointer(xcode.getPointer());
                 }
-            }break;
+            }
+			break;
         case ByteCode::EXPON:{
                 StackData b = Stack::pop();
                 StackData a = Stack::pop();
@@ -478,11 +518,13 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
                 if (xcode.getPointer() > 0) {
                     Stack::setTopPointer(xcode.getPointer());
                 }
-            }break;
-        case ByteCode::FUNC:
-                //save the return address inside the newly created executing function
-                pushMethod(instructionPointer + 1, xcode.getOperand());
-            break;
+            }
+			break;
+		case ByteCode::FUNC: {
+				//save the return address inside the newly created executing function
+				pushMethod(instructionPointer + 1, xcode.getOperand());
+			}
+			break;
         case ByteCode::ARG: {
                 Method *m = getActiveMethod();
                 if ( m == NULL ) {
@@ -495,13 +537,16 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
                         m->addVariable(xcode.getOperand(), sd.getString());
                     }
                 }
-            } break;
-        case ByteCode::ARGC:
-                if(xcode.getNumber() <= Stack::size()){
+            } 
+			break;
+		case ByteCode::ARGC: {
+				if (xcode.getNumber() <= Stack::size()) {
 
-                } else {
-                    ScriptError::msg("Current active method requires sufficient argument");
-                }
+				}
+				else {
+					ScriptError::msg("Current active method requires sufficient argument");
+				}
+			}
             break;
         case ByteCode::DEF:{
                 Method *m = getActiveMethod();
@@ -512,7 +557,8 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
                     //Assign in method scope:
                     m->addVariable(xcode.getOperand());
                 }
-            }break;
+            }
+			break;
         case ByteCode::CALL:{ //begin of call switch
                 string operand = xcode.getOperand();
                 string object = "NULL";
@@ -774,7 +820,8 @@ string errors[] = {
 	"8 misuse of Braces",
 	"9 declaration variable should be followed by an assignment delimiter or by end of statement",
 	"10 found two commas in variable declaration",
-	"11 declaraion expression cannot contain keywords"
+	"11 declaraion expression cannot contain keywords",
+	"12 break statement can't use keywords"
 };
 
 /** Loads and precompiles a script:

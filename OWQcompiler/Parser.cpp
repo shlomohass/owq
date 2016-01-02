@@ -411,6 +411,11 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
     //--------------------------------------------------------------------
     if (operatorToken->type == TokenType::KEYWORD) {
 
+		//Validate good marks:
+		if (getMark() == ParseMark::BREAKEXP) {
+			return 12;
+		}
+
         //Execute functions:
         if (rightToken != nullptr && operatorToken->token == Lang::LangFindKeyword("function")) {
             
@@ -495,27 +500,46 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
             compiler(script, tokens, rCount);	//compile the expression
             script->addInstruction(Instruction(ByteCode::ELE, operatorTokenStr));
             return 0;
-        } else if (operatorToken->token == Lang::LangFindKeyword("loop-while")) {
+		}
+		else if (operatorToken->token == Lang::LangFindKeyword("loop-while")) {
 
-            //while(expression){
-            script->addInstruction(Instruction(ByteCode::LOOP));
-            tokens.pop(0);	//erase the while keyword
-            //(expression){
-            if (tokens.getToken(tokens.getSize()-1) != Lang::LangFindDelimiter("bracesOpen")) {
-                Tokens::stdError("WHILE statement syntax error, expected a " + Lang::LangFindDelimiter("bracesOpen"));
-                return 5;
-            }
-            tokens.pop(tokens.getSize()-1);
-            //(expression)
-            mark(ParseMark::WHILE);
-            // (expression)
-            //------------------------------------------------------
-            //recursively evaluate the condition of this while loop
-            //------------------------------------------------------
-            compiler(script, tokens, rCount); //compile the expression
-            script->addInstruction(Instruction(ByteCode::CMP, operatorTokenStr));
-            return 0;
-            
+			//while(expression){
+			script->addInstruction(Instruction(ByteCode::LOOP));
+			tokens.pop(0);	//erase the while keyword
+			//(expression){
+			if (tokens.getToken(tokens.getSize() - 1) != Lang::LangFindDelimiter("bracesOpen")) {
+				Tokens::stdError("WHILE statement syntax error, expected a " + Lang::LangFindDelimiter("bracesOpen"));
+				return 5;
+			}
+			tokens.pop(tokens.getSize() - 1);
+			//(expression)
+			mark(ParseMark::WHILE);
+			// (expression)
+			//------------------------------------------------------
+			//recursively evaluate the condition of this while loop
+			//------------------------------------------------------
+			compiler(script, tokens, rCount); //compile the expression
+			script->addInstruction(Instruction(ByteCode::CMP, operatorTokenStr));
+			return 0;
+
+		} else if (operatorToken->token == Lang::LangFindKeyword("loop-break")) {
+
+			//Check for number of breaks:
+			if (rightToken == nullptr) {
+				script->addInstruction(Instruction(ByteCode::PUSH, "1"));
+				script->addInstruction(Instruction(ByteCode::BRE));
+				return 0;
+			}
+			//mark break:
+			mark(ParseMark::BREAKEXP);
+			//Evaluate the break expression keywords are not allowed:
+			Tokens sub = tokens.extractInclusive(operatorIndex + 1, tokens.getSize() - 1, eraseCount, script);
+			int ret = compiler(script, sub, rCount); //compile the expression
+			if (ret > 0) { return ret; }
+			unmark(); //unmarks the break;
+			script->addInstruction(Instruction(ByteCode::BRE));
+			return 0;
+
         } else if (operatorToken->token == Lang::LangFindKeyword("return")) {
 
             //extract the return value and evaluate it recursively

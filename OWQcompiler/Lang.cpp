@@ -42,6 +42,7 @@ map<string, string> Lang::LangKeywords = {
     {"cond-else"    , "else"},
     {"loop-while"   , "while"},
     {"loop-do"      , "do"},
+	{"loop-break"   , "break" },
     {"return"       , "return"},
 };
 

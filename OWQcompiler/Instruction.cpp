@@ -16,6 +16,7 @@ string byteCode[] = {
     "GTR", 
     "LSR", 
     "LOOP", 
+	"BRE",
     "DONE",
     "EIF", 
     "CMP",
