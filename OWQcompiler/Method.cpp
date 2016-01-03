@@ -20,19 +20,22 @@ Method::~Method() {
     var.clear();
 }
 
-void Method::addVariable(string name, string value) {
-    ScriptVariable sv = ScriptVariable(name,value);
+bool Method::addVariable(string name, StackData& sd) {
+	if (hasVariable(name)) {
+		return false;
+	}
+    ScriptVariable sv = ScriptVariable(name,sd);
     var.push_back(sv);
+	return true;
 }
 
-void Method::addVariable(string name) {
+bool Method::addVariable(string name) {
+	if (hasVariable(name)) {
+		return false;
+	}
     ScriptVariable sv = ScriptVariable(name);
     var.push_back(sv);
-}
-
-void Method::addVariable(string name, double value) {
-    ScriptVariable sv = ScriptVariable(name, value);
-    var.push_back(sv);
+	return true;
 }
 
 ScriptVariable* Method::getVariable(string name) {
@@ -42,6 +45,15 @@ ScriptVariable* Method::getVariable(string name) {
         }
     }
     return NULL;
+}
+
+bool Method::hasVariable(string name) {
+	for (int i = 0; i<(int)var.size(); i++) {
+		if (var[i].getName() == name) {
+			return true;
+		}
+	}
+	return false;
 }
 
 int Method::getReturnAddress() {

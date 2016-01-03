@@ -66,11 +66,13 @@ class Script {
     void addInstruction(Instruction I, bool allowRST);
 public:
     Script();
+
     //Register variable to global scope from Application layer:
-    void registerVariable(string varName, RegisteredVariable type, void* address);
+    bool registerVariable(string varName, RegisteredVariable type, void* address);
     //Register variable to global scope by execution runtime:
-    void registerVariable(string varName);
-    void unregisterVariable(string varName);
+    bool registerVariable(string varName);
+	bool registerVariable(string varName, StackData& sd);
+    bool unregisterVariable(string varName);
 
     void render();
 

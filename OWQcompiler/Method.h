@@ -14,35 +14,38 @@
 using namespace std;
 
 class Method {
+
 	vector<ScriptVariable> var;
 	int retAddress;
-        //Cached name just for debugging future!
-        string name; 
+    //Cached name just for debugging future!
+    string name; 
+
 public:
     
-        //Constructors:
+    //Constructors:
 	Method();
 	Method(int xRetAddress, string setName);
         
-        //Destructor:
+    //Destructor:
 	virtual ~Method();
         
-        //Push method variables by types:
-	void addVariable(string name, string value);
-	void addVariable(string name, double value);
-	void addVariable(string name); //With NAN
+    //Push method variables by types:
+	bool addVariable(string name, StackData& sd);
+	bool addVariable(string name); //With NAN
         
-        //Return address:
+    //Return address:
 	int getReturnAddress();
         
-        //Return cached name:
+    //Return cached name:
 	string getName();
         
-        //Get a scoped method variable:
+    //Get a scoped method variable:
 	ScriptVariable *getVariable(string name);
-        
-        //Render all registered variables:
-        void renderScopeVars();
+	bool hasVariable(string name);
+
+    //Render all registered variables:
+    void renderScopeVars();
+
 };
 
 #endif	/* METHOD_H */

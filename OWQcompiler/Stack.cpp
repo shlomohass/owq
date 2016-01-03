@@ -43,11 +43,7 @@ void Stack::push(StackData data) {
  * @param ScriptVariable data
  */
 void Stack::push(ScriptVariable& data) {
-    if (data.isNumber()) {
-        push(data.getNumberValue());
-    } else if (data.isString()) {
-        push(data.getStringValue());
-    }
+	stack.push_back(data.getValue());
 }
 /** Pop a value from the stack
  * 

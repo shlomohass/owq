@@ -207,6 +207,12 @@ bool Instruction::isOperandNumber() {
 bool Instruction::isOperandString() {
     return !isOperandNumber();
 }
+bool Instruction::isOperandBoolean() {
+	if (operand == "true" || operand == "TRUE" || operand == "false" || operand == "FALSE") {
+		return true;
+	}
+	return false;
+}
 bool Instruction::operandHasQuote() {
     return containsQuotes;
 }

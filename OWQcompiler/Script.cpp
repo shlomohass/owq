@@ -161,15 +161,14 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
             Stack::ShiftTop(true);
             break;
         case ByteCode::PUSH:
-            if (xcode.isOperandString()) { //if operand is string
-                if (xcode.operandHasQuote()) {          //if this operand is in the form---> ["what is this a string literal"]
-                    Stack::push(xcode.getOperand());	//save the string literal
-                    if (xcode.getPointer() > 0) {
-                        Stack::setTopPointer(xcode.getPointer());
-                    }
-                } else if (xcode.isRstPointer() && xcode.getPointer() > 0) { // We are handling with a static stack pointer
-                    Stack::push(StackData(true, xcode.getPointer())); //This will push the special type of RST
-                } else {
+			if (xcode.isOperandString()) { //if operand is string
+				if (xcode.operandHasQuote()) {          //if this operand is in the form---> ["what is this a string literal"]
+					Stack::push(xcode.getOperand());	//save the string literal
+				} else if (xcode.isRstPointer() && xcode.getPointer() > 0) { // We are handling with a static stack pointer
+					Stack::push(StackData(true, xcode.getPointer())); //This will push the special type of RST
+				} else if (xcode.isOperandBoolean()) {
+					Stack::push(StackData(xcode.getOperand(), true)); //This will push a boolean stack data
+				} else {
                     //the operand is in a form --> someWord <<---------no quotes around it, meaning it is a name of variable
                     //find that variable from the function/method stacking
                     ScriptVariable* sv = getVariable(xcode.getOperand());
@@ -179,19 +178,15 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
                     } else {
                         //else push the value
                         Stack::push(*sv);
-                        if (xcode.getPointer() > 0) {
-                            Stack::setTopPointer(xcode.getPointer());
-                        }
                     }
                 }
             } else {
                 Stack::push(xcode.getNumber());
-                if (xcode.getPointer() > 0) {
-                    Stack::setTopPointer(xcode.getPointer());
-                }
             }
-            //push immediate value onto the stack
             //if operand is a reference to some variable, push its value onto the stack
+			if (xcode.getPointer() > 0) {
+				Stack::setTopPointer(xcode.getPointer());
+			}
             break;
         case ByteCode::RET:{
                 Method *m = getActiveMethod();	//get active method
@@ -216,24 +211,26 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
                     ScriptError::msg("unable to resolve symbol " + xcode.getOperand());
                 } else {
                     //assign the value
-                    sv->setFromStackData(sd);
+					if (!sv->setValue(sd)) {
+						ScriptError::msg("unable to assign to native variable");
+					}
                 }
             }
             break;
         case ByteCode::GTR: {
                 StackData b = Stack::pop();
                 StackData a = Stack::pop();
-                if (a.isNumber() && b.isNumber()) {                           //a = number AND b = number
-                    Stack::push(a.getNumber() > b.getNumber());
-                } else if (a.isNumber() && b.isString()) {                  //a = number AND b = string
-                    Stack::push(a.getNumber() > b.getString().length());
-                } else if (a.isString() && b.isNumber()) {                  //a = string AND b = number
-                    Stack::push(a.getString().length() > b.getNumber());
+                if (a.isNumber(true) && b.isNumber(true)) {                           //a = number AND b = number
+                    Stack::push(StackData(a.getNumber(true) > b.getNumber(true)));
+                } else if (a.isNumber(true) && b.isString()) {                  //a = number AND b = string
+                    Stack::push(StackData(a.getNumber(true) > b.getString().length()));
+                } else if (a.isString() && b.isNumber(true)) {                  //a = string AND b = number
+                    Stack::push(StackData(a.getString().length() > b.getNumber(true)));
                 } else if (a.isString() && b.isString()) {                  //a = string AND b = string
-                    Stack::push(a.getString().length() > b.getString().length());
+                    Stack::push(StackData(a.getString().length() > b.getString().length()));
                 } else {
                     ScriptError::msg("Tried To GTR with unsupported types");
-                    Stack::push(0);
+                    Stack::push(StackData(false));
                 }
                 if (xcode.getPointer() > 0) {
                     Stack::setTopPointer(xcode.getPointer());
@@ -243,17 +240,17 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
         case ByteCode::LSR:{
                 StackData b = Stack::pop();
                 StackData a = Stack::pop();
-                if(a.isNumber() && b.isNumber()) {                                   //a = number AND b = number
-                    Stack::push(a.getNumber() < b.getNumber());
-                } else if(a.isNumber() && b.isString()) {                            //a = number AND b = string
-                    Stack::push(a.getNumber() < b.getString().length());
-                } else if(a.isString() && b.isNumber()) {                            //a = string AND b = number
-                    Stack::push(a.getString().length() < b.getNumber());
+                if(a.isNumber(true) && b.isNumber(true)) {                                   //a = number AND b = number
+                    Stack::push(StackData(a.getNumber(true) < b.getNumber(true)));
+                } else if(a.isNumber(true) && b.isString()) {                            //a = number AND b = string
+                    Stack::push(StackData(a.getNumber(true) < b.getString().length()));
+                } else if(a.isString() && b.isNumber(true)) {                            //a = string AND b = number
+                    Stack::push(StackData(a.getString().length() < b.getNumber(true)));
                 } else if (a.isString() && b.isString()) {                           //a = string AND b = string
-                    Stack::push(a.getString().length() < b.getString().length());
+                    Stack::push(StackData(a.getString().length() < b.getString().length()));
                 } else {
                     ScriptError::msg("Tried To LSR with unsupported types");
-                    Stack::push(0);
+                    Stack::push(StackData(false));
                 }
                 if (xcode.getPointer() > 0) {
                     Stack::setTopPointer(xcode.getPointer());
@@ -264,17 +261,20 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
         case ByteCode::CVE:{
                 StackData b = Stack::pop();
                 StackData a = Stack::pop();
-                if(a.isNumber() && b.isNumber()) {                                    //a = number AND b = number
-                    Stack::push(a.getNumber() == b.getNumber());
-                } else if (a.isNumber() && b.isString()) {                            //a = string AND b = string
-                    Stack::push(a.getNumber() == b.getString().length());
-                } else if (a.isString() && b.isNumber()) {                            //a = string AND b = number
-                    Stack::push(a.getString().length() == b.getNumber());
+                if(a.isNumber(true) && b.isNumber(true)) {                                    //a = number AND b = number
+                    Stack::push(StackData(a.getNumber(true) == b.getNumber(true)));
+                } else if (a.isNumber(true) && b.isString()) {                            //a = string AND b = string
+                    Stack::push(StackData(a.getNumber(true) == b.getString().length()));
+                } else if (a.isString() && b.isNumber(true)) {                            //a = string AND b = number
+                    Stack::push(StackData(a.getString().length() == b.getNumber(true)));
                 } else if (a.isString() && b.isString()){                             //a = string AND b = string
-                    Stack::push(a.getString() == b.getString());
+                    Stack::push(StackData(a.getString() == b.getString()));
                 } else {
-                    Stack::push(0);
+                    Stack::push(StackData(false));
                 }
+				if (xcode.getPointer() > 0) {
+					Stack::setTopPointer(xcode.getPointer());
+				}
             }
             break;
         case ByteCode::LOOP:	
@@ -304,25 +304,31 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
         case ByteCode::AND:{
                 StackData b = Stack::pop();
                 StackData a = Stack::pop();
-                if (!a.isNumber() || !b.isNumber()) {  
+                if (!a.isNumber(true) || !b.isNumber(true)) {  
                     ScriptError::msg("expected evaluation of boolean expression to be numeric"); 
-                } else if(a.getNumber() == 1 && b.getNumber() == 1) { 
-                    Stack::push(1);
+                } else if(a.getNumber(true) > 0 && b.getNumber(true) > 0) { 
+                    Stack::push(StackData(true));
                 } else {  
-                    Stack::push(0);
+                    Stack::push(StackData(false));
                 }
+				if (xcode.getPointer() > 0) {
+					Stack::setTopPointer(xcode.getPointer());
+				}
             }
             break;
         case ByteCode::POR:{
                 StackData b = Stack::pop();
                 StackData a = Stack::pop();
-                if (!a.isNumber() || !b.isNumber()) {  
+                if (!a.isNumber(true) || !b.isNumber(true)) {  
                     ScriptError::msg("expected evaluation of boolean expression to be numeric"); 
-                } else if ( a.getNumber() == 1 || b.getNumber() == 1 ) { 
-                    Stack::push(1);
+                } else if ( a.getNumber(true) > 0 || b.getNumber(true) > 0 ) { 
+                    Stack::push(StackData(true));
                 } else {  
-                    Stack::push(0);
+                    Stack::push(StackData(false));
                 }
+				if (xcode.getPointer() > 0) {
+					Stack::setTopPointer(xcode.getPointer());
+				}
             }
             break;
 		case ByteCode::BRE: {
@@ -368,14 +374,15 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
                 //I call CMP as the gate keeper because it functions to determine if the body of a condition can be executed or
                 //not depending of the value on the stack
                 StackData a = Stack::pop();	//used to overal condition of the while or if statement
-                //1 - true : 0 - false
-                if (!a.isNumber()) { 
+                //1 - true : 0 - false OR boolean type
+                if (!a.isNumber(true)) 
+				{ 
                     ScriptError::msg("expected evaluation of boolean expression to be numeric"); 
                 } else {
-                    if (a.getNumber() == 1) { //condition is true
+                    if (a.getNumber(true) > 0) { //condition is true
                         //continue
                     } else {
-                        int matchCount=0;
+                        int matchCount = 0;
                         string curCode = code[instructionPointer].getOperand();
                         //used to match respective cmp and done so we enter or exit the right conditon bodies
                         //-----------------------------------------------------------------------------------------------------|
@@ -425,15 +432,15 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
         case ByteCode::ADD:{
                 StackData b = Stack::pop();
                 StackData a = Stack::pop();
-                if (a.isNumber() && b.isNumber()) {                         //a = number AND b = number
-                    Stack::push(a.getNumber() + b.getNumber());
-                } else if(a.isNumber() && b.isString()) {                  //a = number AND b = string
-                    Stack::push(a.numberValueToString() + b.getString());
-                } else if(a.isString() && b.isNumber()) {                  //a = string AND b = number
-                    Stack::push(a.getString() + b.numberValueToString());
-                } else if(a.isString() && b.isString()) {                                                    //a = string AND b = string
+                if (a.isNumber(true) && b.isNumber(true)) {                         //a = number AND b = number
+                    Stack::push(a.getNumber(true) + b.getNumber(true));
+                } else if (a.isNumber(true) && b.isString()) {                  //a = number AND b = string
+                    Stack::push(a.numberValueToString(true) + b.getString());
+                } else if (a.isString() && b.isNumber(true)) {                  //a = string AND b = number
+                    Stack::push(a.getString() + b.numberValueToString(true));
+                } else if (a.isString() && b.isString()) {                                                    //a = string AND b = string
                     Stack::push(a.getString() + b.getString());
-                } else {
+                } else { //Unsupprted.
                     ScriptError::msg("Tried To ADD with unsupported types");
                     Stack::push(0);
                 }
@@ -445,15 +452,15 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
         case ByteCode::SUB: {
                 StackData b = Stack::pop();
                 StackData a = Stack::pop();
-                if (a.isNumber() && b.isNumber()) {                     //a = number AND b = number
-                    Stack::push(a.getNumber() - b.getNumber());
-                } else if (a.isNumber() && b.isString()) {             //a = number AND b = string
-                        Stack::push(a.getNumber() - b.getString().length());
-                } else if (a.isString() && b.isNumber()) {             //a = string AND b = number
-                        Stack::push(a.getString().length() - b.getNumber());
+                if (a.isNumber(true) && b.isNumber(true)) {                     //a = number AND b = number
+                    Stack::push(a.getNumber(true) - b.getNumber(true));
+                } else if (a.isNumber(true) && b.isString()) {             //a = number AND b = string
+                        Stack::push(a.getNumber(true) - b.getString().length());
+                } else if (a.isString() && b.isNumber(true)) {             //a = string AND b = number
+                        Stack::push(a.getString().length() - b.getNumber(true));
                 } else if (a.isString() && b.isString()){                                                //a = string AND b = string
                         Stack::push(a.getString().length() - b.getString().length());
-                } else {
+                } else { //Unsupprted.
                     ScriptError::msg("Tried To SUB with unsupported types");
                     Stack::push(0);
                 }
@@ -465,15 +472,15 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
         case ByteCode::MULT:{
                 StackData b = Stack::pop();
                 StackData a = Stack::pop();
-                if (a.isNumber() && b.isNumber()) {                     //a = number AND b = number
-                    Stack::push(a.getNumber() * b.getNumber());
-                } else if(a.isNumber() && b.isString()) {              //a = number AND b = string
-                    Stack::push(a.getNumber() * b.getString().length());
-                } else if(a.isString() && b.isNumber()) {              //a = string AND b = number
-                    Stack::push(a.getString().length() * b.getNumber());
-                } else if(a.isString() && b.isString()){                                                //a = string AND b = string
+                if (a.isNumber(true) && b.isNumber(true)) {  //a = number AND b = number
+                    Stack::push(a.getNumber(true) * b.getNumber(true));
+                } else if(a.isNumber(true) && b.isString()) {  //a = number AND b = string
+                    Stack::push(a.getNumber(true) * b.getString().length());
+                } else if(a.isString() && b.isNumber(true)) {  //a = string AND b = number
+                    Stack::push(a.getString().length() * b.getNumber(true));
+                } else if(a.isString() && b.isString()){  //a = string AND b = string
                     Stack::push(a.getString().length() * b.getString().length());
-                } else {
+                } else { //Unsupprted.
                     ScriptError::msg("Tried To MULT with unsupported types");
                     Stack::push(0);
                 }
@@ -485,19 +492,28 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
         case ByteCode::DIV:{
                 StackData b = Stack::pop();
                 StackData a = Stack::pop();
-                if (a.isNumber() && b.isNumber()) {                     //a = number AND b = number
+				if (b.isString()) {  //First make sure b is not of zero length string
+					if (b.getString().length() == 0) {
+						ScriptError::msg("division by zero prevented, calculation aborted");
+						break;
+					}
+				}
+                if (a.isNumber(true) && b.isNumber(true)) {  //a = number AND b = number
                     if (b.getNumber() == 0.0) {
                         ScriptError::msg("division by zero prevented, calculation aborted");
                         break;
                     }
-                    Stack::push(a.getNumber() / b.getNumber());
-                } else if (a.isNumber() && !b.isNumber()) {             //a = number AND b = string
-                        //Stack::push(a.numberValueToString() - b.getString());
-                } else if (!a.isNumber() && b.isNumber()) {             //a = string AND b = number
-                        //Stack::push(a.getString() - b.numberValueToString());
-                } else {                                                //a = string AND b = string
-                        //Stack::push(a.getString()  - b.getString());
-                }
+                    Stack::push(a.getNumber(true) / b.getNumber(true));
+                } else if (a.isNumber(true) && b.isString()) {  //a = number AND b = string
+                        Stack::push(a.getNumber(true) / b.getString().length());
+                } else if (a.isString() && b.isNumber(true)) {  //a = string AND b = number
+                        Stack::push(a.getString().length() / b.getNumber(true));
+                } else if (a.isString() && b.isString()) {   //a = string AND b = string
+                        Stack::push(a.getString().length() / b.getString().length());
+				} else { //Unsupprted.
+					ScriptError::msg("Tried To DIV with unsupported types");
+					Stack::push(0);
+				}
                 if (xcode.getPointer() > 0) {
                     Stack::setTopPointer(xcode.getPointer());
                 }
@@ -506,15 +522,18 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
         case ByteCode::EXPON:{
                 StackData b = Stack::pop();
                 StackData a = Stack::pop();
-                if(a.isNumber() && b.isNumber()){                       //a = number AND b = number
-                    Stack::push( pow(a.getNumber() , b.getNumber()));
-                }else if(a.isNumber() && !b.isNumber()){                //a = number AND b = string
-                    //Stack::push(a.numberValueToString() - b.getString());
-                }else if(!a.isNumber() && b.isNumber()){                //a = string AND b = number
-                    //Stack::push(a.getString() - b.numberValueToString());
-                }else {                                                 //a = string AND b = string
-                    //Stack::push(a.getString()  - b.getString());
-                }
+                if (a.isNumber(true) && b.isNumber(true)){  //a = number AND b = number
+                    Stack::push( pow(a.getNumber(true) , b.getNumber(true)));
+                } else if(a.isNumber(true) && b.isString()) {  //a = number AND b = string
+					Stack::push(pow(a.getNumber(true), b.getString().length()));
+                } else if(a.isString() && b.isNumber(true)){  //a = string AND b = number
+					Stack::push(pow(a.getString().length(), b.getNumber(true)));
+                } else if (a.isString() && b.isString()) {  //a = string AND b = string                                               //a = string AND b = string
+					Stack::push(pow(a.getString().length(), b.getString().length()));
+				} else { //Unsupprted.
+					ScriptError::msg("Tried To EXPON with unsupported types");
+					Stack::push(0);
+				}
                 if (xcode.getPointer() > 0) {
                     Stack::setTopPointer(xcode.getPointer());
                 }
@@ -531,19 +550,16 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
                     ScriptError::msg("argument definition requires execution of method");
                 } else {
                     StackData sd = Stack::pop();
-                    if (sd.isNumber()) {
-                        m->addVariable(xcode.getOperand(),sd.getNumber());
-                    } else {
-                        m->addVariable(xcode.getOperand(), sd.getString());
-                    }
+					if (!m->addVariable(xcode.getOperand(), sd)) {
+						ScriptError::msg("re-definition of variable in method");
+					}
                 }
             } 
 			break;
 		case ByteCode::ARGC: {
 				if (xcode.getNumber() <= Stack::size()) {
 
-				}
-				else {
+				} else {
 					ScriptError::msg("Current active method requires sufficient argument");
 				}
 			}
@@ -619,26 +635,45 @@ void Script::popActiveMethod() {
  *  @param string name
  *  @param RegisteredVariable type will be a enum value
  *  @param void* address
- * 
+ *  @return boolean
  */
-void Script::registerVariable(string name, RegisteredVariable type, void* address) {
-    variables[name] = ScriptVariable(name, type, address);
+bool Script::registerVariable(string name, RegisteredVariable type, void* address) {
+	if (variables.find(name) == variables.end()) {
+		variables[name] = ScriptVariable(name, type, address);
+		return true;
+	}
+	return false;
 }
-/** Assign a global variable scope from runtime code:
- * 
- * @param name
- */
-void Script::registerVariable(string name) {
+bool Script::registerVariable(string name) {
     //Will register a global scope value but without a pointer address should
     //not be unregistered at the end of execution:
-    variables[name] = ScriptVariable(name, true);
+	if (variables.find(name) == variables.end()) {
+		variables[name] = ScriptVariable(name);
+		return true;
+	}
+	return false;
 }
-void Script::unregisterVariable(string name){
+bool Script::registerVariable(string name, StackData& sd) {
+	//Will register a global scope value but without a pointer address should
+	//not be unregistered at the end of execution:
+	if (variables.find(name) == variables.end()) {
+		variables[name] = ScriptVariable(name, sd);
+		return true;
+	}
+	return false;
+}
+/** Unregister a variable only if it exists:
+ * @param string name
+ * @return boolean
+*/
+bool Script::unregisterVariable(string name){
     map<string, ScriptVariable>::iterator it;
     it = variables.find(name);
     if (it != variables.end()) {
         variables.erase(it);
+		return true;
     }
+	return false;
 }
 
 /**
@@ -669,23 +704,18 @@ Method* Script::getActiveMethod() {
  * @return
  */
 ScriptVariable* Script::getVariable(string varName) {
-    //Get a handle of the current executing method
-    
-    //cout << " ** getVariable -> " << varName << endl;
-    
+
+    //Get and handle of the current executing method
     Method* m = getActiveMethod();
     //sv points the to variable to be returned to caller
     ScriptVariable *sv = NULL;
     if (m != NULL) { //if there is a valid and active method
-        //cout << " ** variable in method -> " << m->getName() << endl;
-        m->renderScopeVars();
-        
         sv = m->getVariable(varName); //search for the variable we are interested in
         if ( sv == NULL ) {	 //if not found, se variable to the return value of possible registered variable
             sv = getGlobalVariable(varName);
         }
     } else {
-        //Note in scope so search in global scope
+        //Not in scope so search in global scope
         sv = getGlobalVariable(varName);
     }
     return sv;
@@ -723,11 +753,7 @@ bool Script::isSystemCall(string object, string functionName) {
     //Console print:
     if (functionName == "rep" || functionName == "print") {
         StackData sd = Stack::pop();
-        if (sd.isNumber()) {
-            ScriptConsole::print(ScriptConsole::toString(sd.getNumber()));
-        } else {
-            ScriptConsole::print(sd.getString());
-        }
+		ScriptConsole::print(sd.getAsString());
         return true;
     }
     
@@ -741,30 +767,25 @@ bool Script::isSystemCall(string object, string functionName) {
         if (sv != NULL) {
             //return the length of a string
             if (functionName == "length") {
-                if (sv->isNumber()) {
-                    Stack::push(0);
+                if (sv->getValue().isString()) {
+					int len = (int)sv->getValue().getString().length();
+					Stack::push(len);
                 } else {
-                    double len = (double)(sv->getStringValue().length());
-                    Stack::push(len);
+					Stack::push(0);
                 }
             }
             //return substring of a string
             //definition of substring: object.substring(index, numberOfCharacters)
             if (functionName == "substr") {
-                if (sv->isString()) {
+                if (sv->getValue().isString()) {
                     Stack::render();
-                    string value = sv->getStringValue();
+                    string value = sv->getValue().getString();
                     StackData sb = Stack::pop();	//second argument first
                     StackData sa = Stack::pop();	//first argument
-                    double a = sa.getNumber();
-                    double b = sb.getNumber();
-                    string sub = value.substr((int)a,(int)b);
-                    cout << "need to assign the value of " << sub << endl;
-                    if (a >= 0 && a <= (double)value.size()-b-1) {	//make sure we are not out of bounds
-                        Stack::push(sub);
-                    } else {
-                        Stack::push("null_range");
-                    }
+                    int a = (int)sa.getNumber(true);
+                    int b = (int)sb.getNumber(true);
+                    string sub = value.substr(a,b);
+					Stack::push(sub);
                 }
             }
             return true;

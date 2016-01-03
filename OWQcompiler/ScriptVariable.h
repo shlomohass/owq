@@ -22,43 +22,39 @@ using namespace std;
 enum RegisteredVariable { 
     REGISTERED_STRING,    //Holds a string 
     REGISTERED_DOUBLE,    //Holds a double
+	REGISTERED_BOOLEAN,    //Holds a double
     GLOBAL_FLEX           //This is an execution global that is defined but not assigned 
 };
 
 class ScriptVariable {
+
     string name;
-    string svalue;
-    double dvalue;
+	StackData value;
     bool  isRegistered;
     void  *address;
     RegisteredVariable type;
+
 public:
-        //Constructors:
+
+    //Constructors:
 	ScriptVariable();
 	ScriptVariable(string xName);
-	ScriptVariable(string xName, double value);
-	ScriptVariable(string xName, string value);
-    ScriptVariable(string xName, bool reg);
+	ScriptVariable(string xName, StackData& sd);
 	ScriptVariable(string xName, RegisteredVariable type, void*  xAddress);
 
-        //Get methods:
+    //Get methods:
 	string getName();
-	string getStringValue();
-	double getNumberValue();
-        
-        //Set methods:
-	void setNumberValue(double value);
-	void setStringValue(string value);
-	void setFromStackData(StackData& sd);
-        
-        //Check types:
-	bool isString();
-	bool isNumber();
-        
-        //Render a variable for debugging:
-        string renderVariable();
-        //Destructor:
+	StackData getValue();
+
+    //Set value:
+	bool setValue(StackData& sd);
+
+    //Render a variable for debugging:
+    string renderVariable();
+
+    //Destructor:
 	virtual ~ScriptVariable();
+
 };
 
 #endif	/* SCRIPTVARIABLE_H */
