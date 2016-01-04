@@ -18,47 +18,9 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <ItemGroup>
-    <None Include="assets\example.scs">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="OWQcompiler\Instruction.h" />
-    <ClInclude Include="OWQcompiler\Lang.h" />
-    <ClInclude Include="OWQcompiler\Method.h" />
-    <ClInclude Include="OWQcompiler\Parser.h" />
-    <ClInclude Include="OWQcompiler\Script.h" />
-    <ClInclude Include="OWQcompiler\ScriptConsole.h" />
-    <ClInclude Include="OWQcompiler\ScriptError.h" />
-    <ClInclude Include="OWQcompiler\ScriptVariable.h" />
-    <ClInclude Include="OWQcompiler\Setowq.h" />
-    <ClInclude Include="OWQcompiler\Source.h" />
-    <ClInclude Include="OWQcompiler\Stack.h" />
-    <ClInclude Include="OWQcompiler\StackData.h" />
-    <ClInclude Include="OWQcompiler\Token.h" />
-    <ClInclude Include="OWQcompiler\Tokens.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="OWQcompiler\Instruction.cpp" />
-    <ClCompile Include="OWQcompiler\Lang.cpp" />
-    <ClCompile Include="OWQcompiler\Method.cpp" />
-    <ClCompile Include="OWQcompiler\Parser.cpp" />
-    <ClCompile Include="OWQcompiler\Script.cpp" />
-    <ClCompile Include="OWQcompiler\ScriptConsole.cpp" />
-    <ClCompile Include="OWQcompiler\ScriptError.cpp" />
-    <ClCompile Include="OWQcompiler\ScriptVariable.cpp" />
-    <ClCompile Include="OWQcompiler\Source.cpp" />
-    <ClCompile Include="OWQcompiler\Stack.cpp" />
-    <ClCompile Include="OWQcompiler\StackData.cpp" />
-    <ClCompile Include="OWQcompiler\Token.cpp" />
-    <ClCompile Include="OWQcompiler\Tokens.cpp" />
-  </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{9B07BD48-C9D9-4D4D-982E-E1731641CFC5}</ProjectGuid>
-    <RootNamespace>OWQ</RootNamespace>
+    <ProjectGuid>{C1BD9E44-F3CD-4FBD-8014-9A0F62A99691}</ProjectGuid>
+    <RootNamespace>OWQexecutiontest</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -107,25 +69,18 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>S:\programms\boost\boost_1_60_0-32\lib32-msvc-14.0;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>S:\programms\boost\boost_1_60_0-32\lib32-msvc-14.0;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\OWQcompiler</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\CmdParser;S:\programms\boost\boost_1_60_0-32</AdditionalIncludeDirectories>
     </ClCompile>
-    <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
-    <Manifest>
-      <AssemblyIdentity>
-      </AssemblyIdentity>
-    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -133,9 +88,6 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
     </ClCompile>
-    <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -144,17 +96,12 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\OWQcompiler</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\CmdParser;S:\programms\boost\boost_1_60_0-32</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
-    <Manifest>
-      <AssemblyIdentity>
-      </AssemblyIdentity>
-    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -165,11 +112,19 @@
       <SDLCheck>true</SDLCheck>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="Argu.cpp" />
+    <ClCompile Include="CmdParser\argvparser.cpp" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Argu.h" />
+    <ClInclude Include="CmdParser\argvparser.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets" />
 </Project>
