@@ -20,6 +20,7 @@ enum ByteCode {
     LSR,    //lesser
     LOOP,
 	BRE,    //break loop
+	BIF,    //break if statement;
     DONE,   //End of block
     EIF,    //end of function
     CMP,    //The conditions results looks one value back in the stack for Boolean result;
@@ -43,7 +44,7 @@ enum ByteCode {
     SHT     //Shift top on stack.
     
 };
-extern string byteCode[27];
+extern string byteCode[28];
 class Instruction {
     ByteCode code;
     string operand;

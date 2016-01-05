@@ -40,6 +40,7 @@ map<string, string> Lang::LangKeywords = {
     {"variable"     , "let"},
     {"cond-if"      , "if"},
     {"cond-else"    , "else"},
+	{"cond-break"   , "breakif" },
     {"loop-while"   , "while"},
     {"loop-do"      , "do"},
 	{"loop-break"   , "break" },

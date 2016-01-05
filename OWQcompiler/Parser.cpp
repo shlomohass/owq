@@ -540,7 +540,25 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 			script->addInstruction(Instruction(ByteCode::BRE));
 			return 0;
 
-        } else if (operatorToken->token == Lang::LangFindKeyword("return")) {
+        } else if (operatorToken->token == Lang::LangFindKeyword("cond-break")) {
+
+			//Check for number of breaks:
+			if (rightToken == nullptr) {
+				script->addInstruction(Instruction(ByteCode::PUSH, "1"));
+				script->addInstruction(Instruction(ByteCode::BIF));
+				return 0;
+			}
+			//mark break same as loop break:
+			mark(ParseMark::BREAKEXP);
+			//Evaluate the break expression keywords are not allowed:
+			Tokens sub = tokens.extractInclusive(operatorIndex + 1, tokens.getSize() - 1, eraseCount, script);
+			int ret = compiler(script, sub, debug, rCount); //compile the expression
+			if (ret > 0) { return ret; }
+			unmark(); //unmarks the break;
+			script->addInstruction(Instruction(ByteCode::BIF));
+			return 0;
+
+		} else if (operatorToken->token == Lang::LangFindKeyword("return")) {
 
             //extract the return value and evaluate it recursively
             if (tokens.getSize() > 1) {
@@ -550,8 +568,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
             }
             script->addInstruction(Instruction(ByteCode::RET));
             return 0; //there is nothing else to be done  
-		}
-		else if (operatorToken->token == Lang::LangFindKeyword("variable")) {
+		} else if (operatorToken->token == Lang::LangFindKeyword("variable")) {
 
 			//Set first variable on the right:
 			if (rightToken->type == TokenType::VAR) {

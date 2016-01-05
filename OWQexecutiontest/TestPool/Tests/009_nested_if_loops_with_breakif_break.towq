@@ -1,0 +1,19 @@
+let a = 1, b = 1;
+while (a < 10) {
+	if (a > 3) {
+		b = b + 1;
+		if (a < 7) {
+			breakif 2;  
+		}
+		break;
+	} else {
+		b = b + 3;
+	}
+	a = a + 1;
+}
+print(a + "," + b); //7,14
+/*
+@expected-output
+7,14
+@end-expected-output
+*/

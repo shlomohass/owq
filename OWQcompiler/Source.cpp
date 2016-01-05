@@ -112,7 +112,7 @@ bool Source::pushChar(char ch) {
             macroCounter++;
             macroBuffer = "";
             inMacro = false;
-            return true;
+            return false;
         } else {
             //Return a naming error in macros: macro don't exists
             return false;

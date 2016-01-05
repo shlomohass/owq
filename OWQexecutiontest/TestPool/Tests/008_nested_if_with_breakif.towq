@@ -1,0 +1,21 @@
+let a = 13,
+    b = a + 1,
+	c,
+	d;
+
+if (a == b | b > a) {
+	c = true;
+	if (a < b) {
+		d = false;
+		breakif 2;
+	}
+	d = true;
+} else {
+	c = false;
+}
+print(c + "," + d + "," + a + "," + b);
+/*
+@expected-output
+TRUE,FALSE,13,14
+@end-expected-output
+*/

@@ -5,3 +5,8 @@ let a = # version #;
 let b = "#p#";
 #p#(a);
 #p#(b);
+/*
+@expected-output
+54#p#
+@end-expected-output
+*/

@@ -336,7 +336,7 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
 		case ByteCode::BRE: {
 			StackData a = Stack::pop();
 			if (!a.isNumber() || a.getNumber() < 1) {
-				ScriptError::msg("break expected positive numeric value - skiped loop break");
+				ScriptError::msg("break expected positive numeric value - skipped loop break");
 			} else {
 				int nestedLoops = 0;
 				int numberOfBreaks = (int)a.getNumber();
@@ -356,6 +356,44 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
 						&& cupOPr != langIf
 						&& cupOPr != langElse
 					) {
+						numberOfBreaks--;
+					}
+					if (numberOfBreaks == 0) {
+						break;
+					}
+				}
+				if (numberOfBreaks == 0) {
+					instructionPointer = j;
+				}
+				else {
+					ScriptError::msg("wrong break number used!");
+					ret = 0;
+				}
+			}
+		}
+		break;
+		case ByteCode::BIF: {
+			StackData a = Stack::pop();
+			if (!a.isNumber() || a.getNumber() < 1) {
+				ScriptError::msg("break expected positive numeric value - skipped condition break");
+			} else {
+				int nestedConds = 0;
+				int numberOfBreaks = (int)a.getNumber();
+				int j = instructionPointer + 1;
+				for (j; j < (int)code.size(); j++) {	//scan for next Done
+					ByteCode curBC = code[j].getCode();
+					string cupOpr = code[j].getOperand();
+					string langWhile = Lang::LangFindKeyword("loop-while");
+					if (curBC == ByteCode::CMP || curBC == ByteCode::ELE) { //if the instruction has an instruction code that matches LOOP OR IF BLOCKS AFTER the BLOCK avoid
+						nestedConds++;
+					}
+					else if (nestedConds > 0 && curBC == ByteCode::DONE) {
+						nestedConds--;
+					} else if (
+						nestedConds == 0
+						&& curBC == ByteCode::DONE
+						&& cupOpr != langWhile
+						) {
 						numberOfBreaks--;
 					}
 					if (numberOfBreaks == 0) {
