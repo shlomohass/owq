@@ -99,7 +99,7 @@ ArgvParser::parse(int _argc, char ** _argv)
 
     // loop over all command line arguments
     int i = 1; // argument counter
-    while( i< _argc )
+    while( i < _argc )
     {
         string argument = _argv[i];
         unsigned int key = 0;
@@ -110,7 +110,7 @@ ArgvParser::parse(int _argc, char ** _argv)
         if (!isValidOptionString(argument))
         {
             // string is a real argument since values are processed elsewhere
-            finished_options=true;
+            finished_options = true;
             argument_container.push_back(argument);
         }
         else // can be a long or multiple short options at this point

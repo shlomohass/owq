@@ -149,7 +149,7 @@ bool isNumberic(char c) {
     return ret;
 }
 bool Instruction::isOperandNumber() {
-    if (operand.length() == 0) {
+    if (operand.length() == 0 || operandHasQuote()) {
         return false;
     }
     bool valid     = true;

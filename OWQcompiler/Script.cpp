@@ -10,10 +10,13 @@
 #include <fstream>
 #include <streambuf>
 
+namespace fs = boost::filesystem;
+
 Script::Script() {
     code.reserve(100);	//pre-allocate 100 instruction space for byte-codes
     functions.reserve(50);	//pre allocate 50 spaces for functions
     internalStaticPointer = 0;
+	script_debug = OWQ_DEBUG;
 }
 
 void Script::addInstruction(Instruction I) {
@@ -67,7 +70,6 @@ void Script::render() {
             cout << endl;
         }
     }
-    //Lang::printSepLine(2);
 }
 
 int Script::getSize() {
@@ -585,7 +587,7 @@ int Script::executeInstruction(Instruction xcode, int& instructionPointer, bool 
                         object = operand.substr(0,dotOperator);
                         method = operand.substr(dotOperator+1);
                 }
-                if (isSystemCall(object, method)) {
+                if (isSystemCall(object, method, xcode)) {
                     break;
                 } else {
                     int address = getFunctionAddress(operand);
@@ -748,12 +750,12 @@ int Script::injectScript(Script* script) {
     return script->getSize();
 }
 
-bool Script::isSystemCall(string object, string functionName) {
+bool Script::isSystemCall(string object, string functionName, Instruction& _xcode) {
     
     //Console print:
     if (functionName == "rep" || functionName == "print") {
         StackData sd = Stack::pop();
-		ScriptConsole::print(sd.getAsString());
+		ScriptConsole::print(sd.getAsString(), this->script_debug);
         return true;
     }
     
@@ -773,6 +775,9 @@ bool Script::isSystemCall(string object, string functionName) {
                 } else {
 					Stack::push(0);
                 }
+				if (_xcode.getPointer() > 0) {
+					Stack::setTopPointer(_xcode.getPointer());
+				}
             }
             //return substring of a string
             //definition of substring: object.substring(index, numberOfCharacters)
@@ -786,6 +791,9 @@ bool Script::isSystemCall(string object, string functionName) {
                     int b = (int)sb.getNumber(true);
                     string sub = value.substr(a,b);
 					Stack::push(sub);
+					if (_xcode.getPointer() > 0) {
+						Stack::setTopPointer(_xcode.getPointer());
+					}
                 }
             }
             return true;
@@ -803,18 +811,12 @@ bool Script::isSystemCall(string object, string functionName) {
  * @param filename
  * @return boolean
  */
-bool Script::validateExtension(string filename) {
-    int extensionIndex = filename.find_first_of(".");
-    // -force the extension extension
-    if (extensionIndex != -1) {
-        string extension = filename.substr(extensionIndex + 1);
-        if(find(Lang::extensionLib.begin(), Lang::extensionLib.end(), extension) != Lang::extensionLib.end()) {
-            return true;
-        } else {
-            ScriptError::msg("script extension \"" + extension + "\" does not match OpenWebQuery scripts");
-        }
+bool Script::validateExtension(wstring extension) {
+	string to_str(extension.begin(), extension.end());
+    if(find(Lang::extensionLib.begin(), Lang::extensionLib.end(), to_str) != Lang::extensionLib.end()) {
+        return true;
     } else {
-        ScriptError::msg("Script file failed to load, no file extension provided");
+        ScriptError::msg("script extension \"" + to_str + "\" does not match OpenWebQuery scripts");
     }
     return false;
 }
@@ -829,6 +831,7 @@ int  Script::mergeLinesAndCompile(Source *source, Parser *parser, int linenum, b
     //Compile stuff (line of code):
     return  parser->compile(this, source->getLines(), debug);
 }
+
 string errors[] = {
     " ", 
     "1 script object is null",
@@ -852,20 +855,27 @@ string errors[] = {
  * @return 
  * 
  */
-bool Script::loadFile(string filename) {
-    return loadFile(filename,false);
+bool Script::loadFile(fs::wpath filename) {
+    return loadFile(filename, this->script_debug);
 }       
-bool Script::loadFile(string filename, bool debug) {
-    //Force a file extension:
-    if (!validateExtension(filename)) {
+bool Script::loadFile(fs::wpath filename, bool debug) {
+    
+	//Set debugger flag:
+	script_debug = debug;
+
+	//Force a file extension:
+    if (!validateExtension(filename.extension().wstring())) {
         return false;
     }
+
     //Open file:
-    ifstream input;
-    char cbuffer;
-    input.open(filename.c_str());
+    wifstream input;
+	wstring wstring_filename = filename.wstring();
+	string string_filename(wstring_filename.begin(), wstring_filename.end());
+    wchar_t cbuffer;
+    input.open(filename.wstring());
     if (!input) {
-        ScriptError::msg("unable to open " + filename + " for loading");
+        ScriptError::msg("unable to open " + string_filename + " for loading");
         return false;
     }
     //Load pre-compiler AKA Source parser:
@@ -893,8 +903,8 @@ bool Script::loadFile(string filename, bool debug) {
     while (input.get(cbuffer)) {
         
         //Pre parse:
-        if (cbuffer != '\n') {
-            flag = source.pushChar(cbuffer);
+        if (cbuffer != L'\n') {
+            flag = source.pushChar((char)cbuffer);
             if (!flag) { continue; }
         }
         
@@ -916,11 +926,10 @@ bool Script::loadFile(string filename, bool debug) {
             source.cleanLine();
             source.pushLine(linenum);
         }
-        if (cbuffer == '\n') {
+        if (cbuffer == L'\n') {
             linenum++;
         }
     }
-    
     //Execute all is left:
     ret = mergeLinesAndCompile(&source, &parser, linenum, debug);
     if (ret != 0) {

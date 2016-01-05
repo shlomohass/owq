@@ -2,13 +2,14 @@
 
 Argu::Argu()
 {
-	execfile = "OWQ.exe";
+	execfile = "OWQ"; // Assumes its included in the path
 	curdir = fs::current_path();
-	testdir = fs::path("OwqTests");
+	testdir = fs::path("Tests");
 	outdir = fs::path("OwqTestResults");
 }
 
 
 Argu::~Argu()
 {
+
 }

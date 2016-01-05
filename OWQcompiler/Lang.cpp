@@ -56,10 +56,9 @@ vector<char> Lang::LangNamingAllowedChars = {
 
 //Set allowed extensions:
 vector<string> Lang::extensionLib = {
-    "scs",
-    "SCS",
-    "owq",
-    "OWQ"
+    ".owq",
+    ".OWQ",
+	".towq"
 };
 
 //Define constants definition characters:

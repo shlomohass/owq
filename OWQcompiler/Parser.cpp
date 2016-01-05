@@ -52,7 +52,7 @@ int Parser::compile(Script* script, string exp, bool debug) {
     script->internalStaticPointer = 0;
     
     //compile our tokens
-    return compiler(script, tokens, 0);
+    return compiler(script, tokens, debug, 0);
 }
 /** Repeatedly call getToken as a means to populate a set of Tokens.
  *
@@ -359,7 +359,7 @@ void Parser::evaluateGroups(Tokens& tokens, TokenFlag flagToGroup, int startFrom
  * @param integer rCount -> the recursion counter for limits
  * @return integer
  */
-int Parser::compiler(Script* script, Tokens& tokens, int rCount){
+int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     
     if(!script) return 1;
     
@@ -371,7 +371,7 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
     // parenthetical groups are handled by first case and have the highest priority
     // func/parenthetical groups have a priority of 2 -
     
-    if (OWQ_DEBUG && OWQ_DEBUG_EXPOSE_COMPILER_PARSE && OWQ_DEBUG_LEVEL > 1) {
+    if (debug && OWQ_DEBUG_EXPOSE_COMPILER_PARSE && OWQ_DEBUG_LEVEL > 1) {
         tokens.renderTokens();
         if (OWQ_DEBUG_LEVEL > 2) { tokens.renderTokenType(); }
         if (OWQ_DEBUG_LEVEL > 3) { tokens.renderTokenPriorty(); }
@@ -477,7 +477,7 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
             //-------------------------------------------------------
             // recursively evaluate the condition of this if statement
             //-------------------------------------------------------
-            compiler(script, tokens, rCount);	//compile the expression
+            compiler(script, tokens, debug, rCount);	//compile the expression
             script->addInstruction(Instruction(ByteCode::CMP, operatorTokenStr));
             return 0;
             
@@ -497,7 +497,7 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
             //-------------------------------------------------------
             // recursively evaluate the condition of this if statement
             //-------------------------------------------------------
-            compiler(script, tokens, rCount);	//compile the expression
+            compiler(script, tokens, debug, rCount);	//compile the expression
             script->addInstruction(Instruction(ByteCode::ELE, operatorTokenStr));
             return 0;
 		}
@@ -518,7 +518,7 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
 			//------------------------------------------------------
 			//recursively evaluate the condition of this while loop
 			//------------------------------------------------------
-			compiler(script, tokens, rCount); //compile the expression
+			compiler(script, tokens, debug, rCount); //compile the expression
 			script->addInstruction(Instruction(ByteCode::CMP, operatorTokenStr));
 			return 0;
 
@@ -534,7 +534,7 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
 			mark(ParseMark::BREAKEXP);
 			//Evaluate the break expression keywords are not allowed:
 			Tokens sub = tokens.extractInclusive(operatorIndex + 1, tokens.getSize() - 1, eraseCount, script);
-			int ret = compiler(script, sub, rCount); //compile the expression
+			int ret = compiler(script, sub, debug, rCount); //compile the expression
 			if (ret > 0) { return ret; }
 			unmark(); //unmarks the break;
 			script->addInstruction(Instruction(ByteCode::BRE));
@@ -546,7 +546,7 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
             if (tokens.getSize() > 1) {
                 Tokens sub = tokens.extractInclusive(1, tokens.getSize()-1, eraseCount, script);
                 operatorIndex -= eraseCount;
-                compiler(script,sub,rCount);
+                compiler(script, sub, debug, rCount);
             }
             script->addInstruction(Instruction(ByteCode::RET));
             return 0; //there is nothing else to be done  
@@ -581,15 +581,13 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
 						Tokens sub = tokens.extractInclusive(operatorIndex + 1, i - 1, eraseCount, script);
 						i -= eraseCount;
 						tokenSetSize -= eraseCount;
-						sub.renderTokens();
 						//If the sub is just one token avoid anything elese and continue:
 						if (sub.getSize() > 1) {
 							//Evaluate:
 							int t1 = evaluateDeclarationSub(sub, true);
 							if (t1 > 0) { return t1; } //Invalid return error code!
 							//Compile sub expression:
-							sub.renderTokens();
-							compiler(script, sub, rCount);
+							compiler(script, sub, debug, rCount);
 						}
 						tokens.pop(i); //Pop RST || variable
 						tokens.pop(i); //Pop comma
@@ -610,7 +608,9 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
 				}
 			}
 			//Continue compilation:
-            compiler(script, tokens, rCount);
+			if (tokens.getSize() > 1) {
+				compiler(script, tokens, debug, rCount);
+			} 
             return 0;
         }
     } //end of keywords
@@ -645,10 +645,13 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
         Tokens sub = tokens.extractContentOfParenthesis(operatorIndex, closeOfParenthesis, eraseCount, script);
         operatorIndex -= 1;	//Just in case its a function call set next block to parse the call name,
         int prevRstPos = script->internalStaticPointer; //just in case the group won't do anything but push
-        compiler(script, sub, rCount);
+        compiler(script, sub, debug, rCount);
         
         //Set the correct Static Pointer of the brackets group since we set it to zero by default:
         if (tokens.getSize() > operatorIndex + 1) {
+			if (prevRstPos == script->internalStaticPointer) {
+				script->internalStaticPointer++;
+			}
             tokens.tokens[operatorIndex + 1].rstPos = script->internalStaticPointer;
         }
         
@@ -657,8 +660,9 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
             //if previous token before the parenthesis has a non zero priority of 2 then make function call
             if (tokens.getTokenPriorty(operatorIndex) && leftToken->type != TokenType::KEYWORD && leftToken->type != TokenType::DELIMITER) {
                 string funcName = leftToken->token;
+				script->addInstruction(Instruction(ByteCode::CALL, funcName, tokens.tokens[operatorIndex + 1].rstPos));
                 tokens.pop(operatorIndex); //removes function name, operatorIndex points to function name
-                script->addInstruction(Instruction(ByteCode::CALL, funcName));
+                
             }
         }
     }
@@ -674,11 +678,11 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
             if (tokens.getToken(i) == Lang::LangFindDelimiter("comma")) {
                 Tokens sub = tokens.extractInclusive(0, i - 1, eraseCount, script);
                 operatorIndex -= eraseCount;
-                compiler(script, sub, rCount);
+                compiler(script, sub, debug, rCount);
                 tokens.pop(0);	//remove RST
                 tokens.pop(0);	//remove comma
                 operatorIndex -= 2;
-                compiler(script, tokens, rCount);
+                compiler(script, tokens, debug, rCount);
                 break;
             }
         }
@@ -741,7 +745,7 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
 
         //extract from 1 past the equal sign to the end of the tokens
         Tokens sub = tokens.extractInclusive(operatorIndex+1, tokens.getSize()-1, eraseCount, script);
-        compiler(script, sub, rCount);
+        compiler(script, sub, debug, rCount);
         script->addInstruction(Instruction(ByteCode::ASN, leftToken->token));
         tokens.extractInclusive(operatorIndex-1, operatorIndex+1, eraseCount, script);
         operatorIndex -= eraseCount;
@@ -760,7 +764,7 @@ int Parser::compiler(Script* script, Tokens& tokens, int rCount){
     // Recursive compilation of whatever is not yet compiled
     //-------------------------------------------------------
     if (tokens.getSize() > 1) {
-        return compiler(script, tokens, rCount);
+        return compiler(script, tokens, debug, rCount);
     }
     
     return 0;

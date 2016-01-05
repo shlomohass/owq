@@ -1,0 +1,13 @@
+let a = 1 + 5 * 8 + 9;   //50
+let b = 1 - (2 * 8) + 3; //-12
+let t = "sh";
+let r = "more";
+let z = 1 - 2 * (4 + t.length()) * 2 - r.length(); // -27
+print(a + b + t.length() * t.length()); // 42
+print(","); //-27
+print(z); //-27
+/*
+@expected-output
+42,-27
+@end-expected-output
+*/

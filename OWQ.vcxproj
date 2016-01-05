@@ -19,12 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="assets\example.scs">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
+    <ClInclude Include="CmdParser\argvparser.h" />
+    <ClInclude Include="Argu.h" />
     <ClInclude Include="OWQcompiler\Instruction.h" />
     <ClInclude Include="OWQcompiler\Lang.h" />
     <ClInclude Include="OWQcompiler\Method.h" />
@@ -41,6 +37,8 @@
     <ClInclude Include="OWQcompiler\Tokens.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Argu.cpp" />
+    <ClCompile Include="CmdParser\argvparser.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OWQcompiler\Instruction.cpp" />
     <ClCompile Include="OWQcompiler\Lang.cpp" />
@@ -55,6 +53,9 @@
     <ClCompile Include="OWQcompiler\StackData.cpp" />
     <ClCompile Include="OWQcompiler\Token.cpp" />
     <ClCompile Include="OWQcompiler\Tokens.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\example.owq" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9B07BD48-C9D9-4D4D-982E-E1731641CFC5}</ProjectGuid>
@@ -108,16 +109,18 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>S:\programms\boost\boost_1_60_0-32\lib32-msvc-14.0;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(IncludePath)</IncludePath>
+    <LibraryPath>S:\programms\boost\boost_1_60_0-32\lib32-msvc-14.0;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\OWQcompiler</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\OWQcompiler;$(SolutionDir)\CmdParser;S:\programms\boost\boost_1_60_0-32</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -144,7 +147,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(SolutionDir)\OWQcompiler</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)\OWQcompiler;$(SolutionDir)\CmdParser;S:\programms\boost\boost_1_60_0-32</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

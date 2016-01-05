@@ -1,0 +1,10 @@
+let a = "shlomi";
+let b = 5;
+let c = true;
+let d = false;
+print(a + "-" + b + "-" + c + "-" + d);
+/*
+@expected-output
+shlomi-5-TRUE-FALSE
+@end-expected-output
+*/

@@ -14,8 +14,8 @@ ScriptConsole::ScriptConsole() {
  * Write to the console
  * @param msg
  */
-void ScriptConsole::print(string msg1) {
-    if (OWQ_DEBUG && OWQ_DEBUG_LEVEL > 0) {
+void ScriptConsole::print(string msg1, bool debug) {
+    if (debug && OWQ_DEBUG_LEVEL > 0) {
         cout << endl << "CONSOLE-OUT >> " << msg1 << endl;
         return;
     }
@@ -25,8 +25,8 @@ void ScriptConsole::print(string msg1) {
  * Write to the console
  * @param msg
  */
-void ScriptConsole::print(string msg1, string msg2) {
-    if (OWQ_DEBUG && OWQ_DEBUG_LEVEL > 0) {
+void ScriptConsole::print(string msg1, string msg2, bool debug) {
+    if (debug && OWQ_DEBUG_LEVEL > 0) {
         cout << endl << "CONSOLE-OUT >> " << msg1 << ", " << msg2 << endl;
         return;
     }

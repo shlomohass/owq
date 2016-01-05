@@ -1,0 +1,11 @@
+let a = "abc",
+    b = 2^2,
+	c = a.length();
+let d = b > c & c * 2 > b;
+print(a + "," + b + "," + c + "," + d);
+
+/*
+@expected-output
+abc,4,3,TRUE
+@end-expected-output
+*/

@@ -7,6 +7,12 @@
 #ifndef SCRIPT_H
 #define	SCRIPT_H
 
+
+//#include <boost\filesystem.hpp>
+//#include <boost\filesystem\fstream.hpp>
+#include <boost\filesystem\operations.hpp>
+#include <boost\filesystem\path.hpp>
+
 #include "Instruction.h"
 #include "Method.h"
 #include "Stack.h"
@@ -15,6 +21,8 @@
 #include <map>
 #include <vector>
 
+
+namespace fs = boost::filesystem;
 using namespace std;
 
 class Parser;
@@ -22,6 +30,11 @@ class Script {
     
     friend class Parser;
     friend class Tokens;
+
+	/**
+	* Debugger flag:
+	*/
+	bool script_debug;
     /**
      * The complete listing of instructions that define this script
      */
@@ -56,8 +69,8 @@ class Script {
 
     int injectScript(Script* script);
 
-    bool isSystemCall(string object, string functionName);
-    bool validateExtension(string filename);
+    bool isSystemCall(string object, string functionName, Instruction& _xcode);
+    bool validateExtension(wstring extension);
     int  mergeLinesAndCompile(Source* source, Parser* parser, int linenum, bool debug);
     ScriptVariable *getVariable(string varName);
     ScriptVariable *getGlobalVariable(string varName);
@@ -81,8 +94,8 @@ public:
     void run();
     void run(bool debug);
     
-    bool loadFile(string filename);
-    bool loadFile(string filename, bool debug);
+    bool loadFile(fs::wpath filename);
+    bool loadFile(fs::wpath filename, bool debug);
 
     int getSize();
     virtual ~Script();

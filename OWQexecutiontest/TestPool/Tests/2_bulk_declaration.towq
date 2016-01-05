@@ -1,0 +1,15 @@
+let a = "shlomi",
+    b = "hassid",
+	c = a + " " + b;
+	
+print(a + "\n");
+print(b + "\n");
+print(c);
+
+/*
+@expected-output
+shlomi
+hassid
+shlomi hassid
+@end-expected-output
+*/

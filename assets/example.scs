@@ -1,7 +1,0 @@
-let j = "shlomi";
-let m = true;
-if (m == true) {
-	print(j + " test " + true);
-} else {
-	print("Im in else block!!!");
-}

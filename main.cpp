@@ -5,6 +5,11 @@
 
 #include <exception>
 
+#include <boost\filesystem\operations.hpp>
+#include <boost\filesystem\path.hpp>
+
+#include "argvparser.h"
+#include "Argu.h"
 #include "Setowq.h"
 #include "Lang.h"
 #include "Script.h"
@@ -13,27 +18,74 @@
 #define OWQ_NAN -3231307.6790
 #endif
 
-
-using namespace std;
+namespace fs = boost::filesystem;
+namespace cm = CommandLineProcessing;
 
 int main(int argc, char** argv) {
 
-	Lang* lang = new Lang();
-	Script s;
+	//Define args and project settings:
+	int exitCode = 0;
+	string filepath_temp;
+	Argu settings;
+	cm::ArgvParser cmd;
+	bool enable_debug = OWQ_DEBUG;
+	bool execute_is_requested = false;
 
-	//Register global system variables to Interpreter:
-	//s.registerVariable("Aflag",   RegisteredVariable::REGISTERED_DOUBLE, &Aflag);
+	cmd.addErrorCode(0, "Success");
+	cmd.addErrorCode(1, "Error");
+	cmd.setIntroductoryDescription("This is foo written by bar.");
+	cmd.setHelpOption("h", "help", "Print this help page");
+	cmd.defineOption("r", "Compile and run a file -r path.owq", cm::ArgvParser::OptionRequiresValue);
+	cmd.defineOption("debug", "enable deep debug", cm::ArgvParser::NoOptionAttribute);
 
-	//Load target script:
-	bool indicator = s.loadFile("assets\\example.scs", OWQ_DEBUG);
-	//Loading success so go and do stuff:
-	if (indicator) {
-		s.run(OWQ_DEBUG);
+	int result = cmd.parse(argc, argv);
+
+
+	//Parse and set Argu:
+	if (result != cm::ArgvParser::NoParserError)
+	{
+		std::cout << cmd.parseErrorDescription(result);
+		if (result == cm::ArgvParser::ParserHelpRequested) {
+			exitCode = 0;
+		}
+		exitCode = 1;
+	}
+	else {
+		if (cmd.foundOption("r")) {
+			filepath_temp = cmd.optionValue("r");
+			settings.inscript = fs::wpath(filepath_temp);
+			execute_is_requested = true;
+		}
+		if (cmd.foundOption("debug")) {
+			enable_debug = true;
+		}
 	}
 
-	delete lang;
+	if (result == cm::ArgvParser::ParserHelpRequested) {
+		system("pause");
+		exit(exitCode);
+	}
+	
+	if (execute_is_requested) {
+		Lang* lang = new Lang();
+		Script s;
 
-	system("pause");
+		//Register global system variables to Interpreter:
+		//s.registerVariable("Aflag",   RegisteredVariable::REGISTERED_DOUBLE, &Aflag);
+
+		//Load target script:
+		bool indicator = s.loadFile( settings.inscript, enable_debug);
+		//Loading success so go and do stuff:
+		if (indicator) {
+			s.run( enable_debug );
+		}
+
+		delete lang;
+	}
+
+	if (enable_debug) {
+		system("pause");
+	}
 	return 0;
 }
 

@@ -19,11 +19,12 @@
     <Filter Include="Source Files\OWQcompiler">
       <UniqueIdentifier>{dbf5232d-cb24-4385-9a2a-ad9412d12a23}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="assets\example.scs">
-      <Filter>Resource Files</Filter>
-    </None>
+    <Filter Include="Source Files\CmdParser">
+      <UniqueIdentifier>{4a0f75e0-8675-484c-a597-a77ff5a798df}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\CmdParser">
+      <UniqueIdentifier>{0008d7e5-ebae-44fb-adcf-70707508aa6e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="OWQcompiler\Instruction.h">
@@ -36,9 +37,6 @@
       <Filter>Header Files\OWQcompiler</Filter>
     </ClInclude>
     <ClInclude Include="OWQcompiler\Parser.h">
-      <Filter>Header Files\OWQcompiler</Filter>
-    </ClInclude>
-    <ClInclude Include="OWQcompiler\Script.h">
       <Filter>Header Files\OWQcompiler</Filter>
     </ClInclude>
     <ClInclude Include="OWQcompiler\ScriptConsole.h">
@@ -68,6 +66,15 @@
     <ClInclude Include="OWQcompiler\Tokens.h">
       <Filter>Header Files\OWQcompiler</Filter>
     </ClInclude>
+    <ClInclude Include="CmdParser\argvparser.h">
+      <Filter>Header Files\CmdParser</Filter>
+    </ClInclude>
+    <ClInclude Include="Argu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="OWQcompiler\Script.h">
+      <Filter>Header Files\OWQcompiler</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="OWQcompiler\Instruction.cpp">
@@ -80,9 +87,6 @@
       <Filter>Source Files\OWQcompiler</Filter>
     </ClCompile>
     <ClCompile Include="OWQcompiler\Parser.cpp">
-      <Filter>Source Files\OWQcompiler</Filter>
-    </ClCompile>
-    <ClCompile Include="OWQcompiler\Script.cpp">
       <Filter>Source Files\OWQcompiler</Filter>
     </ClCompile>
     <ClCompile Include="OWQcompiler\ScriptConsole.cpp">
@@ -112,5 +116,19 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CmdParser\argvparser.cpp">
+      <Filter>Source Files\CmdParser</Filter>
+    </ClCompile>
+    <ClCompile Include="Argu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="OWQcompiler\Script.cpp">
+      <Filter>Source Files\OWQcompiler</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="assets\example.owq">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

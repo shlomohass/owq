@@ -1,0 +1,30 @@
+let mer = 9 + 8 * (3) + (2) * (4 + 5) 		//51
+let ter = "shlomi";
+let a = 14 + 3; 							//17
+ter.length(); 								// Garbage 6
+let b = 1 - 6 * 8 + 4; 						// -43
+ter.length(); 								// Garbage 6
+let c = 8 * 3 - 8 * 7 - 9;					// -41
+let d = 3 * 7 * 2 + 17 - 6 * 2;				// 47
+let e = 8 * (3 - 8) * 7 - 9;				// -289
+let f = 8 * (3 - 8) * 7 - 9 < 0;        	// true
+ter.length();								// Garbage 6
+let g = 8 * (3 - 8) * 7 - 9 > -45 * 2-4;	// false
+print(a); // 17
+print(",");
+print(b); // -43
+print(",");
+print(c); // -41
+print(",");
+print(d); // 47
+print(",");
+print(e); // -289
+print(",");
+print(f); // TRUE
+print(",");
+print(g); // FALSE
+/*
+@expected-output
+17,-43,-41,47,-289,TRUE,FALSE
+@end-expected-output
+*/

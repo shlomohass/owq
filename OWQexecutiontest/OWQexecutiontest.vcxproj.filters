@@ -24,19 +24,19 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CmdParser\argvparser.cpp">
-      <Filter>Source Files\CmdParser</Filter>
-    </ClCompile>
     <ClCompile Include="Argu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\CmdParser\argvparser.cpp">
+      <Filter>Source Files\CmdParser</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CmdParser\argvparser.h">
-      <Filter>Header Files\CmdParser</Filter>
-    </ClInclude>
     <ClInclude Include="Argu.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CmdParser\argvparser.h">
+      <Filter>Header Files\CmdParser</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
