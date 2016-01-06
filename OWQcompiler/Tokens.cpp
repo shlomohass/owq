@@ -227,7 +227,28 @@ Tokens Tokens::extractInclusive(int startIndex, int endIndex, int& extractionCou
            
     return newTokenSet;
 }
-
+/** Extrack token set that are bound by a end of expression:
+ *
+ */
+Tokens Tokens::extractSubExpr() {
+	Tokens newTokenSet;
+	//copy from current token-set to new token-set
+	int i;
+	int count = 0; //the total count of values to extract
+	string semi = Lang::LangFindDelimiter("semicolon");
+	for (i = 0; i < tokens.size(); i++) {
+		count++;
+		if (tokens[i].type == TokenType::DELIMITER && tokens[i].token == semi) {
+			break;
+		}
+		newTokenSet.addToken(tokens[i]);
+	}
+	//erase
+	for (i = 0; i < count; i++) {
+		tokens.erase(tokens.begin());
+	}
+	return newTokenSet;
+}
 /** Report error to user
  * 
  * @param msg

@@ -924,7 +924,10 @@ bool Script::loadFile(fs::wpath filename, bool debug) {
         Lang::LangBlockCloseChar,
         Lang::LangOperationEnd,
         Lang::LangMacroIndicator,
-        Lang::LangMacroSetChar
+        Lang::LangMacroSetChar,
+		Lang::LangFunctionOpenArguChar,
+		Lang::LangFunctionCloseArguChar,
+		Lang::LangArgumentSpacer
     );
     //Load compiler AKA  Parser:
     Parser parser;
@@ -932,6 +935,7 @@ bool Script::loadFile(fs::wpath filename, bool debug) {
     //Basic flags and counters:
     int  ret = 0;        //Return code of compiler
     int  linenum = 1;    //Keep track of line that is parsed
+	bool macroFlag = false;
     bool flag = false;   //Whether to try validate the line or merge several lines.
 
     //Expose debugger output of pre compiling:

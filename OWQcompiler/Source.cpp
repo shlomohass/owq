@@ -8,7 +8,7 @@
 #include "Source.h"
 #include "Lang.h"
 
-Source::Source(char d_str, char str_esc, char d_blo_open, char d_blo_close, char d_op, char d_mIndi, char d_mSet) {
+Source::Source(char d_str, char str_esc, char d_blo_open, char d_blo_close, char d_op, char d_mIndi, char d_mSet, char d_mOFunc, char d_mCFunc, char d_mSFunc) {
     deli_string     = d_str;
     string_escape   = str_esc;
     deli_block_open = d_blo_open;
@@ -17,16 +17,22 @@ Source::Source(char d_str, char str_esc, char d_blo_open, char d_blo_close, char
     inverted_deli_op = '\a';
     macroIndicator  = d_mIndi;
     macroSetSymbol  = d_mSet;
+	macroFuncOpen   = d_mOFunc;
+	macroFuncClose  = d_mCFunc;
+	macroArguSpacer = d_mSFunc;
     instring        = false;
     inMacro         = false;
+	inMacroFunc		= false;
     inMacroSet      = false;
     macroSet        = "";
+	macroArgBuffer  = "";
     macroCounter    = 0;
     mcomment        = false;
     skipToEnd       = false;
     hasDelimitter   = false;
     bufferSize      = 0;
     prevchar        = '\0';
+	macroArguments.reserve(10);
 }
 Source::Source(const Source& orig) {
 }
@@ -66,6 +72,7 @@ void Source::pushLine(int linenumber) {
         lineNumbers.back() = linenumber;
     }
 }
+
 /** Push char 
  * 
  * @param ch
@@ -97,33 +104,104 @@ bool Source::pushChar(char ch) {
         return false;
     } 
     
-    //Open a macro
+    //Open a macro:
     if (!instring && ch == macroIndicator && !inMacro) {
         inMacro = true;
         inMacroSet = false;
+		inMacroFunc = false;
         macroBuffer = "";
+		macroArgBuffer = "";
         return false;
     }
+	//A makro arguments start here:
+	if (inMacro && !inMacroSet && !inMacroFunc && ch == macroFuncOpen) {
+		//must have a name
+		if (macroBuffer != "" && macros.find(macroBuffer) != macros.end()) {
+			inMacroFunc = true;
+			macroArgBuffer = "";
+			return false;
+		} else {
+			//Return a naming error in macros: macro don't exists or empty
+			macroBuffer = "";
+			macroArgBuffer = "";
+			inMacro = false;
+			inMacroFunc = false;
+			macroArguments.clear();
+			return false;
+		}
+	}
+	//Stop a macro function call:
+	if (inMacro && !inMacroSet && inMacroFunc && ch == macroIndicator) {
+		inMacro = false;
+		inMacroFunc = false;
+		macroBuffer = "";
+		macroArguments.clear();
+		return false;
+	}
+	//Parse macro arguments until end:
+	if (inMacro && !inMacroSet && inMacroFunc) {
+		if (ch == macroArguSpacer && macroArgBuffer.length() > 0) {
+			if (macroArgBuffer.at(macroArgBuffer.length() - 1) != '\\') {
+				macroArguments.push_back(macroArgBuffer);
+				macroArgBuffer = "";
+			} else {
+				macroArgBuffer.pop_back();
+				macroArgBuffer += ch;
+			}
+			return false;
+		}
+		if (ch == macroFuncClose) {
+			if (macroArgBuffer.length() > 0) {
+				macroArguments.push_back(macroArgBuffer);
+				macroArgBuffer = "";
+			}
+			if (macroArguments.size() > 0) {
+				while (macroArguments.size() > 0) {
+					string temp_mac = macros[macroBuffer];
+					macroFuncAppend(temp_mac);
+					buffer += temp_mac;
+					bufferSize += (int)temp_mac.length();
+				}
+				usedMacrosCounter[macroBuffer]++;
+				macroCounter++;
+				macroBuffer = "";
+				macroArgBuffer = "";
+				return false;
+			}
+		}
+		macroArgBuffer += ch;
+		return false;
+	}
+	//Close a macro -> regular macro call or definition macro:
     if (inMacro && !inMacroSet && ch == macroIndicator) {
         if (macroBuffer != "" && macros.find(macroBuffer) != macros.end()) {
             buffer += macros[macroBuffer];
-            bufferSize += (int)macros[macroBuffer].size();
+            bufferSize += (int)macros[macroBuffer].length();
             usedMacrosCounter[macroBuffer]++;
             macroCounter++;
             macroBuffer = "";
+			macroArgBuffer = "";
             inMacro = false;
+			inMacroFunc = false;
+			macroArguments.clear();
             return false;
         } else {
             //Return a naming error in macros: macro don't exists
+			macroBuffer = "";
+			macroArgBuffer = "";
+			inMacro = false;
+			inMacroFunc = false;
+			macroArguments.clear();
             return false;
         }
     }
+	//Set a macro name:
     if (inMacro && !inMacroSet) {
         if (!Lang::LangIsNamingAllowed(ch) && ch != macroSetSymbol) {
             return false;
         }
         if (ch != macroSetSymbol) {
-                macroBuffer += ch; 
+            macroBuffer += ch; 
             return false;
         } else {
             if (macroBuffer != "" && macros.find(macroBuffer) == macros.end()) {
@@ -131,23 +209,30 @@ bool Source::pushChar(char ch) {
                 usedMacrosCounter.insert(pair<string, int>(macroBuffer,0));
                 macroSet = macroBuffer;
                 macroBuffer = "";
+				macroArgBuffer = "";
                 inMacroSet = true;
+				inMacroFunc = false;
+				macroArguments.clear();
                 return false;
             } else {
-                //Return a naming error in macros: name empty or exists
+              //Return a naming error in macros: name empty or exists
               return false;
             }
         }
         return false;
     }
+	//Set the definition macro value:
     if (inMacro && inMacroSet) {
         if (ch == macroIndicator) {
             if (macroBuffer.back() != string_escape) {
                 if (macroSet.size() > 0 && macros.find(macroSet) != macros.end()) {
                     macros[macroSet] = macroBuffer;
                     macroSet = "";
+					macroArgBuffer = "";
                     inMacro = false;
                     inMacroSet = false;
+					inMacroFunc = false;
+					macroArguments.clear();
                 } else {
                   //Error macro set a unknown macro naming
                    return false; 
@@ -218,8 +303,9 @@ bool Source::pushChar(char ch) {
         prevchar = '\0';
         bufferSize++;
         return true;
-    } else {
-    //Add character (nothing special but don't save double space):
+    } 
+	//Add character (nothing special but don't save double space):
+	else {
         if (ch == ' ' && !instring && prevchar == ' ') {
             return false;
         }
@@ -253,6 +339,46 @@ bool Source::validateLine() {
     }
     return false;
 }
+/** Append macro variables to value:
+ *
+ * @param string ref temp_res
+ */
+void Source::macroFuncAppend(string& temp_res) {
+	bool insert_flag = false;
+	int  size = (int)temp_res.length();
+	string strbuild = "";
+	vector<int> toearase;
+	for (int i = 0; i < size; i++) {
+		char c = temp_res[i];
+		if (c == '$') {
+			if (i > 0 && temp_res[i - 1] == string_escape) {
+				continue;
+			}
+			insert_flag = true;
+		} else if (insert_flag && '1' <= c && c <= '9') {
+			int in = ((int)c - 48) - 1;
+			if ((int)macroArguments.size() > in) {
+				strbuild += macroArguments[in];
+				if (find(toearase.begin(), toearase.end(), in) == toearase.end()) {
+					toearase.push_back(in);
+				}
+			}
+			insert_flag = false;
+		} else {
+			strbuild += c;
+		}
+	}
+	vector<string> leftArgu;
+	//Erase from macroArguments:
+	for (int i = 0; i < (int)macroArguments.size(); i++) {
+		if (find(toearase.begin(), toearase.end(), i) == toearase.end()) {
+			leftArgu.push_back(macroArguments[i]);
+		}
+	}
+	macroArguments = leftArgu;
+	temp_res = strbuild;
+}
+
 /** Clean buffer from unneeded chars op_end;
  * 
  * @return boolean

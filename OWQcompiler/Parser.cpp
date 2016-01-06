@@ -37,20 +37,32 @@ int Parser::compile(Script* script, string exp, bool debug) {
         return 1;
     }
     Tokens tokens;
+	int ret;
     //generate our tokens
     tokenize(exp, tokens);
-    //Evaluate groups:
-    evaluateGroups(tokens, TokenFlag::CONDITION);
-    evaluateGroups(tokens, TokenFlag::COMPARISON);
-    //For debugging:
-    if (debug && OWQ_DEBUG_LEVEL > 0 && OWQ_DEBUG_EXPOSE_COMPILER_PARSE) { 
-        tokens.renderTokens();
-        tokens.renderTokensJoined();
-    }
-    
-    //Reset internalStaticPointer used for RST stack calls:
-    script->internalStaticPointer = 0;
-    
+
+	//Loop from sub expression (;) may be passed by macros:
+	while (tokens.getSize() > 0) {
+		//Sub exp
+		Tokens subexp = tokens.extractSubExpr();
+		if (subexp.getSize() < 1) {
+			continue;
+		}
+		//Evaluate groups:
+		evaluateGroups(subexp, TokenFlag::CONDITION);
+		evaluateGroups(subexp, TokenFlag::COMPARISON);
+		//For debugging:
+		if (debug && OWQ_DEBUG_LEVEL > 0 && OWQ_DEBUG_EXPOSE_COMPILER_PARSE) {
+			subexp.renderTokens();
+			subexp.renderTokensJoined();
+		}
+
+		//Reset internalStaticPointer used for RST stack calls:
+		script->internalStaticPointer = 0;
+
+		ret = compiler(script, subexp, debug, 0);
+		if (ret > 0) { break; }
+	}
     //compile our tokens
     return compiler(script, tokens, debug, 0);
 }
@@ -149,7 +161,7 @@ string Parser::getToken() {
         currentToken = "\0";
         return currentToken;
     }
-    //skip over white spaces
+    //skip over white spaces and ;
     while (expressionIndex < (int)expression.length() && isSpace(expression[expressionIndex])) {
         ++expressionIndex;
     }

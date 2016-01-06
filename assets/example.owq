@@ -1,7 +1,14 @@
-# version : 54 #
-#p:print# 
+
+# version : 54  #
+# name : "shlom\#i"  #
+# testone : "$1- $2- $3- $4-"#
+# testtwo : "$1- $2- $2- $1-"#
+# print : print($1 + " "); # 
 
 let a = # version #;
-let b = "#p#";
-#p#(a);
-#p#(b);
+let b = # name #;
+let c = # testone(a, sh) #;
+let d = # testone(a, sh, lo, mi)#;
+let e = # testtwo(1, 2) #;
+let f = # testtwo(1) #;
+#print(a,b,c,d,e,f)#

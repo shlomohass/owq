@@ -45,6 +45,7 @@ public:
     Tokens extractContentOfParenthesis(int startIndex, int endIndex, int& extractionCount, Script* script, bool setPointer);
     Tokens extractInclusive(int startIndex, int endIndex,int& extractionCount, Script* script);
     Tokens extractInclusive(int startIndex, int endIndex,int& extractionCount, Script* script, bool setPointer);
+	Tokens Tokens::extractSubExpr();
     int getHighestOperatorPriorityIndex(int& priortyCod);
     int getMatchingCloseParenthesis(int openIndex);
     string getToken(int index);
