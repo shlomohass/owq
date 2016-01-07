@@ -45,7 +45,7 @@ Source::~Source() {
  * @param string line
  * @param integer linenumber
  */
-void Source::pushLine(string line, int linenumber) {
+void Source::pushLine(std::string line, int linenumber) {
     lines.push_back(line);
     if (lineNumbers.size() < 2) {
         lineNumbers.push_back(linenumber);
@@ -162,7 +162,7 @@ bool Source::pushChar(char ch) {
 			}
 			if (macroArguments.size() > 0) {
 				while (macroArguments.size() > 0) {
-					string temp_mac = macros[macroBuffer];
+					std::string temp_mac = macros[macroBuffer];
 					macroFuncAppend(temp_mac);
 					buffer += temp_mac;
 					bufferSize += (int)temp_mac.length();
@@ -213,8 +213,8 @@ bool Source::pushChar(char ch) {
             return false;
         } else {
             if (macroBuffer != "" && macros.find(macroBuffer) == macros.end()) {
-                macros.insert(pair<string, string>(macroBuffer,""));
-                usedMacrosCounter.insert(pair<string, int>(macroBuffer,0));
+                macros.insert(std::pair<std::string, std::string>(macroBuffer,""));
+                usedMacrosCounter.insert(std::pair<std::string, int>(macroBuffer,0));
                 macroSet = macroBuffer;
                 macroBuffer = "";
 				macroArgBuffer = "";
@@ -351,11 +351,11 @@ bool Source::validateLine() {
  *
  * @param string ref temp_res
  */
-void Source::macroFuncAppend(string& temp_res) {
+void Source::macroFuncAppend(std::string& temp_res) {
 	bool insert_flag = false;
 	int  size = (int)temp_res.length();
-	string strbuild = "";
-	vector<int> toearase;
+	std::string strbuild = "";
+	std::vector<int> toearase;
 	for (int i = 0; i < size; i++) {
 		char c = temp_res[i];
 		if (c == '$') {
@@ -376,7 +376,7 @@ void Source::macroFuncAppend(string& temp_res) {
 			strbuild += c;
 		}
 	}
-	vector<string> leftArgu;
+	std::vector<std::string> leftArgu;
 	//Erase from macroArguments:
 	for (int i = 0; i < (int)macroArguments.size(); i++) {
 		if (find(toearase.begin(), toearase.end(), i) == toearase.end()) {
@@ -402,7 +402,7 @@ void Source::cleanLine() {
         }
     }
     bufsize = unsavedSize();
-	string temp_buf = "";
+	std::string temp_buf = "";
 	char prev_char = '\0';
 	bool in_string = false;
     for (int i = 0; i < bufsize; i++) {
@@ -458,9 +458,9 @@ int Source::unsavedSize() {
 /** Return a line of the combined vector lines
  *  @return string
  */
-string Source::getLines() {
-    ostringstream output;
-    vector<string>::iterator src_iter;
+std::string Source::getLines() {
+	std::ostringstream output;
+	std::vector<std::string>::iterator src_iter;
     for (src_iter = lines.begin(); src_iter != lines.end(); src_iter++) {
         if (!output.str().empty()) {
             output << ' ' << *src_iter;
@@ -473,9 +473,9 @@ string Source::getLines() {
 /** Return a line of the combined vector line numbers
  *  @return string
  */
-string Source::getLineNumbers() {
-    ostringstream output;
-    vector<int>::iterator src_iter;
+std::string Source::getLineNumbers() {
+	std::ostringstream output;
+	std::vector<int>::iterator src_iter;
     for (src_iter = lineNumbers.begin(); src_iter != lineNumbers.end(); src_iter++) {
         if (!output.str().empty()) {
             output << '-' << *src_iter;
@@ -485,21 +485,21 @@ string Source::getLineNumbers() {
     }
     return output.str();
 }
-/** Render a debugger source pre parsed
+/** Render functions for debugger source pre parsed
  */
 void Source::renderSource() {
-    cout << " * From Original Line Scope --> " << getLineNumbers() << endl << endl;
+	std::cout << " * From Original Line Scope --> " << getLineNumbers() << std::endl << std::endl;
     for (int i=0; i < (int)lines.size(); i++) {
-        cout << "\t[" << i << "] -> " << lines[i] << endl;
+		std::cout << "\t[" << i << "] -> " << lines[i] << std::endl;
     }
-    cout << endl << "   CODE --> " << getLines() << endl;
+	std::cout << std::endl << "   CODE --> " << getLines() << std::endl;
 }
 void Source::renderMacros() {
-    cout << " * Total registered Macros --> " << macros.size() << endl;
-    cout << " * Total Macros used       --> " << macroCounter << endl << endl;
-    typedef map<string,string>::iterator it_type;
+	std::cout << " * Total registered Macros --> " << macros.size() << std::endl;
+	std::cout << " * Total Macros used       --> " << macroCounter << std::endl << std::endl;
+    typedef std::map<std::string, std::string>::iterator it_type;
     for(it_type iterator = macros.begin(); iterator != macros.end(); iterator++) {
-        cout << "\tM[" << iterator->first << "](" << usedMacrosCounter[iterator->first] << ")-> " << iterator->second << endl;
+		std::cout << "\tM[" << iterator->first << "](" << usedMacrosCounter[iterator->first] << ")-> " << iterator->second << std::endl;
     }
-    cout << endl;
+	std::cout << std::endl;
 }

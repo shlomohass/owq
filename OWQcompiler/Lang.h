@@ -17,45 +17,43 @@
 
 //Important Language Macros:
 
-using namespace std;
-
 class Lang {
 public:
     Lang();
     Lang(const Lang& orig);
     
     //Regex lib:
-    static map<string, string>     LangRegexLib;
+    static std::map<std::string, std::string> LangRegexLib;
     
     //Allowed extensions:
-    static vector<string>          extensionLib;
+    static std::vector<std::string> extensionLib;
     
     //Delimiters Definition and functions:
-    static map<string, string>     LangDelimiter;
-    static map<string, string>     LangInverseDelimiter;
-    static string                  LangFindDelimiter(const string& key);
-    static bool                    LangHasKeyDelimiter(const string& key);
+    static std::map<std::string, std::string>     LangDelimiter;
+    static std::map<std::string, std::string>     LangInverseDelimiter;
+    static std::string                            LangFindDelimiter(const std::string& key);
+    static bool                    LangHasKeyDelimiter(const std::string& key);
     static bool                    LangIsDelimiter(const char& value);
-    static bool                    LangIsDelimiter(const string& value);
+    static bool                    LangIsDelimiter(const std::string& value);
     static bool                    LangIsComparison(const char& value);
-    static bool                    LangIsComparison(const string& value);
+    static bool                    LangIsComparison(const std::string& value);
     static bool                    LangIsOfCondition(const char& value);
-    static bool                    LangIsOfCondition(const string& value);
+    static bool                    LangIsOfCondition(const std::string& value);
     //Digits Definition and functions:
-    static map<int, char>          LangDigits;
+    static std::map<int, char>          LangDigits;
     
     
     //Keywords Definition and functions:
-    static map<string, string>     LangKeywords;
-    static map<string, string>     LangInverseKeywords;
-    static string                  LangFindKeyword(const string& key);
-    static bool                    LangHasKeyKeyword(const string& key);
-    static bool                    LangIsKeyword(const string& value);
+    static std::map<std::string, std::string>     LangKeywords;
+    static std::map<std::string, std::string>     LangInverseKeywords;
+    static std::string                  LangFindKeyword(const std::string& key);
+    static bool                         LangHasKeyKeyword(const std::string& key);
+    static bool                         LangIsKeyword(const std::string& value);
     
     //Naming system Definition and functions:
-    static vector<char>            LangNamingAllowedChars;
-    static bool                    LangIsNamingAllowed(const string& value);
-    static bool                    LangIsNamingAllowed(const char& value);
+    static std::vector<char> LangNamingAllowedChars;
+    static bool              LangIsNamingAllowed(const std::string& value);
+    static bool              LangIsNamingAllowed(const char& value);
     
     //Define constant definition characters:
     static char                    LangStringIndicator;
@@ -71,10 +69,9 @@ public:
     virtual ~Lang();
     
     //Printing stuff:
-    static void printHeader(string headername);
+    static void printHeader(std::string headername);
     static void printSepLine(int breaks);
     static void printEmpLine(int breaks);
-private:
 
 };
 

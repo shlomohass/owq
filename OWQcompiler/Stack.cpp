@@ -9,7 +9,7 @@
 
 /** Holds the stack
  */
-vector<StackData> Stack::stack;
+std::vector<StackData> Stack::stack;
 
 /** Construct the stack
  * 
@@ -28,7 +28,7 @@ void Stack::push(double data) {
  * 
  * @param string data
  */
-void Stack::push(string data) {
+void Stack::push(std::string data) {
     push(StackData(data));
 }
 /** Push a stack data to the stack
@@ -66,7 +66,7 @@ void Stack::setTopPointer(int pointer) {
         stack.back().setRstPos(pointer);
         return;
     } 
-    cout << endl << "Error: tried to set pointer in empty stack" << endl; 
+	std::cout << std::endl << "Error: tried to set pointer in empty stack" << std::endl;
 }
 StackData Stack::extract(int pointer) {
     StackData stackdata;
@@ -80,7 +80,7 @@ StackData Stack::extract(int pointer) {
             return stackdata;
         }
     }
-    cout << endl << "Error: stack pointer did not found nothing!" << endl; 
+	std::cout << std::endl << "Error: stack pointer did not found nothing!" << std::endl;
     return stackdata;
 }
 /** Swap top 2 value on the stack
@@ -129,11 +129,11 @@ StackData Stack::Shift() {
  *  
  */
 void Stack::render() {
-    cout << "     Stack("<< stack.size() << "):\n";
+	std::cout << "     Stack("<< stack.size() << "):\n";
     for (int i=(int)stack.size()-1; i > -1; i--) {
-        cout << "           [" << i << "] = ";
+		std::cout << "           [" << i << "] = ";
         stack[i].render();
-        cout << endl;
+		std::cout << std::endl;
     }
 }
 /** get the stack current size

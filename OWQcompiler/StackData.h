@@ -19,8 +19,6 @@
 #define OWQ_NAN -3231307.6790
 #endif
 
-using namespace std;
-
 enum SDtype {
 	SD_NULL,
 	SD_STRING,
@@ -38,15 +36,15 @@ class StackData {
 	SDtype type;
 
 	//Primitives:
-    string svalue;
+	std::string svalue;
     double dvalue;
 	int    bvalue;
 
 	//Objects childs:
 	bool isOwqObj; //Flag an object;
 	bool isOwqArr; //Flag an array;
-	map<string, StackData> owqObj;
-	vector<StackData> owqArray;
+	std::map<std::string, StackData> owqObj;
+	std::vector<StackData> owqArray;
 
 	//Static stack pointers:
     bool   rst;
@@ -55,12 +53,12 @@ class StackData {
 public:
     
     StackData();				// Asign an undefined value
-    StackData(string value);	// Asign a string value
+    StackData(std::string value);	// Asign a string value
     StackData(double value);    // Asign a double value
 	StackData(int value);       // Asign a double value
 	StackData(bool value);
 	StackData(int value, bool valueBool); // Asign a boolean value
-	StackData(string value, bool valueBool); // Asign a boolean value
+	StackData(std::string value, bool valueBool); // Asign a boolean value
 	StackData(double value, bool valueBool); // Asign a boolean value
     StackData(bool _rst, int _pos); // Asign a pointer stack value
     
@@ -76,18 +74,18 @@ public:
     bool isRst();
     bool isRstPos(int pos);
     
-    int    getRstPos();
-    double getNumber();
-	double getNumber(bool alsoBools);
-	int    getBoolean();
-	bool   getRealBoolean();
-    string getString();
-	string getAsString();
+    int         getRstPos();
+    double      getNumber();
+	double      getNumber(bool alsoBools);
+	int         getBoolean();
+	bool        getRealBoolean();
+	std::string getString();
+	std::string getAsString();
     
-    string numberValueToString(double number);
-	string numberValueToString(bool alsoBools);
-    string numberValueToString();
-	string booleanValueToString();
+	std::string numberValueToString(double number);
+	std::string numberValueToString(bool alsoBools);
+	std::string numberValueToString();
+	std::string booleanValueToString();
     void render();
     
     virtual ~StackData();

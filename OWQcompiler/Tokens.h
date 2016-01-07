@@ -11,8 +11,6 @@
 #include <vector>
 #include "Token.h"
 
-using namespace std;
-
 /**
  * Functions to hold script terms that characterize a line
  */
@@ -22,15 +20,15 @@ class Tokens {
     friend class Parser;
     
 private:
-    vector<Token> tokens;
+	std::vector<Token> tokens;
     //Flags which indicates if the set of tokens has special token which needs grouping
     bool comparisonFlag;
     bool conditionFlag;
     
 public:
     Tokens();
-    void addToken(string _token, int priortyCode, TokenType tokenType, bool useFlags);
-    void addToken(string _token, int priortyCode, TokenType tokenType);
+    void addToken(std::string _token, int priortyCode, TokenType tokenType, bool useFlags);
+    void addToken(std::string _token, int priortyCode, TokenType tokenType);
     void addToken(Token _token);
     bool isNumber(int index);
     bool isString(int index);
@@ -48,7 +46,7 @@ public:
 	Tokens Tokens::extractSubExpr();
     int getHighestOperatorPriorityIndex(int& priortyCod);
     int getMatchingCloseParenthesis(int openIndex);
-    string getToken(int index);
+	std::string getToken(int index);
     Token* getTokenObject(int index);
     bool setHasComparison();
     bool setHasCondition();
@@ -58,9 +56,9 @@ public:
     void renderTokenType();
     void renderTokenPriorty();
     void pop(int index);
-    bool pushBefore(int index, string _token, int pri, TokenType type);
-    bool pushAfter(int index, string _token, int pri, TokenType type);
-    static void stdError(string msg);
+    bool pushBefore(int index, std::string _token, int pri, TokenType type);
+    bool pushAfter(int index, std::string _token, int pri, TokenType type);
+    static void stdError(std::string msg);
     int getSize();
     virtual ~Tokens();
 };

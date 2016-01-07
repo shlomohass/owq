@@ -10,7 +10,7 @@ Method::Method() {
     var.reserve(4);
     name = "";
 }
-Method::Method(int xRetAddress, string setName) {
+Method::Method(int xRetAddress, std::string setName) {
     var.reserve(4);
     retAddress = xRetAddress;
     name = setName;
@@ -20,7 +20,7 @@ Method::~Method() {
     var.clear();
 }
 
-bool Method::addVariable(string name, StackData& sd) {
+bool Method::addVariable(std::string name, StackData& sd) {
 	if (hasVariable(name)) {
 		return false;
 	}
@@ -29,7 +29,7 @@ bool Method::addVariable(string name, StackData& sd) {
 	return true;
 }
 
-bool Method::addVariable(string name) {
+bool Method::addVariable(std::string name) {
 	if (hasVariable(name)) {
 		return false;
 	}
@@ -38,7 +38,7 @@ bool Method::addVariable(string name) {
 	return true;
 }
 
-ScriptVariable* Method::getVariable(string name) {
+ScriptVariable* Method::getVariable(std::string name) {
     for (int i=0; i<(int)var.size(); i++) {
         if ( var[i].getName() == name ) {
             return &var[i];
@@ -47,7 +47,7 @@ ScriptVariable* Method::getVariable(string name) {
     return NULL;
 }
 
-bool Method::hasVariable(string name) {
+bool Method::hasVariable(std::string name) {
 	for (int i = 0; i<(int)var.size(); i++) {
 		if (var[i].getName() == name) {
 			return true;
@@ -60,16 +60,16 @@ int Method::getReturnAddress() {
     return retAddress;
 }
 
-string Method::getName() {
+std::string Method::getName() {
     return name;
 }
 
 void Method::renderScopeVars() {
-    cout << "--------------------------------------------" << endl;
-    cout << "| OWQ Script -> Expose method scope        |" << endl;
-    cout << "--------------------------------------------" << endl;
-    cout << "METHOD -> " << name << endl;
+	std::cout << "--------------------------------------------" << std::endl;
+	std::cout << "| OWQ Script -> Expose method scope        |" << std::endl;
+	std::cout << "--------------------------------------------" << std::endl;
+	std::cout << "METHOD -> " << name << std::endl;
     for (int i=0; i<(int)var.size(); i++) {
-        cout << var[i].renderVariable() << endl;
+		std::cout << var[i].renderVariable() << std::endl;
     }
 }

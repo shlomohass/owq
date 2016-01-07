@@ -10,8 +10,6 @@
 #include "Setowq.h"
 #include <iomanip>
 
-using namespace std;
-
 #include "Tokens.h"
 #include "Lang.h"
 #include "Script.h"
@@ -27,23 +25,23 @@ enum ParseMark { UNMARK, FUNCTION, IF, WHILE, ELSE, GROUPDEFINE, BREAKEXP };
 
 class Parser {
     
-    string expression;		//expression to evaluate and compile
+	std::string expression;		//expression to evaluate and compile
     int expressionIndex;	//the index into the expression; i.e expression[expressionIndex]
-    string currentToken;	//the currentToken as a function of expression
-    vector<ParseMark> marks;		//helps to group related code branches: functions, if, while
+	std::string currentToken;	//the currentToken as a function of expression
+	std::vector<ParseMark> marks;		//helps to group related code branches: functions, if, while
     TokenType currentTokenType;	//describes the current token type
     
     //---------------------------------------------------------
     // vital workers
     //---------------------------------------------------------
-    void 	tokenize(string& exp, Tokens& token);
-    void 	evaluateGroups(Tokens& token, TokenFlag flagToGroup);
-    void 	evaluateGroups(Tokens& token, TokenFlag flagToGroup, int startFrom);
-    int   	compiler(Script* script, Tokens& token, bool debug, int rCount);
-    string 	getToken();
-    void 	mark(ParseMark markType);
-    ParseMark unmark();
-	ParseMark getMark();
+    void 	    tokenize(std::string& exp, Tokens& token);
+    void 	    evaluateGroups(Tokens& token, TokenFlag flagToGroup);
+    void 	    evaluateGroups(Tokens& token, TokenFlag flagToGroup, int startFrom);
+    int   	    compiler(Script* script, Tokens& token, bool debug, int rCount);
+	std::string getToken();
+    void 	    mark(ParseMark markType);
+    ParseMark   unmark();
+	ParseMark   getMark();
     
 	//----------------------------------------------------------
 	// Evaluation functions at compilation time:
@@ -55,21 +53,21 @@ class Parser {
     // Aux- helper functions
     //----------------------------------------------------------
     bool whileNotDelimiter(int currentPos);
-    bool isDelimiter(const string& c);
+    bool isDelimiter(const std::string& c);
     bool isDelimiter(const char& c);
     bool isSpace(const char& c);
-    bool isSpace(const string& c);
+    bool isSpace(const std::string& c);
     bool isQstring(const char& c);
-    bool isQstring(const string& c);
+    bool isQstring(const std::string& c);
     bool isLetter(const char& c);
-    bool isLetter(const string& c);
+    bool isLetter(const std::string& c);
     bool isDigit(const char& c);
-    bool isDigit(const string& c);
-    bool isKeyword(string s);
+    bool isDigit(const std::string& c);
+    bool isKeyword(std::string s);
     bool hasCommas(Tokens& token);
 	bool hasCommasNotNested(Tokens& token);
     int  getDelimiterPriorty();
-    int  getDelimiterPriorty(string toCheckToken, TokenType toCheckType);
+    int  getDelimiterPriorty(std::string toCheckToken, TokenType toCheckType);
     
     //----------------------------------------------------------
     // Compiler - Methods
@@ -81,12 +79,12 @@ public:
     virtual ~Parser();
     
     //main work horses entry point compile -> tokenize -> compiler
-    int compile(Script* script, string exp);
-    int compile(Script* script, string exp, bool debug);
+    int compile(Script* script, std::string exp);
+    int compile(Script* script, std::string exp, bool debug);
 
     //General:
-    string toLowerString(string *s);
-    string toUpperString(string *s);
+	std::string toLowerString(std::string *s);
+	std::string toUpperString(std::string *s);
     
 };
 

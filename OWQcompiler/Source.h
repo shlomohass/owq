@@ -12,23 +12,20 @@
 #include <vector>
 #include <map>
 
-
-using namespace std;
-
 class Source {
     
     //Holders
-    vector<string> lines;        //Will hold lines to be merged
-    string buffer;               //A buffer before setting a line
+	std::vector<std::string> lines;        //Will hold lines to be merged
+	std::string buffer;               //A buffer before setting a line
     char prevchar;               //Previous Char buffer
     int bufferSize;              //Keeps track of buffer size -> number of characters, for avoiding .size() all the time
-    vector<int> lineNumbers;     //
-    map<string, string> macros;
-    map<string, int> usedMacrosCounter;
+	std::vector<int> lineNumbers;     //
+	std::map<std::string, std::string> macros;
+	std::map<std::string, int> usedMacrosCounter;
     int macroCounter;
-    string macroBuffer;
-	string macroArgBuffer;
-	vector<string> macroArguments;
+	std::string macroBuffer;
+	std::string macroArgBuffer;
+	std::vector<std::string> macroArguments;
     
     //Definitions:
     char deli_string;       // the open and close character for strings
@@ -50,7 +47,7 @@ class Source {
 	bool inMacroFunc;
 	int  inMacroNested;
 
-    string macroSet;
+	std::string macroSet;
     bool mcomment;      // for multi-line comments
     bool skipToEnd;     // for single line comments
     bool hasDelimitter; // Is the character escaped?
@@ -58,7 +55,7 @@ class Source {
 public:
     Source(char d_str, char str_esc, char d_blo_open, char d_blo_close, char d_op, char d_mIndi, char d_mSet, char d_mOFunc, char d_mCFunc, char d_mSFunc);
     
-    void pushLine(string line, int linenumber);
+    void pushLine(std::string line, int linenumber);
     void pushLine(int linenumber);
     bool pushChar(char ch);
     bool validateLine();
@@ -67,16 +64,14 @@ public:
     int unsavedSize();
     void renderSource();
     void renderMacros();
-    string getLines();
-    string getLineNumbers();
+	std::string getLines();
+	std::string getLineNumbers();
 
-	void macroFuncAppend(string& temp_res);
+	void macroFuncAppend(std::string& temp_res);
     
     Source(const Source& orig);
     virtual ~Source();
     
-private:
-
 };
 
 #endif	/* SOURCE_H */

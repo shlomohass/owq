@@ -10,8 +10,6 @@
 #include <iostream>
 #include <sstream>
 
-using namespace std;
-
 enum ByteCode { 
     NOP,    //nothing appends
     RET,    //return from a function, change instruction pointer, pop off method from function stack
@@ -44,19 +42,19 @@ enum ByteCode {
     SHT     //Shift top on stack.
     
 };
-extern string byteCode[28];
+extern std::string byteCode[28];
 class Instruction {
-    ByteCode code;
-    string operand;
-    int    staticPointer;
-    bool isRST;
-    bool  containsQuotes;
+    ByteCode		code;
+    std::string		operand;
+    int				staticPointer;
+    bool			isRST;
+    bool			containsQuotes;
 public:
     
     Instruction();
     Instruction(ByteCode inst);
-    Instruction(ByteCode inst, string xOperand);
-    Instruction(ByteCode inst, string xOperand, int pointer);
+    Instruction(ByteCode inst, std::string xOperand);
+    Instruction(ByteCode inst, std::string xOperand, int pointer);
     
     bool isOperandNumber();
     bool isOperandString();
@@ -66,12 +64,12 @@ public:
     int getPointer();
     bool isRstPointer();
     double getNumber();
-    string getString();
+    std::string getString();
 
-    string getOperand();
+    std::string getOperand();
     ByteCode getCode();
-    string toString();
-    string byteCodeToShort();
+    std::string toString();
+    std::string byteCodeToShort();
     virtual ~Instruction();
 };
 

@@ -15,21 +15,21 @@ ScriptVariable::ScriptVariable() {
     address         = NULL;
     type            = RegisteredVariable::GLOBAL_FLEX;
 }
-ScriptVariable::ScriptVariable(string xName) {
+ScriptVariable::ScriptVariable(std::string xName) {
 	value = StackData();
 	name = xName;
 	isRegistered = false;
 	address = NULL;
 	type = RegisteredVariable::GLOBAL_FLEX;
 }
-ScriptVariable::ScriptVariable(string xName, StackData& sd) {
+ScriptVariable::ScriptVariable(std::string xName, StackData& sd) {
 	value = sd;
 	name = xName;
 	isRegistered = false;
 	address = NULL;
 	type = RegisteredVariable::GLOBAL_FLEX;
 }
-ScriptVariable::ScriptVariable(string xName, RegisteredVariable xType, void* xAddress) {
+ScriptVariable::ScriptVariable(std::string xName, RegisteredVariable xType, void* xAddress) {
 	value		 = StackData();
     name         = xName;
     isRegistered = true;
@@ -37,7 +37,7 @@ ScriptVariable::ScriptVariable(string xName, RegisteredVariable xType, void* xAd
     type         = xType;
 }
 
-string ScriptVariable::getName() {
+std::string ScriptVariable::getName() {
 	return name;
 }
 
@@ -54,7 +54,7 @@ bool ScriptVariable::setValue(StackData& sd) {
 			*v = sd.getNumber();
 		}
 		else if (sd.isString() && type == RegisteredVariable::REGISTERED_STRING) {
-			string* v = static_cast<string*>(address);
+			std::string* v = static_cast<std::string*>(address);
 			*v = sd.getString();
 		}
 		else if (sd.isBoolean() && type == RegisteredVariable::REGISTERED_DOUBLE) {
@@ -67,7 +67,7 @@ bool ScriptVariable::setValue(StackData& sd) {
 	return true;
 }
 
-string ScriptVariable::renderVariable() {
+std::string ScriptVariable::renderVariable() {
 	return "";
 }
 

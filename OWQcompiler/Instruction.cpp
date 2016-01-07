@@ -9,7 +9,7 @@
 #include <math.h>
 
 
-string byteCode[] = { 
+std::string byteCode[] = { 
     "NOP", 
     "RET", 
     "ASN", 
@@ -48,8 +48,8 @@ Instruction::Instruction() {
     isRST = false;
 }
 
-string Instruction::toString() {
-    string display = byteCodeToShort() + "           ";
+std::string Instruction::toString() {
+    std::string display = byteCodeToShort() + "           ";
     display = display.substr(0, 5) + " ->  ";
     //display properly
     if(operandHasQuote()) {
@@ -63,14 +63,14 @@ string Instruction::toString() {
     display += "                ";
     display = display.substr(0,20);
     //display instruction set static pointer:
-    ostringstream convert;   // stream used for the conversion
+    std::ostringstream convert;   // stream used for the conversion
     convert << staticPointer;
     display += "  :  SP[ " + convert.str() + " ]";
     return display;
 }
 
-string Instruction::byteCodeToShort() {
-    string ret;
+std::string Instruction::byteCodeToShort() {
+    std::string ret;
     switch (code) {
         case LOOP: ret  = "LOO"; break;
         case DONE: ret  = "DON"; break;
@@ -85,7 +85,7 @@ string Instruction::byteCodeToShort() {
     }
     return ret;
 }
-Instruction::Instruction(ByteCode inst, string xOperand) {
+Instruction::Instruction(ByteCode inst, std::string xOperand) {
     code = inst;
     operand = xOperand;
     staticPointer = 0;
@@ -99,7 +99,7 @@ Instruction::Instruction(ByteCode inst, string xOperand) {
         containsQuotes = false;
     }
 }
-Instruction::Instruction(ByteCode inst, string xOperand, int pointer) {
+Instruction::Instruction(ByteCode inst, std::string xOperand, int pointer) {
     code = inst;
     operand = xOperand;
     staticPointer = pointer;
@@ -217,7 +217,7 @@ bool Instruction::isOperandBoolean() {
 bool Instruction::operandHasQuote() {
     return containsQuotes;
 }
-string Instruction::getOperand() {
+std::string Instruction::getOperand() {
     return operand;
 }
 ByteCode Instruction::getCode() {
@@ -226,7 +226,7 @@ ByteCode Instruction::getCode() {
 double Instruction::getNumber() {
     return atof(operand.c_str());
 }
-string Instruction::getString() {
+std::string Instruction::getString() {
     return operand;
 }
 Instruction::~Instruction() {

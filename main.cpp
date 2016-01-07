@@ -25,7 +25,7 @@ int main(int argc, char** argv) {
 
 	//Define args and project settings:
 	int exitCode = 0;
-	string filepath_temp;
+	std::string filepath_temp;
 	Argu settings;
 	cm::ArgvParser cmd;
 	bool enable_debug = OWQ_DEBUG;

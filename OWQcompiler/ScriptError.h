@@ -7,16 +7,14 @@
 #ifndef SCRIPTERROR_H
 #define	SCRIPTERROR_H
 
-using namespace std;
-
 #include <string>
 #include <iostream>
 
 class ScriptError {
 public:
     ScriptError();
-    static void msg(string event);
-    static void render(string msg);
+    static void msg(std::string event);
+    static void render(std::string msg);
     virtual ~ScriptError();
 };
 

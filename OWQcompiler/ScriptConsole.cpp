@@ -38,17 +38,17 @@ StackData ScriptConsole::length(StackData* sd) {
 * @param StackData* sd
 */
 StackData ScriptConsole::type(StackData* sd) {
-	string littype = stackTypeName(sd->getType());
+	std::string littype = stackTypeName(sd->getType());
 	return StackData(littype);
 }
 
-string ScriptConsole::toString(double number) {
-    stringstream ss;
+std::string ScriptConsole::toString(double number) {
+	std::stringstream ss;
     ss << number;
     return ss.str();
 }
 
-string ScriptConsole::stackTypeName(SDtype sdtype) {
+std::string ScriptConsole::stackTypeName(SDtype sdtype) {
 	switch (sdtype) {
 		case SDtype::SD_ARRAY:		return "ARRAY";			break;
 		case SDtype::SD_BOOLEAN:	return "BOOLEAN";		break;

@@ -11,8 +11,6 @@
 #include <iostream>
 #include <sstream>
 
-using namespace std;
-
 class ScriptConsole {
 public:
     
@@ -22,10 +20,10 @@ public:
     static void print(StackData* sd, bool debug);
 	static StackData length(StackData* sd);
 	static StackData type(StackData* sd);
-    static string toString(double number);
+    static std::string toString(double number);
 
 	//Helpers 
-	static string stackTypeName(SDtype sdtype);
+	static std::string stackTypeName(SDtype sdtype);
 
     virtual ~ScriptConsole();
     

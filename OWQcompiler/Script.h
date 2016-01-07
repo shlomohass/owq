@@ -23,7 +23,6 @@
 
 
 namespace fs = boost::filesystem;
-using namespace std;
 
 class Parser;
 class Script {
@@ -38,42 +37,42 @@ class Script {
     /**
      * The complete listing of instructions that define this script
      */
-    vector<Instruction> code;
+	std::vector<Instruction> code;
     /**
      * Created as instructions are added to the Script via addInstruction
      */
-    map<string, int> functionTable;
+	std::map<std::string, int> functionTable;
     /**
      * only registered variables can be registered
      */
-    map<string, ScriptVariable> variables;
+	std::map<std::string, ScriptVariable> variables;
 
     /**
      * As a function is executed more reference to it is pushed onto this variable
      */
-    vector<Method> functions;
+	std::vector<Method> functions;
     /**
      * Used to as a tag to remind vm of the method that is being executing
      * Helpful when exiting a function, so we can clean up variables defined in that function
      */
-    string currentExecutingMethod;
+	std::string currentExecutingMethod;
     
     int internalStaticPointer;
     
     void popActiveMethod();
-    void pushMethod( int retAddress, string name);
+    void pushMethod( int retAddress, std::string name);
     int	executeInstruction(Instruction code, int& instructionPointer);
     int	executeInstruction(Instruction code, int& instructionPointer, bool debug);
-    int getFunctionAddress(string funcName);
+    int getFunctionAddress(std::string funcName);
     Method* getActiveMethod();
 
     int injectScript(Script* script);
 
-    bool isSystemCall(string object, string functionName, Instruction& _xcode);
-    bool validateExtension(wstring extension);
+    bool isSystemCall(std::string object, std::string functionName, Instruction& _xcode);
+    bool validateExtension(std::wstring extension);
     int  mergeLinesAndCompile(Source* source, Parser* parser, int linenum, bool debug);
-    ScriptVariable *getVariable(string varName);
-    ScriptVariable *getGlobalVariable(string varName);
+    ScriptVariable *getVariable(std::string varName);
+    ScriptVariable *getGlobalVariable(std::string varName);
     
     void addInstruction(Instruction I);
     void addInstruction(Instruction I, bool allowRST);
@@ -81,15 +80,15 @@ public:
     Script();
 
     //Register variable to global scope from Application layer:
-    bool registerVariable(string varName, RegisteredVariable type, void* address);
+    bool registerVariable(std::string varName, RegisteredVariable type, void* address);
     //Register variable to global scope by execution runtime:
-    bool registerVariable(string varName);
-	bool registerVariable(string varName, StackData& sd);
-    bool unregisterVariable(string varName);
+    bool registerVariable(std::string varName);
+	bool registerVariable(std::string varName, StackData& sd);
+    bool unregisterVariable(std::string varName);
 
     void render();
 
-    void execute(string funcCall);
+    void execute(std::string funcCall);
     
     void run();
     void run(bool debug);

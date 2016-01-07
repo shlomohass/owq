@@ -25,10 +25,10 @@ Tokens::Tokens() {
 void Tokens::addToken(Token _token) {
     tokens.push_back(_token);
 }
-void Tokens::addToken(string _token, int priortyCode, TokenType tokenType) {
+void Tokens::addToken(std::string _token, int priortyCode, TokenType tokenType) {
     addToken(_token, priortyCode, tokenType, false);
 }
-void Tokens::addToken(string _token, int priortyCode, TokenType tokenType, bool useFlags) {
+void Tokens::addToken(std::string _token, int priortyCode, TokenType tokenType, bool useFlags) {
     Token token(_token, priortyCode, tokenType, TokenFlag::NORMAL); 
     if (useFlags && tokenType == TokenType::DELIMITER) {
         if (Lang::LangIsComparison(_token)) {
@@ -235,7 +235,7 @@ Tokens Tokens::extractSubExpr() {
 	//copy from current token-set to new token-set
 	int i;
 	int count = 0; //the total count of values to extract
-	string semi = Lang::LangFindDelimiter("semicolon");
+	std::string semi = Lang::LangFindDelimiter("semicolon");
 	for (i = 0; i < (int)tokens.size(); i++) {
 		count++;
 		if (tokens[i].type == TokenType::DELIMITER && tokens[i].token == semi) {
@@ -253,31 +253,31 @@ Tokens Tokens::extractSubExpr() {
  * 
  * @param msg
  */
-void Tokens::stdError(string msg) {
-    cout << "error: " << msg << endl;
+void Tokens::stdError(std::string msg) {
+	std::cout << "error: " << msg << std::endl;
 }
 
 /** Expose token:
  * 
  */
 void Tokens::renderTokens() {
-    cout << "   TOKENS        --> { ";
+	std::cout << "   TOKENS        --> { ";
     for(int i=0; i<getSize(); i++){
-        cout << "'" << tokens[i].token << "' ";
+		std::cout << "'" << tokens[i].token << "' ";
     }
-    cout << "}" << endl;
+	std::cout << "}" << std::endl;
 }
 
 void Tokens::renderTokensJoined() {
-    cout << "   TOKENS-JOINED   --> ";
+	std::cout << "   TOKENS-JOINED   --> ";
     for(int i=0; i<getSize(); i++) {
-        cout << tokens[i].token << " ";
+		std::cout << tokens[i].token << " ";
     }
-    cout << endl << endl;
+	std::cout << std::endl << std::endl;
 }
 void Tokens::renderTokenType() {
-    string str;
-    cout << "   TOKENS-TYPE   --> { ";
+	std::string str;
+	std::cout << "   TOKENS-TYPE   --> { ";
     for(int i=0; i<getSize(); i++){
         switch(tokens[i].type) {
             case TokenType::DELIMITER:  str = "DLM"; break;
@@ -291,20 +291,20 @@ void Tokens::renderTokenType() {
                 str = "UNKNOWN";
         }
         if (str == "RST") {
-            cout << "'" << str << ":" << tokens[i].rstPos << "' ";
+			std::cout << "'" << str << ":" << tokens[i].rstPos << "' ";
         } else {
-            cout << "'" << str << "' ";
+			std::cout << "'" << str << "' ";
         }
     }
-    cout << "}" << endl;
+	std::cout << "}" << std::endl;
 }
 
 void Tokens::renderTokenPriorty(){
-    cout << "   TOKENS-PRIORITY --> ";
+	std::cout << "   TOKENS-PRIORITY --> ";
     for(int i=0; i<getSize(); i++){
-        cout << "[" << tokens[i].priority << "] ";
+		std::cout << "[" << tokens[i].priority << "] ";
     }
-    cout << "}" << endl;
+	std::cout << "}" << std::endl;
 }
 
 /**
@@ -343,7 +343,7 @@ int Tokens::getHighestOperatorPriorityIndex(int& priortyCode) {
  * @param int index
  * @return string
  */
-string Tokens::getToken(int index) {
+std::string Tokens::getToken(int index) {
     if (index < 0 || index >= getSize()) {
         return ".none.";
     }
@@ -386,8 +386,8 @@ int Tokens::getMatchingCloseParenthesis(int openIndex) {
     int i;
     int nested = 0;
     int size = getSize();
-    string bracketOpen = Lang::LangFindDelimiter("braketOpen");
-    string bracketClose = Lang::LangFindDelimiter("braketClose");
+	std::string bracketOpen = Lang::LangFindDelimiter("braketOpen");
+	std::string bracketClose = Lang::LangFindDelimiter("braketClose");
     for (i = openIndex + 1; i < size; i++ ) {
         if (tokens[i].token == bracketOpen) {
             nested++;
@@ -421,7 +421,7 @@ void Tokens::pop(int index) {
  * @return boolean
  * 
  */
-bool Tokens::pushBefore(int index, string _token, int pri, TokenType type) {
+bool Tokens::pushBefore(int index, std::string _token, int pri, TokenType type) {
     auto pos_tokens = tokens.begin();
     if (index >= (int)tokens.size() || index < 0) { return false; }
     Token token(_token, pri, type, TokenFlag::NORMAL);
@@ -437,7 +437,7 @@ bool Tokens::pushBefore(int index, string _token, int pri, TokenType type) {
  * @return boolean
  * 
  */
-bool Tokens::pushAfter(int index, string _token, int pri, TokenType type) {
+bool Tokens::pushAfter(int index, std::string _token, int pri, TokenType type) {
     Token token(_token, pri, type, TokenFlag::NORMAL);
     if (index + 1 >= (int)this->tokens.size()) {
         this->tokens.push_back(token);

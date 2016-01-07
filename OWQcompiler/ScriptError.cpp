@@ -10,12 +10,12 @@ ScriptError::ScriptError() {
 
 }
 
-void ScriptError::msg(string event) {
-    cout << "Compilation ERROR: " << event << endl;
+void ScriptError::msg(std::string event) {
+	std::cout << "Compilation ERROR: " << event << std::endl;
 }
 
-void ScriptError::render(string msg) {
-    cout << msg << endl;
+void ScriptError::render(std::string msg) {
+	std::cout << msg << std::endl;
 }
 
 ScriptError::~ScriptError() {

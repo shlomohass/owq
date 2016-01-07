@@ -11,37 +11,35 @@
 #include "ScriptVariable.h"
 #include <vector>
 
-using namespace std;
-
 class Method {
 
-	vector<ScriptVariable> var;
+	std::vector<ScriptVariable> var;
 	int retAddress;
     //Cached name just for debugging future!
-    string name; 
+	std::string name;
 
 public:
     
     //Constructors:
 	Method();
-	Method(int xRetAddress, string setName);
+	Method(int xRetAddress, std::string setName);
         
     //Destructor:
 	virtual ~Method();
         
     //Push method variables by types:
-	bool addVariable(string name, StackData& sd);
-	bool addVariable(string name); //With NAN
+	bool addVariable(std::string name, StackData& sd);
+	bool addVariable(std::string name); //With NAN
         
     //Return address:
 	int getReturnAddress();
         
     //Return cached name:
-	string getName();
+	std::string getName();
         
     //Get a scoped method variable:
-	ScriptVariable *getVariable(string name);
-	bool hasVariable(string name);
+	ScriptVariable *getVariable(std::string name);
+	bool hasVariable(std::string name);
 
     //Render all registered variables:
     void renderScopeVars();

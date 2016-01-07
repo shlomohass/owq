@@ -17,8 +17,6 @@
 #define OWQ_NAN -3231307.6790
 #endif
 
-using namespace std;
-
 enum RegisteredVariable { 
     REGISTERED_STRING,    //Holds a string 
     REGISTERED_DOUBLE,    //Holds a double
@@ -28,7 +26,7 @@ enum RegisteredVariable {
 
 class ScriptVariable {
 
-    string name;
+	std::string name;
 	StackData value;
     bool  isRegistered;
     void  *address;
@@ -38,19 +36,19 @@ public:
 
     //Constructors:
 	ScriptVariable();
-	ScriptVariable(string xName);
-	ScriptVariable(string xName, StackData& sd);
-	ScriptVariable(string xName, RegisteredVariable type, void*  xAddress);
+	ScriptVariable(std::string xName);
+	ScriptVariable(std::string xName, StackData& sd);
+	ScriptVariable(std::string xName, RegisteredVariable type, void*  xAddress);
 
     //Get methods:
-	string getName();
+	std::string getName();
 	StackData getValue();
 
     //Set value:
 	bool setValue(StackData& sd);
 
     //Render a variable for debugging:
-    string renderVariable();
+	std::string renderVariable();
 
     //Destructor:
 	virtual ~ScriptVariable();

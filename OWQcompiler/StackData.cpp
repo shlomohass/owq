@@ -26,7 +26,7 @@ StackData::StackData() {
  * @param string|double value
  */
 //A STRING:
-StackData::StackData(string value) {
+StackData::StackData(std::string value) {
 	type = SDtype::SD_STRING;
     dvalue = OWQ_NAN;
     svalue = value;
@@ -98,7 +98,7 @@ StackData::StackData(double value, bool valueBool) {
 	rstPos = -1;
 	rst = false;
 }
-StackData::StackData(string value, bool valueBool) {
+StackData::StackData(std::string value, bool valueBool) {
 	type = SDtype::SD_BOOLEAN;
 	dvalue = OWQ_NAN;
 	svalue = "null";
@@ -202,7 +202,7 @@ double StackData::getNumber(bool alsoBools) {
  * 
  * @return string
  */
-string StackData::getString() {
+std::string StackData::getString() {
     return svalue;
 }
 /** Returns the Stack Data boolean value
@@ -223,17 +223,17 @@ bool StackData::getRealBoolean() {
  * @param double number DEFAUT : current dvalue
  * @return string 
  */
-string StackData::numberValueToString() {
+std::string StackData::numberValueToString() {
     return numberValueToString(dvalue);
 }
-string StackData::numberValueToString(bool alsoBools) {
+std::string StackData::numberValueToString(bool alsoBools) {
 	if (isNumber()) {
 		return numberValueToString();
 	}
 	return booleanValueToString();
 }
-string StackData::numberValueToString(double number) {
-    stringstream s;
+std::string StackData::numberValueToString(double number) {
+	std::stringstream s;
     s << number;
     return s.str();
 }
@@ -241,15 +241,15 @@ string StackData::numberValueToString(double number) {
 *
 * @return string
 */
-string StackData::booleanValueToString() {
+std::string StackData::booleanValueToString() {
 	if (bvalue > 0) {
 		return "TRUE";
 	}
 	return "FALSE";
 }
 
-string StackData::getAsString() {
-	stringstream ss;
+std::string StackData::getAsString() {
+	std::stringstream ss;
 	if (isNumber()) {         // Print a number
 		ss << getNumber();
 	}
@@ -275,19 +275,19 @@ string StackData::getAsString() {
 void StackData::render() {
     bool printRst = true;
     if (isNumber()) {         // Print a number
-        cout << getNumber();
+		std::cout << getNumber();
 	} else if (isString()) {  // Print a string
-		cout << getString();
+		std::cout << getString();
 	} else if (isBoolean()) {
-		cout << booleanValueToString();
+		std::cout << booleanValueToString();
     } else if (isRst()) {     // Print a rst
-        cout << "RST";
+		std::cout << "RST";
     } else {                  // Print NULL
-        cout << "NULL";
+		std::cout << "NULL";
         printRst = false;
     }
     //Handle output of rst positions:
     if (printRst && rstPos > -1) {
-        cout << " :: P{ " << rstPos << " }";
+		std::cout << " :: P{ " << rstPos << " }";
     }
 }

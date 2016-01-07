@@ -13,15 +13,13 @@
 #include <iostream>
 #include <vector>
 
-using namespace std;
-
 class Stack {
-    static vector<StackData> stack;
+    static std::vector<StackData> stack;
     
 public:
     Stack();
     static void push(double data);
-    static void push(string data);
+    static void push(std::string data);
     static void push(StackData data);
     static void push(ScriptVariable& data);
     static int  size();

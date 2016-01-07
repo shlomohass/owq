@@ -28,10 +28,10 @@ Parser::~Parser() {
  * @param boolean debug DEFUALT : FALSE
  * @return integer
  */
-int Parser::compile(Script* script, string exp) {
+int Parser::compile(Script* script, std::string exp) {
     return compile(script, exp, false);
 }
-int Parser::compile(Script* script, string exp, bool debug) { 
+int Parser::compile(Script* script, std::string exp, bool debug) {
     if (script == NULL) {
         Tokens::stdError("compile expression, script pointer is null");
         return 1;
@@ -71,7 +71,7 @@ int Parser::compile(Script* script, string exp, bool debug) {
  * @param string exp
  * @param Tokens token
  */
-void Parser::tokenize(string& exp, Tokens& tokens) {
+void Parser::tokenize(std::string& exp, Tokens& tokens) {
     expression = exp;
     expressionIndex = 0;
     int parenthesisScaler = 0;
@@ -84,14 +84,14 @@ void Parser::tokenize(string& exp, Tokens& tokens) {
         priortyValue = getDelimiterPriorty(); //get the current tokens priortyValue as a function of its evaluation hierarchy
         //this serves to ensure that multiple parenthetical grouping will be evaluated in a manner such that the deepest
         //grouping is evaluated first
-        if (currentToken == string(1, Lang::LangFunctionOpenArguChar)) {
+        if (currentToken == std::string(1, Lang::LangFunctionOpenArguChar)) {
             priortyValue += parenthesisScaler;
             parenthesisScaler += 1;
         }
         
         //clean up the escaped characters of string :
         bool isEscaped = false;
-        string buffToken = "";
+		std::string buffToken = "";
         if (currentTokenType == TokenType::STRING) {
             for (int i=0; i<(int)currentToken.length(); i++) {
                 if(currentToken[i] == Lang::LangStringEscape && !isEscaped) {
@@ -131,9 +131,9 @@ void Parser::tokenize(string& exp, Tokens& tokens) {
         if (currentTokenType == TokenType::NUMBER && tokens.getSize() > 0) {
             //Look behind for -
             int stackTempSize = tokens.getSize();
-            string behindCheck1 = tokens.getToken(stackTempSize - 1);
+			std::string behindCheck1 = tokens.getToken(stackTempSize - 1);
             if ( behindCheck1 == "-" ) {
-                string behindCheck2 = tokens.getToken(stackTempSize - 2);
+				std::string behindCheck2 = tokens.getToken(stackTempSize - 2);
                 bool isDelCheck2   = tokens.isDelimiter(stackTempSize - 2);
                 if ((behindCheck2 != ".none" && isDelCheck2) || behindCheck2 == ".none.") {
                     //Merge with last its negative number:
@@ -150,7 +150,7 @@ void Parser::tokenize(string& exp, Tokens& tokens) {
  * 
  * @return
  */
-string Parser::getToken() {
+std::string Parser::getToken() {
     currentToken = "";
     //check for endl of expression
     if (expressionIndex == (int)expression.length()){
@@ -173,8 +173,8 @@ string Parser::getToken() {
     //Store correct token:
     //First watch for double delimiters:
     if (expressionIndex + 1 < (int)expression.length()) {
-        string lookInfront = string(1, expression[expressionIndex]);
-        lookInfront += string(1, expression[expressionIndex+1]);
+		std::string lookInfront = std::string(1, expression[expressionIndex]);
+        lookInfront += std::string(1, expression[expressionIndex+1]);
         if (isDelimiter(lookInfront)) {
             currentToken += lookInfront;
             expressionIndex += 2;
@@ -196,7 +196,7 @@ string Parser::getToken() {
             }
         }
         //Set all to lower that make sure we can check if its a keyword:
-        string temp_currentToken = toLowerString(&currentToken);
+		std::string temp_currentToken = toLowerString(&currentToken);
         //Set this current token type to either variable or keyword
         if (isKeyword(temp_currentToken)) {
             currentTokenType = TokenType::KEYWORD;
@@ -265,8 +265,8 @@ void Parser::evaluateGroups(Tokens& tokens, TokenFlag flagToGroup, int startFrom
     int nestBrackets;
     int addAtPosition;
     int i;
-    string braketClose = Lang::LangFindDelimiter("braketClose");
-    string braketOpen = Lang::LangFindDelimiter("braketOpen");
+	std::string braketClose = Lang::LangFindDelimiter("braketClose");
+	std::string braketOpen = Lang::LangFindDelimiter("braketOpen");
     int bracketPriority = getDelimiterPriorty(braketOpen, TokenType::DELIMITER);
     Token* token;
     Token* checkToken;
@@ -399,7 +399,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     int priortyCode = 0; //Lowest definition.
     int operatorIndex = tokens.getHighestOperatorPriorityIndex(priortyCode);
     
-    string operatorTokenStr;
+	std::string operatorTokenStr;
     Token* operatorToken;
     Token* leftToken = nullptr;
     Token* rightToken = nullptr;
@@ -449,8 +449,8 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
             tokens.pop(tokens.getSize()-1); // erase the: '{'
             
             //count the number of arguments in this parenthesis
-            vector<string> arg;
-            string t;
+			std::vector<std::string> arg;
+			std::string t;
             for (int i=1; i < (int)tokens.getSize()-1; i++) {
                 t = tokens.getToken(i);
                 if (t != Lang::LangFindDelimiter("comma")) {
@@ -459,7 +459,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
                 }
             }
             
-            stringstream strtoa;
+			std::stringstream strtoa;
             strtoa << argumentCount;
             script->addInstruction(Instruction(ByteCode::ARGC, strtoa.str()));
             for (int i=arg.size()-1; i>-1; i--) {
@@ -594,10 +594,10 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 			if (hasCommasNotNested(tokens)) {
 				//TODO avoid BRACKETS!
 				//Scan to Define all recursivly:
-				string t;
-				string langCommas = Lang::LangFindDelimiter("comma");
-				string langOpenBracket = Lang::LangFindDelimiter("braketOpen");
-				string langCloseBracket = Lang::LangFindDelimiter("braketClose");
+				std::string t;
+				std::string langCommas = Lang::LangFindDelimiter("comma");
+				std::string langOpenBracket = Lang::LangFindDelimiter("braketOpen");
+				std::string langCloseBracket = Lang::LangFindDelimiter("braketClose");
 				int tokenSetSize = (int)tokens.getSize();
 				int nestedBrackets = 0;
 				for (int i = operatorIndex + 1; i < tokenSetSize - 1; i++) {
@@ -689,7 +689,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
         if (tokens.getSize() > 1 && operatorIndex >= 0 && leftToken != nullptr) { //two or more
             //if previous token before the parenthesis has a non zero priority of 2 then make function call
             if (tokens.getTokenPriorty(operatorIndex) && leftToken->type != TokenType::KEYWORD && leftToken->type != TokenType::DELIMITER) {
-                string funcName = leftToken->token;
+				std::string funcName = leftToken->token;
 				script->addInstruction(Instruction(ByteCode::CALL, funcName, tokens.tokens[operatorIndex + 1].rstPos));
                 tokens.pop(operatorIndex); //removes function name, operatorIndex points to function name
                 
@@ -903,7 +903,7 @@ bool Parser::whileNotDelimiter(int currentPos) {
  * @param string|char c
  * @return return true if it is a delimiter otherwise false
  */
-bool Parser::isDelimiter(const string& c) {
+bool Parser::isDelimiter(const std::string& c) {
     return Lang::LangIsDelimiter(c);
 }
 bool Parser::isDelimiter(const char& c) {
@@ -915,9 +915,9 @@ bool Parser::isDelimiter(const char& c) {
  * @return boolean
  */
 bool Parser::isSpace(const char& c) {
-    return (string(1, c) == Lang::LangFindDelimiter("space")) ? true : false;
+    return (std::string(1, c) == Lang::LangFindDelimiter("space")) ? true : false;
 }
-bool Parser::isSpace(const string& c) {
+bool Parser::isSpace(const std::string& c) {
     return (c == Lang::LangFindDelimiter("space")) ? true : false;
 }
 /** Check whether we entering using a string:
@@ -928,7 +928,7 @@ bool Parser::isSpace(const string& c) {
 bool Parser::isQstring(const char& c) {
     return c == Lang::LangStringIndicator;
 }
-bool Parser::isQstring(const string& c) {
+bool Parser::isQstring(const std::string& c) {
     return c[0] == Lang::LangStringIndicator;
 }
 /** Validate naming chars:
@@ -939,7 +939,7 @@ bool Parser::isQstring(const string& c) {
 bool Parser::isLetter(const char& c) {
     return Lang::LangIsNamingAllowed(c);
 }
-bool Parser::isLetter(const string& c) {
+bool Parser::isLetter(const std::string& c) {
     return Lang::LangIsNamingAllowed(c);
 }
 /** Indicate true of false if a specific character constant, c, is a digit or not
@@ -947,7 +947,7 @@ bool Parser::isLetter(const string& c) {
  * @param char|string c
  * @return boolean
  */
-bool Parser::isDigit(const string& c) {
+bool Parser::isDigit(const std::string& c) {
 	return isDigit(c[0]);
 }
 bool Parser::isDigit(const char& c) {
@@ -976,7 +976,7 @@ bool Parser::isDigit(const char& c) {
  * @param string s
  * @return boolean
  */
-bool Parser::isKeyword(string s) {
+bool Parser::isKeyword(std::string s) {
     if (Lang::LangIsKeyword(s)) {
         currentTokenType = TokenType::KEYWORD;
         return true;
@@ -1022,7 +1022,7 @@ int Parser::getDelimiterPriorty() {
  * @param TokenType toCheckType
  * @return integer
  */
-int Parser::getDelimiterPriorty(string toCheckToken, TokenType toCheckType) {
+int Parser::getDelimiterPriorty(std::string toCheckToken, TokenType toCheckType) {
     if(toCheckType == KEYWORD) {
         return 140;
     } else if (toCheckToken == Lang::LangFindDelimiter("bracesClose")) {
@@ -1058,7 +1058,7 @@ int Parser::getDelimiterPriorty(string toCheckToken, TokenType toCheckType) {
  */
 bool Parser::hasCommas(Tokens& tokens) {
     int size = tokens.getSize();
-	string comma = Lang::LangFindDelimiter("comma");
+	std::string comma = Lang::LangFindDelimiter("comma");
     for (int i = 0; i < size; i++){
         if(tokens.getToken(i) == comma){
             return true;
@@ -1073,12 +1073,12 @@ bool Parser::hasCommas(Tokens& tokens) {
 */
 bool Parser::hasCommasNotNested(Tokens& tokens) {
 	int size = tokens.getSize();
-	string comma = Lang::LangFindDelimiter("comma");
-	string langOpenBracket = Lang::LangFindDelimiter("braketOpen");
-	string langCloseBracket = Lang::LangFindDelimiter("braketClose");
+	std::string comma = Lang::LangFindDelimiter("comma");
+	std::string langOpenBracket = Lang::LangFindDelimiter("braketOpen");
+	std::string langCloseBracket = Lang::LangFindDelimiter("braketClose");
 	int nested = 0;
 	for (int i = 0; i < size; i++) {
-		string t = tokens.getToken(i);
+		std::string t = tokens.getToken(i);
 		if (t == langOpenBracket) {
 			nested++;
 		}
@@ -1096,9 +1096,9 @@ bool Parser::hasCommasNotNested(Tokens& tokens) {
  * @param string s
  * @return string
  */
-string Parser::toLowerString(string *s) {
-    string outBuffer = *s;
-    transform(s->begin(), s->end(), outBuffer.begin(), ::tolower);
+std::string Parser::toLowerString(std::string *s) {
+	std::string outBuffer = *s;
+	std::transform(s->begin(), s->end(), outBuffer.begin(), ::tolower);
     return outBuffer;
 }
 /** Parse any string to lower ASCII chars
@@ -1106,8 +1106,8 @@ string Parser::toLowerString(string *s) {
  * @param string s
  * @return string
  */
-string Parser::toUpperString(string *s) {
-    string outBuffer = *s;
-    transform(s->begin(), s->end(), outBuffer.begin(), ::toupper);
+std::string Parser::toUpperString(std::string *s) {
+	std::string outBuffer = *s;
+    std::transform(s->begin(), s->end(), outBuffer.begin(), ::toupper);
     return outBuffer;
 }

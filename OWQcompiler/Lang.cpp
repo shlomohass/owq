@@ -8,11 +8,11 @@
 #include "Lang.h"
 
 //Initialize maps:
-map<string, string> Lang::LangInverseDelimiter = map<string, string>{};
-map<string, string> Lang::LangInverseKeywords = map<string, string>{};
+std::map<std::string, std::string> Lang::LangInverseDelimiter = std::map<std::string, std::string>{};
+std::map<std::string, std::string> Lang::LangInverseKeywords = std::map<std::string, std::string>{};
 
 //Set Delimiters:
-map<string, string> Lang::LangDelimiter = {
+std::map<std::string, std::string> Lang::LangDelimiter = {
     {"space"             , " "},
     {"plus-cast-str"     , "~"},
     {"plus"              , "+"},
@@ -36,7 +36,7 @@ map<string, string> Lang::LangDelimiter = {
 };
 
 //Set Keywords:
-map<string, string> Lang::LangKeywords = {
+std::map<std::string, std::string> Lang::LangKeywords = {
     {"variable"     , "let"},
     {"cond-if"      , "if"},
     {"cond-else"    , "else"},
@@ -50,14 +50,14 @@ map<string, string> Lang::LangKeywords = {
 
 //Set chars allowed as names:
 //if we do not define '"' as a character, no tokens will be generated for string quoetation marks
-vector<char> Lang::LangNamingAllowedChars = {
+std::vector<char> Lang::LangNamingAllowedChars = {
     'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
     'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',
     '_' 
 };
 
 //Set allowed extensions:
-vector<string> Lang::extensionLib = {
+std::vector<std::string> Lang::extensionLib = {
     ".owq",
     ".OWQ",
 	".towq"
@@ -76,18 +76,18 @@ char Lang::LangMacroIndicator           = '#';
 char Lang::LangMacroSetChar             = ':';
 
 //Set Regex lib:
-map<string, string> Lang::LangRegexLib = {
-    {"remove-comments"     , "(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)|(//.*)"}
+std::map<std::string, std::string> Lang::LangRegexLib = {
+    {"remove-comments", "(/\\*([^*]|[\\r\\n]|(\\*+([^*/]|[\\r\\n])))*\\*+/)|(//.*)"}
 };   
 
 Lang::Lang() {
     //Inverse Delimiter:    
     for(auto const &ent1 : LangDelimiter) {
-        LangInverseDelimiter.insert(pair<string, string>(ent1.second, ent1.first));
+        LangInverseDelimiter.insert(std::pair<std::string, std::string>(ent1.second, ent1.first));
     } 
     //Inverse Keywords:    
     for(auto const &ent2 : LangKeywords) {
-        LangInverseKeywords.insert(pair<string, string>(ent2.second, ent2.first));
+        LangInverseKeywords.insert(std::pair<std::string, std::string>(ent2.second, ent2.first));
     } 
 }
 Lang::Lang(const Lang& orig) {
@@ -100,7 +100,7 @@ Lang::~Lang() {
  * @param string key
  * @return char
  */
-string Lang::LangFindDelimiter(const string& key) {
+std::string Lang::LangFindDelimiter(const std::string& key) {
     if (LangHasKeyDelimiter(key)) {
         return LangDelimiter.at(key);
     }
@@ -111,7 +111,7 @@ string Lang::LangFindDelimiter(const string& key) {
  * @param string key key name
  * @return bool
  */
-bool Lang::LangHasKeyDelimiter(const string& key) {
+bool Lang::LangHasKeyDelimiter(const std::string& key) {
     return LangDelimiter.count(key) == 1;
 }
 /** Check whether a char delimiter is an actual register delimiter:
@@ -119,11 +119,11 @@ bool Lang::LangHasKeyDelimiter(const string& key) {
  * @param string key key name
  * @return bool
  */
-bool Lang::LangIsDelimiter(const string& value) {
+bool Lang::LangIsDelimiter(const std::string& value) {
     return LangInverseDelimiter.count(value) == 1;
 }
 bool Lang::LangIsDelimiter(const char& value) {
-    return LangInverseDelimiter.count(string(1, value)) == 1;
+    return LangInverseDelimiter.count(std::string(1, value)) == 1;
 }
 /** Checks if a char|string is a delimiter of comparison:
  *  
@@ -132,9 +132,9 @@ bool Lang::LangIsDelimiter(const char& value) {
  *  
  */
 bool Lang::LangIsComparison(const char& value) {
-    return LangIsComparison(string(1, value));
+    return LangIsComparison(std::string(1, value));
 }
-bool Lang::LangIsComparison(const string& value) {
+bool Lang::LangIsComparison(const std::string& value) {
     if (value == LangFindDelimiter("greater")) {
         return true;
     } else if ( value == LangFindDelimiter("smaller")) {
@@ -151,9 +151,9 @@ bool Lang::LangIsComparison(const string& value) {
  *  
  */
 bool Lang::LangIsOfCondition(const char& value) {
-    return LangIsOfCondition(string(1, value));
+    return LangIsOfCondition(std::string(1, value));
 }
-bool Lang::LangIsOfCondition(const string& value) {
+bool Lang::LangIsOfCondition(const std::string& value) {
     if (value == LangFindDelimiter("and")) {
         return true;
     } else if ( value == LangFindDelimiter("or")) {
@@ -166,7 +166,7 @@ bool Lang::LangIsOfCondition(const string& value) {
  * @param string key
  * @return string
  */
-string Lang::LangFindKeyword(const string& key) {
+std::string Lang::LangFindKeyword(const std::string& key) {
     if (LangHasKeyKeyword(key)) {
         return LangKeywords.at(key);
     }
@@ -177,7 +177,7 @@ string Lang::LangFindKeyword(const string& key) {
  * @param string key key name
  * @return bool
  */
-bool Lang::LangHasKeyKeyword(const string& key) {
+bool Lang::LangHasKeyKeyword(const std::string& key) {
     return LangKeywords.count(key) == 1;
 }
 /** Check whether a string is an actual register keyword:
@@ -185,7 +185,7 @@ bool Lang::LangHasKeyKeyword(const string& key) {
  * @param string key key name
  * @return bool
  */
-bool Lang::LangIsKeyword(const string& value) {
+bool Lang::LangIsKeyword(const std::string& value) {
     return LangInverseKeywords.count(value) == 1;
 }
 /** Checks whether a letter is allowed as function or variable name:
@@ -199,7 +199,7 @@ bool Lang::LangIsNamingAllowed(const char& value) {
     }
     return false;
 }
-bool Lang::LangIsNamingAllowed(const string& value) {
+bool Lang::LangIsNamingAllowed(const std::string& value) {
     if (find(LangNamingAllowedChars.begin(), LangNamingAllowedChars.end(), value[0]) != LangNamingAllowedChars.end()) {
         return true;
     }
@@ -210,20 +210,20 @@ bool Lang::LangIsNamingAllowed(const string& value) {
 /*
  * PRINTING STUFF:
  */
-void Lang::printHeader(string headername) {
-    cout << endl << "-------------------------------------------------------------------" << endl;
-    cout << "| OWQ Debugger -> " << headername << endl;
+void Lang::printHeader(std::string headername) {
+	std::cout << std::endl << "-------------------------------------------------------------------" << std::endl;
+	std::cout << "| OWQ Debugger -> " << headername << std::endl;
     printSepLine(2);
 }
 void Lang::printSepLine(int breaks) {
-    cout << "-------------------------------------------------------------------";
+	std::cout << "-------------------------------------------------------------------";
     for (int i = 0; i < breaks; i++) {
-        cout << endl;
+		std::cout << std::endl;
     }
 }
 void Lang::printEmpLine(int breaks) {
     for (int i = 0; i < breaks; i++) {
-        cout << endl;
+		std::cout << std::endl;
     }
 }
 
