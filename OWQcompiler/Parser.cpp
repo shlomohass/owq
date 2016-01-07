@@ -672,6 +672,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
         int closeOfParenthesis = tokens.getMatchingCloseParenthesis(operatorIndex);
         //extract the content and replace with RST
         Tokens sub = tokens.extractContentOfParenthesis(operatorIndex, closeOfParenthesis, eraseCount, script);
+
         operatorIndex -= 1;	//Just in case its a function call set next block to parse the call name,
         int prevRstPos = script->internalStaticPointer; //just in case the group won't do anything but push
         compiler(script, sub, debug, rCount);

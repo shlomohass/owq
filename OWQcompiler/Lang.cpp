@@ -44,6 +44,7 @@ map<string, string> Lang::LangKeywords = {
     {"loop-while"   , "while"},
     {"loop-do"      , "do"},
 	{"loop-break"   , "break" },
+	{"function"     , "function" },
     {"return"       , "return"},
 };
 

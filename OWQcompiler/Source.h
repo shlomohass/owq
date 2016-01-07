@@ -48,6 +48,7 @@ class Source {
     bool inMacro;
     bool inMacroSet;
 	bool inMacroFunc;
+	int  inMacroNested;
 
     string macroSet;
     bool mcomment;      // for multi-line comments

@@ -9,6 +9,8 @@
 
 #include <iostream>
 #include <sstream>
+#include <vector>
+#include <map>
 
  /** the NULL value we use.
  *
@@ -19,11 +21,34 @@
 
 using namespace std;
 
+enum SDtype {
+	SD_NULL,
+	SD_STRING,
+	SD_NUMBER,   
+	SD_BOOLEAN,   
+	SD_OBJ,        
+	SD_OBJpointer,    
+	SD_ARRAY,         
+	SD_RST,  
+};
+
 class StackData {
     
+	//My type:
+	SDtype type;
+
+	//Primitives:
     string svalue;
     double dvalue;
 	int    bvalue;
+
+	//Objects childs:
+	bool isOwqObj; //Flag an object;
+	bool isOwqArr; //Flag an array;
+	map<string, StackData> owqObj;
+	vector<StackData> owqArray;
+
+	//Static stack pointers:
     bool   rst;
     int    rstPos;
 
@@ -41,6 +66,9 @@ public:
     
     void setRstPos(int _rstPos);
     
+	SDtype getType();
+	bool isOftype(SDtype t);
+	bool isNull();
     bool isString();
     bool isNumber();
 	bool isNumber(bool alsoBools);

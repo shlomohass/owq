@@ -12,31 +12,54 @@ ScriptConsole::ScriptConsole() {
 
 /**
  * Write to the console
- * @param msg
+ * @param StackData sd
  */
-void ScriptConsole::print(string msg1, bool debug) {
+void ScriptConsole::print(StackData* sd, bool debug) {
     if (debug && OWQ_DEBUG_LEVEL > 0) {
-        cout << endl << "CONSOLE-OUT >> " << msg1 << endl;
+		std::cout << std::endl << "CONSOLE-OUT >> " << sd->getAsString() << std::endl;
         return;
     }
-    cout << msg1;
+    std::cout << sd->getAsString();
 }
-/**
- * Write to the console
- * @param msg
- */
-void ScriptConsole::print(string msg1, string msg2, bool debug) {
-    if (debug && OWQ_DEBUG_LEVEL > 0) {
-        cout << endl << "CONSOLE-OUT >> " << msg1 << ", " << msg2 << endl;
-        return;
-    }
-    cout << "CONSOLE-OUT >> " << msg1 << ", " << msg2 << endl;
+/** Get a variable length
+* 
+* @param StackData* sd
+*/
+StackData ScriptConsole::length(StackData* sd) {
+	int l = 0;
+	if (sd->isOftype(SDtype::SD_NUMBER) || sd->isOftype(SDtype::SD_STRING)) {
+		l = (int)sd->getAsString().length();
+		return StackData(l);
+	}
+	return StackData(0);
+}
+/** Get a variable native type
+*
+* @param StackData* sd
+*/
+StackData ScriptConsole::type(StackData* sd) {
+	string littype = stackTypeName(sd->getType());
+	return StackData(littype);
 }
 
 string ScriptConsole::toString(double number) {
     stringstream ss;
     ss << number;
     return ss.str();
+}
+
+string ScriptConsole::stackTypeName(SDtype sdtype) {
+	switch (sdtype) {
+		case SDtype::SD_ARRAY:		return "ARRAY";			break;
+		case SDtype::SD_BOOLEAN:	return "BOOLEAN";		break;
+		case SDtype::SD_NULL:		return "NULL";			break;
+		case SDtype::SD_NUMBER:		return "NUMBER";		break;
+		case SDtype::SD_OBJ:		return "OBJECT";		break;
+		case SDtype::SD_OBJpointer: return "OBJECT";		break;
+		case SDtype::SD_RST:		return "INTERNAL_RST";	break;
+		case SDtype::SD_STRING:		return "STRING";		break;
+	}
+	return "UNKNOWN";
 }
 
 ScriptConsole::~ScriptConsole() {

@@ -40,7 +40,6 @@ int main(int argc, char** argv) {
 
 	int result = cmd.parse(argc, argv);
 
-
 	//Parse and set Argu:
 	if (result != cm::ArgvParser::NoParserError)
 	{

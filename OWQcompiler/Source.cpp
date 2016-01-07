@@ -23,6 +23,7 @@ Source::Source(char d_str, char str_esc, char d_blo_open, char d_blo_close, char
     instring        = false;
     inMacro         = false;
 	inMacroFunc		= false;
+	inMacroNested = 0;
     inMacroSet      = false;
     macroSet        = "";
 	macroArgBuffer  = "";
@@ -126,6 +127,7 @@ bool Source::pushChar(char ch) {
 			macroArgBuffer = "";
 			inMacro = false;
 			inMacroFunc = false;
+			inMacroNested = 0;
 			macroArguments.clear();
 			return false;
 		}
@@ -140,8 +142,8 @@ bool Source::pushChar(char ch) {
 	}
 	//Parse macro arguments until end:
 	if (inMacro && !inMacroSet && inMacroFunc) {
-		if (ch == macroArguSpacer && macroArgBuffer.length() > 0) {
-			if (macroArgBuffer.at(macroArgBuffer.length() - 1) != '\\') {
+		if (ch == macroArguSpacer && macroArgBuffer.length() > 0 && inMacroNested == 0) {
+			if (macroArgBuffer.at(macroArgBuffer.length() - 1) != string_escape) {
 				macroArguments.push_back(macroArgBuffer);
 				macroArgBuffer = "";
 			} else {
@@ -150,7 +152,10 @@ bool Source::pushChar(char ch) {
 			}
 			return false;
 		}
-		if (ch == macroFuncClose) {
+		if (ch == macroFuncOpen) {
+			inMacroNested++;
+		}
+		if (ch == macroFuncClose && inMacroNested == 0) {
 			if (macroArgBuffer.length() > 0) {
 				macroArguments.push_back(macroArgBuffer);
 				macroArgBuffer = "";
@@ -166,8 +171,11 @@ bool Source::pushChar(char ch) {
 				macroCounter++;
 				macroBuffer = "";
 				macroArgBuffer = "";
+				inMacroNested = 0;
 				return false;
 			}
+		} else if (ch == macroFuncClose) {
+			inMacroNested--;
 		}
 		macroArgBuffer += ch;
 		return false;
@@ -394,18 +402,29 @@ void Source::cleanLine() {
         }
     }
     bufsize = unsavedSize();
-    int upto = 0;
+	string temp_buf = "";
+	char prev_char = '\0';
+	bool in_string = false;
     for (int i = 0; i < bufsize; i++) {
-        if (buffer[i] == ' ') {
-            upto++;
-        } else {
-            break;
-        }
+		char tch = buffer[i];
+		if (!in_string && tch == ' ' && prev_char == ' ') {
+			continue;
+		} else if (!in_string && (tch == '\t' || tch == '\n' || tch == '\r' || tch == '\b')) {
+			if (prev_char == ' ') 
+				continue; 
+			else 
+				tch = ' ';
+		} else if (!in_string && tch == deli_op) {
+			temp_buf += tch;
+			tch = ' ';
+		} else if (tch == deli_string && prev_char != string_escape) {
+			in_string = in_string ? false : true;
+		}
+		temp_buf += tch;
+		prev_char = tch;
     }
-    if (upto > 0) {
-        buffer.erase(0, upto);
-        bufferSize -=upto;
-    }
+	buffer = temp_buf;
+	bufferSize = buffer.length();
 }
 /** Clear the Object or even can be called reset:
  *  
@@ -414,6 +433,13 @@ void Source::cleanLine() {
 void Source::clearLines() {
     lines.clear();
     buffer.clear();
+	macroBuffer.clear();
+	macroArguments.clear();
+	macroArgBuffer.clear();
+	inMacro = false;
+	inMacroSet = false;
+	inMacroFunc = false;
+	inMacroNested = 0;
     prevchar = '\0';
     bufferSize = 0;
     lineNumbers.clear();

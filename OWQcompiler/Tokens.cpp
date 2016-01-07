@@ -208,7 +208,7 @@ Tokens Tokens::extractInclusive(int startIndex, int endIndex, int& extractionCou
         count++;
     }
     //erase
-    for (i=0; i<(count); i++){ //erase the total number of tokens extracted including what is before and after
+    for (i=0; i<(count); i++){ //erase the total number of tokens extracted
         //the contents extracted
         tokens.erase(tokens.begin() + startIndex);
     }
@@ -236,7 +236,7 @@ Tokens Tokens::extractSubExpr() {
 	int i;
 	int count = 0; //the total count of values to extract
 	string semi = Lang::LangFindDelimiter("semicolon");
-	for (i = 0; i < tokens.size(); i++) {
+	for (i = 0; i < (int)tokens.size(); i++) {
 		count++;
 		if (tokens[i].type == TokenType::DELIMITER && tokens[i].token == semi) {
 			break;

@@ -12,31 +12,44 @@
  * @param string|double value
  */
 StackData::StackData() {
+	type = SDtype::SD_NULL;
     dvalue = OWQ_NAN;
     svalue = "null";
 	bvalue = -1;
+	isOwqObj = false;
+	isOwqArr = false;
     rstPos = -1;
     rst    = false;
 }
-/** Construct a Stack Data
+/** Construct a Stack Data of some type
  * 
  * @param string|double value
  */
+//A STRING:
 StackData::StackData(string value) {
+	type = SDtype::SD_STRING;
     dvalue = OWQ_NAN;
     svalue = value;
 	bvalue = -1;
+	isOwqObj = false;
+	isOwqArr = false;
     rstPos = -1;
     rst    = false;
 }
+//A NUMBER from double:
 StackData::StackData(double value) {
+	type = SDtype::SD_NUMBER;
 	dvalue = value;
 	svalue = "null";
 	bvalue = -1;
+	isOwqObj = false;
+	isOwqArr = false;
 	rstPos = -1;
 	rst = false;
 }
+//A NUMBER from integer:
 StackData::StackData(int value) {
+	type = SDtype::SD_NUMBER;
     dvalue = (double)value;
     svalue = "null";
 	bvalue = -1;
@@ -49,18 +62,20 @@ StackData::StackData(int value) {
  * @param integer _rstPos
  */
 StackData::StackData(bool _rst, int _rstPos) {
+	type = SDtype::SD_RST;
     dvalue = OWQ_NAN;
     svalue = "null";
 	bvalue = -1;
     rst = _rst;
     setRstPos(_rstPos);
 }
-/** A boolean value constractor will be an integer but set to a boolean container;
+/** A boolean value constructor will be an integer but set to a boolean container;
 *
 * @param int|string|double value
 * @param bool valueBool
 */
 StackData::StackData(bool value) {
+	type = SDtype::SD_BOOLEAN;
 	dvalue = OWQ_NAN;
 	svalue = "null";
 	bvalue = (int)value;
@@ -68,6 +83,7 @@ StackData::StackData(bool value) {
 	rst = false;
 }
 StackData::StackData(int value, bool valueBool) {
+	type = SDtype::SD_BOOLEAN;
 	dvalue = OWQ_NAN;
 	svalue = "null";
 	bvalue = value > 0 ? 1 : 0;
@@ -75,6 +91,7 @@ StackData::StackData(int value, bool valueBool) {
 	rst = false;
 }
 StackData::StackData(double value, bool valueBool) {
+	type = SDtype::SD_BOOLEAN;
 	dvalue = OWQ_NAN;
 	svalue = "null";
 	bvalue = value > 0 ? 1 : 0;
@@ -82,6 +99,7 @@ StackData::StackData(double value, bool valueBool) {
 	rst = false;
 }
 StackData::StackData(string value, bool valueBool) {
+	type = SDtype::SD_BOOLEAN;
 	dvalue = OWQ_NAN;
 	svalue = "null";
 	bvalue = value == "true" || value == "TRUE" ? 1 : 0;
@@ -92,8 +110,10 @@ StackData::StackData(string value, bool valueBool) {
  * 
  */
 StackData::~StackData() {
-
+	owqArray.clear();
+	owqObj.clear();
 }
+
 /** Set the internal static position of the data; 
  * 
  * @param integer _rstPos
@@ -101,50 +121,59 @@ StackData::~StackData() {
 void StackData::setRstPos(int _rstPos) {
     rstPos = _rstPos;
 }
+/**
+*
+*/
+SDtype StackData::getType() {
+	return type;
+}
+/**
+ *
+ */
+bool StackData::isOftype(SDtype t) {
+	return type == t?true : false;
+}
+/** Check if a Stack Data is of type number (double)
+*
+* @return boolean
+*/
+bool StackData::isNull() {
+	return type == SDtype::SD_NULL ? true : false;
+}
 /** Check if a Stack Data is of type number (double)
  * 
  * @return boolean 
  */
 bool StackData::isNumber() {
-	return isNumber(false);
+	return type == SDtype::SD_NUMBER ? true : false;
 }
 bool StackData::isNumber(bool alsoBools) {
-	if (dvalue != OWQ_NAN && !alsoBools) {
-		return true;
-	}
-	else if ((dvalue != OWQ_NAN || bvalue > -1) && alsoBools) {
-		return true;
-	}
-	return false;
+	bool numCheck = isNumber();
+	bool boolCheck = isBoolean();
+	return numCheck || boolCheck ? true : false;
 }
 /** Check if a Stack Data is of type string  
  *
  * @return boolean
  */
 bool StackData::isString() {
-    if (svalue != "null") {
-        return true;
-    }
-    return false;
+	return type == SDtype::SD_STRING ? true : false;
 }
 /** Check if a Stack Data is of type boolean
 *
 * @return boolean
 */
 bool StackData::isBoolean() {
-	if (bvalue == 0 || bvalue == 1) {
-		return true;
-	}
-	return false;
+	return type == SDtype::SD_BOOLEAN ? true : false;
 }
 /** Checks if this Data has a Rst pointer
  * 
  * @return boolean
  */
 bool StackData::isRst() {
-    return rst;
+	return type == SDtype::SD_RST ? true : false;
 }
-/** Checks if this Data has a is at a rst position
+/** Checks if this Data is at a rst position
  * 
  * @param integer pos
  * @return boolean
@@ -201,9 +230,7 @@ string StackData::numberValueToString(bool alsoBools) {
 	if (isNumber()) {
 		return numberValueToString();
 	}
-	else {
-		return booleanValueToString();
-	}
+	return booleanValueToString();
 }
 string StackData::numberValueToString(double number) {
     stringstream s;
@@ -220,6 +247,7 @@ string StackData::booleanValueToString() {
 	}
 	return "FALSE";
 }
+
 string StackData::getAsString() {
 	stringstream ss;
 	if (isNumber()) {         // Print a number
@@ -239,12 +267,13 @@ string StackData::getAsString() {
 	}
 	return ss.str();
 }
+
 /** Render the Stack Data to the terminal
  * 
  */
+
 void StackData::render() {
     bool printRst = true;
-    
     if (isNumber()) {         // Print a number
         cout << getNumber();
 	} else if (isString()) {  // Print a string

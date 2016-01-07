@@ -13,7 +13,7 @@
 namespace fs = boost::filesystem;
 
 Script::Script() {
-    code.reserve(100);	//pre-allocate 100 instruction space for byte-codes
+    code.reserve(300);	//pre-allocate 100 instruction space for byte-codes
     functions.reserve(50);	//pre allocate 50 spaces for functions
     internalStaticPointer = 0;
 	script_debug = OWQ_DEBUG;
@@ -793,7 +793,7 @@ bool Script::isSystemCall(string object, string functionName, Instruction& _xcod
     //Console print:
     if (functionName == "rep" || functionName == "print") {
         StackData sd = Stack::pop();
-		ScriptConsole::print(sd.getAsString(), this->script_debug);
+		ScriptConsole::print(&sd, this->script_debug);
         return true;
     }
     
@@ -807,16 +807,20 @@ bool Script::isSystemCall(string object, string functionName, Instruction& _xcod
         if (sv != NULL) {
             //return the length of a string
             if (functionName == "length") {
-                if (sv->getValue().isString()) {
-					int len = (int)sv->getValue().getString().length();
-					Stack::push(len);
-                } else {
-					Stack::push(0);
-                }
+				StackData thelen = ScriptConsole::length(&sv->getValue());
+				Stack::push(thelen);
 				if (_xcode.getPointer() > 0) {
 					Stack::setTopPointer(_xcode.getPointer());
 				}
             }
+			//return the type of a string
+			if (functionName == "type") {
+				StackData sdtype = ScriptConsole::type(&sv->getValue());
+				Stack::push(sdtype);
+				if (_xcode.getPointer() > 0) {
+					Stack::setTopPointer(_xcode.getPointer());
+				}
+			}
             //return substring of a string
             //definition of substring: object.substring(index, numberOfCharacters)
             if (functionName == "substr") {
@@ -834,6 +838,7 @@ bool Script::isSystemCall(string object, string functionName, Instruction& _xcod
 					}
                 }
             }
+
             return true;
         } else {
             ScriptError::msg("Unable to find object " + object + " for system call " + functionName);

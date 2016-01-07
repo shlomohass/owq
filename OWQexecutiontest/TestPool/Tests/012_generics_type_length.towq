@@ -1,0 +1,21 @@
+#print:print($1 + ",");#
+let a = "shlomi";
+let b = 67;
+let c = true;
+let d;
+#print(
+	a.length(),
+	b.length(),
+	c.length(),
+	a.type(),
+	b.type(),
+	c.type(),
+	d.type(),
+	d.length()
+)#
+
+/*
+@expected-output
+6,2,0,STRING,NUMBER,BOOLEAN,NULL,0,
+@end-expected-output
+*/

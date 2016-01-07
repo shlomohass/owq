@@ -7,6 +7,7 @@
 #define	SCRIPTCONSOLE_H
 
 #include "Setowq.h"
+#include "StackData.h"
 #include <iostream>
 #include <sstream>
 
@@ -17,9 +18,15 @@ public:
     
     ScriptConsole();
     
-    static void print(string msg, bool debug);
-    static void print(string msg, string msg2, bool debug);
+	//Generic methods:
+    static void print(StackData* sd, bool debug);
+	static StackData length(StackData* sd);
+	static StackData type(StackData* sd);
     static string toString(double number);
+
+	//Helpers 
+	static string stackTypeName(SDtype sdtype);
+
     virtual ~ScriptConsole();
     
 };
