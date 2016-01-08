@@ -64,7 +64,7 @@ int Parser::compile(Script* script, std::string exp, bool debug) {
 		if (ret > 0) { break; }
 	}
     //compile our tokens
-    return compiler(script, tokens, debug, 0);
+    return ret;
 }
 /** Repeatedly call getToken as a means to populate a set of Tokens.
  *
@@ -431,20 +431,28 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
         //Execute functions:
         if (rightToken != nullptr && operatorToken->token == Lang::LangFindKeyword("function")) {
             
+			//Throw error if right token is not a name:
+			if (rightToken->type != TokenType::VAR) {
+				return 18;
+			}
             //add the operation opcode
             script->addInstruction(Instruction(ByteCode::FUNC, rightToken->token));
             //extract what we just worked with[ functionKeyword funcName ]
             tokens.extractInclusive( operatorIndex, operatorIndex + 1, eraseCount, script);
+			tokens.renderTokens();
             tokens.pop(operatorIndex);	//erase the RST that is placed in place of 'Function funcName'
             operatorIndex -= eraseCount;
-
+			tokens.renderTokens();
             //all is left now is what is in '( arguments,...,argumentsN )'
             //now count the number of arguments, skip open parenthesis and close parenthesis
-            int argumentCount = 0;
-            if(tokens.getToken(tokens.getSize()-1) != Lang::LangFindKeyword("bracesOpen")){
-                Tokens::stdError("Syntax error for function definition, missing code opening " + Lang::LangFindKeyword("bracesOpen"));
-                return 3;
-            }
+            
+			int evaluate = evaluateFunctionDeclaration(tokens);
+			if (evaluate > 0) {
+				return evaluate;
+			}
+			int argumentCount = 0;
+
+            
             
             tokens.pop(tokens.getSize()-1); // erase the: '{'
             
@@ -886,7 +894,44 @@ bool Parser::evaluateSetIncludeType(Tokens &sub, TokenType type) {
 	}
 	return false;
 }
-
+/** Evaluate a declaration group of tokens:
+ *  We need to see -> Barckets, BraceOpen after Barckets, No keywords, No braces. 
+ */
+int Parser::evaluateFunctionDeclaration(Tokens &sub) {
+	int size = (int)sub.getSize();
+	bool inArguBrackets = false;
+	bool finishedArguBrackets = false;
+	int nestedBrackets = 0;
+	std::string brackOpen = Lang::LangFindDelimiter("braketOpen");
+	std::string brackClose = Lang::LangFindDelimiter("braketClose");
+	std::string bracesOpen = Lang::LangFindDelimiter("bracesOpen");
+	std::string bracesClose = Lang::LangFindDelimiter("bracesClose");
+	for (int i = 0; i < size; i++) {
+		Token* token = sub.getTokenObject(i);
+		if (i == 0 && token->token != brackOpen) {
+			break;
+		}
+		if (!inArguBrackets && token->token == brackOpen) {
+			inArguBrackets = true;
+		} else if (inArguBrackets  && token->token == brackOpen) {
+			nestedBrackets++;
+		} else if (inArguBrackets  && token->token == brackClose && nestedBrackets > 0) {
+			nestedBrackets--;
+		} else if (inArguBrackets  && token->token == brackClose && nestedBrackets < 1) {
+			inArguBrackets = false;
+			finishedArguBrackets = true;
+		} else if (!inArguBrackets && finishedArguBrackets && token->token == bracesOpen) {
+			return 0;
+		} else if (inArguBrackets) {
+			if (token->token == bracesOpen || token->token == bracesClose) { return 14;  }
+			if (token->type  == TokenType::KEYWORD) { return 15; }
+		} else if (!inArguBrackets) {
+			if (!finishedArguBrackets &&  (token->token == bracesOpen || token->token == bracesClose)) { return 16; }
+			if (token->token == brackClose) { return 17; }
+		}
+	}
+	return 13;
+}
 
 
 

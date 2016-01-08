@@ -48,6 +48,7 @@ class Parser {
 	//----------------------------------------------------------
 	int    evaluateDeclarationSub(Tokens &sub, bool andTypes);
 	bool   evaluateSetIncludeType(Tokens &sub, TokenType type);
+	int    evaluateFunctionDeclaration(Tokens &sub);
 
     //----------------------------------------------------------
     // Aux- helper functions

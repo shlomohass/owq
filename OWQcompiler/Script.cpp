@@ -888,7 +888,13 @@ std::string errors[] = {
 	"9 declaration variable should be followed by an assignment delimiter or by end of statement",
 	"10 found two commas in variable declaration",
 	"11 declaraion expression cannot contain keywords",
-	"12 break statement can't use keywords"
+	"12 break statement can't use keywords",
+	"13 Function declaration is expecting argument brackets followed by brace open char.",
+	"14 Braces are not allowed in a argument of functions - missing a bracket close?",
+	"15 Keyword sre not allowed in as function arguments - missing a bracket close?",
+	"16 Braces should be use after function argument brackets.",
+	"17 Unexpected bracket close - missing a bracket open char?",
+	"17 Function declaratin is missing a function name.",
 };
 
 /** Loads and precompiles a script:
