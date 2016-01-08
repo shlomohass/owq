@@ -37,7 +37,7 @@ int Parser::compile(Script* script, std::string exp, bool debug) {
         return 1;
     }
     Tokens tokens;
-	int ret;
+	int ret = 0;
     //generate our tokens
     tokenize(exp, tokens);
 

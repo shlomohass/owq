@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
 		bool indicator = s.loadFile( settings.inscript, enable_debug);
 		//Loading success so go and do stuff:
 		if (indicator) {
-			//s.run( enable_debug );
+			s.run( enable_debug );
 		}
 
 		delete lang;
