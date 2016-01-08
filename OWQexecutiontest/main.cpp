@@ -16,6 +16,7 @@
 #include <vector>
 #include <cstdio>
 #include <memory>
+#include <time.h>
 
 #include "argvparser.h" //http://mih.voxindeserto.de/argvparser.html
 #include "Argu.h"
@@ -188,10 +189,13 @@ int main(int argc, char** argv) {
 			std::wstring unescaped = unescape(iterator->second);
 			std::wcout << L" File: " << iterator->first << L" - Expected: " << unescaped << L"  -  Length[ " << iterator->second.length() << L" ]" << std::endl;
 			if (iterator->second != L"@SKIP@") {
-				std::wstring resultbuf = exec((settings.execfile + " -r " + std::string(iterator->first.begin(), iterator->first.end())).c_str());
-				std::wstring un_escaped_resultbuf = unescape(resultbuf);
-				std::wcout << L"       Result: " << ((resultbuf == iterator->second) ? L"Test PASSED!" : (L"Test FAILLED!  actual result ----> " + un_escaped_resultbuf)) << std::endl << std::endl;
-				computed_results_list[iterator->first] = resultbuf;
+				clock_t tStart = clock();
+					std::wstring resultbuf = exec((settings.execfile + " -r " + std::string(iterator->first.begin(), iterator->first.end())).c_str());
+					std::wstring un_escaped_resultbuf = unescape(resultbuf);
+					std::wcout << L"       Result: " << ((resultbuf == iterator->second) ? L"Test PASSED!" : (L"Test FAILLED!  actual result ----> " + un_escaped_resultbuf)) << std::endl;
+					computed_results_list[iterator->first] = resultbuf;
+				clock_t tEnd = clock();
+				printf("       Execution: %.2fs, %dms\n\n", (double)(tEnd - tStart) / CLOCKS_PER_SEC, (tEnd - tStart) / (CLOCKS_PER_SEC / 1000));
 			} else {
 				std::wcout << std::endl;
 			}
@@ -200,12 +204,6 @@ int main(int argc, char** argv) {
 		std::wcout << std::endl << L" * ERROR: Tests or Result folder not found!" << std::endl;
 		exitCode = 1;
 	}
-
-	//For each file open and search for the test comment Expected result:
-
-	//Execute file and get the output:
-
-	//Compare results:
 
 	//Write to log and output to console:
 	
