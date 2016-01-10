@@ -876,25 +876,25 @@ int  Script::mergeLinesAndCompile(Source *source, Parser *parser, int linenum, b
 }
 
 std::string errors[] = {
-    " ", 
+    "", 
     "1 script object is null",
     "2 recursive call max out script contains error",
     "3 syntax error for function definition",
     "4 if - statement syntax error",
     "5 while - statement syntax error",
     "6 else - statement syntax error",
-	"7 definition - expected definition of valriable name",
-	"8 misuse of Braces",
-	"9 declaration variable should be followed by an assignment delimiter or by end of statement",
-	"10 found two commas in variable declaration",
-	"11 declaraion expression cannot contain keywords",
+	"7 Definition - expected definition of valriable name",
+	"8 Missuse of Braces",
+	"9 Declaration of variables should be followed by an assignment delimiter or by end of statement",
+	"10 Found two commas in variable declaration",
+	"11 Declaraion expression cannot contain keywords",
 	"12 break statement can't use keywords",
 	"13 Function declaration is expecting argument brackets followed by brace open char.",
 	"14 Braces are not allowed in a argument of functions - missing a bracket close?",
-	"15 Keyword sre not allowed in as function arguments - missing a bracket close?",
+	"15 Keywords are not allowed in as function arguments - missing a bracket close?",
 	"16 Braces should be use after function argument brackets.",
 	"17 Unexpected bracket close - missing a bracket open char?",
-	"17 Function declaratin is missing a function name.",
+	"18 Function declaratin is missing a function name.",
 };
 
 /** Loads and precompiles a script:

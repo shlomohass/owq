@@ -190,7 +190,7 @@ int main(int argc, char** argv) {
 			std::wcout << L" File: " << iterator->first << L" - Expected: " << unescaped << L"  -  Length[ " << iterator->second.length() << L" ]" << std::endl;
 			if (iterator->second != L"@SKIP@") {
 				clock_t tStart = clock();
-					std::wstring resultbuf = exec((settings.execfile + " -r " + std::string(iterator->first.begin(), iterator->first.end())).c_str());
+					std::wstring resultbuf = exec((settings.execfile + " -r \"" + std::string(iterator->first.begin(), iterator->first.end()) + "\"").c_str());
 					std::wstring un_escaped_resultbuf = unescape(resultbuf);
 					std::wcout << L"       Result: " << ((resultbuf == iterator->second) ? L"Test PASSED!" : (L"Test FAILLED!  actual result ----> " + un_escaped_resultbuf)) << std::endl;
 					computed_results_list[iterator->first] = resultbuf;

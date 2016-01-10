@@ -3,7 +3,7 @@ let a = 13,
 	c,
 	d;
 
-if (a == b | b > a) {
+if (a == b || b > a) {
 	c = true;
 	if (a < b) {
 		d = false;

@@ -30,8 +30,8 @@ std::map<std::string, std::string> Lang::LangDelimiter = {
     {"smaller"           , "<"},
     {"comma"             , ","},
     {"c-equal"           , "=="},
-    {"and"               , "&"},
-    {"or"                , "|"},
+    {"and"               , "&&"},
+    {"or"                , "||"},
     {"semicolon"         , ";"}
 };
 

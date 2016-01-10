@@ -1,0 +1,12 @@
+let a, b, c, d;
+a = 4;
+b = 2;
+c = a * b; // 8
+d = c + c; // 16
+a = b * c + c * (a - b) + c * 2 + b^a; // 64
+print(a);
+/*
+@expected-output
+64
+@end-expected-output
+*/ 

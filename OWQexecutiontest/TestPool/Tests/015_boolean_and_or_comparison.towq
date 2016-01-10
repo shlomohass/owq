@@ -1,0 +1,17 @@
+let a = 4,
+    b = true,
+	c = false,
+	d = 2;
+	
+if (b) { print("o"); }
+if (b || c) { print("w"); }
+if (a == (d + 2) && (b || c)) { print("q"); }
+if (c) { print("no1"); }
+if (c == b) { print("no2"); }
+if (d == a) { print("no3"); }
+if (b && c) { print("no4"); }
+/*
+@expected-output
+owq
+@end-expected-output
+*/
