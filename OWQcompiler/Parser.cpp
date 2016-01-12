@@ -265,8 +265,8 @@ void Parser::evaluateGroups(Tokens& tokens, TokenFlag flagToGroup, int startFrom
     int nestBrackets;
     int addAtPosition;
     int i;
-	std::string braketClose = Lang::LangFindDelimiter("braketClose");
-	std::string braketOpen = Lang::LangFindDelimiter("braketOpen");
+	std::string braketClose = Lang::dicLang_braketClose;
+	std::string braketOpen = Lang::dicLang_braketOpen;
     int bracketPriority = getDelimiterPriorty(braketOpen, TokenType::DELIMITER);
     Token* token;
     Token* checkToken;
@@ -429,7 +429,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 		}
 
         //Execute functions:
-        if (rightToken != nullptr && operatorToken->token == Lang::LangFindKeyword("function")) {
+        if (rightToken != nullptr && operatorToken->token == Lang::dicLangKey_function) {
             
 			//Throw error if right token is not a name:
 			if (rightToken->type != TokenType::VAR) {
@@ -461,7 +461,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 			std::string t;
             for (int i=1; i < (int)tokens.getSize()-1; i++) {
                 t = tokens.getToken(i);
-                if (t != Lang::LangFindDelimiter("comma")) {
+                if (t != Lang::dicLang_comma) {
                     argumentCount++;
                     arg.push_back(t);
                 }
@@ -478,14 +478,14 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 
             return 0;
             
-        } else if (operatorToken->token == Lang::LangFindKeyword("cond-if")) {
+        } else if (operatorToken->token == Lang::dicLangKey_cond_if) {
 
             //if(expression){
             tokens.pop(operatorIndex);	//erase the if keyword
             
             //(expression){
-            if(tokens.getToken(tokens.getSize()-1) != Lang::LangFindDelimiter("bracesOpen")) {
-                Tokens::stdError("IF statement syntax error, expected a " + Lang::LangFindDelimiter("bracesOpen"));
+            if(tokens.getToken(tokens.getSize()-1) != Lang::dicLang_bracesOpen) {
+                Tokens::stdError("IF statement syntax error, expected a " + Lang::dicLang_bracesOpen);
                 return 4;
             }
             //Erase block open == brace open:
@@ -501,12 +501,12 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
             script->addInstruction(Instruction(ByteCode::CMP, operatorTokenStr));
             return 0;
             
-        } else if (operatorToken->token == Lang::LangFindKeyword("cond-else")) {
+        } else if (operatorToken->token == Lang::dicLangKey_cond_else) {
             //else (expression){
             tokens.pop(0);	//erase the else keyword
             //(expression){
-            if(tokens.getToken(tokens.getSize()-1) != Lang::LangFindDelimiter("bracesOpen")) {
-                Tokens::stdError("ELSE statement syntax error, expected a " + Lang::LangFindDelimiter("bracesOpen"));
+            if(tokens.getToken(tokens.getSize()-1) != Lang::dicLang_bracesOpen) {
+                Tokens::stdError("ELSE statement syntax error, expected a " + Lang::dicLang_bracesOpen);
                 return 6;
             }
             tokens.pop(tokens.getSize()-1);
@@ -521,14 +521,14 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
             script->addInstruction(Instruction(ByteCode::ELE, operatorTokenStr));
             return 0;
 		}
-		else if (operatorToken->token == Lang::LangFindKeyword("loop-while")) {
+		else if (operatorToken->token == Lang::dicLangKey_loop_while) {
 
 			//while(expression){
 			script->addInstruction(Instruction(ByteCode::LOOP));
 			tokens.pop(0);	//erase the while keyword
 			//(expression){
-			if (tokens.getToken(tokens.getSize() - 1) != Lang::LangFindDelimiter("bracesOpen")) {
-				Tokens::stdError("WHILE statement syntax error, expected a " + Lang::LangFindDelimiter("bracesOpen"));
+			if (tokens.getToken(tokens.getSize() - 1) != Lang::dicLang_bracesOpen) {
+				Tokens::stdError("WHILE statement syntax error, expected a " + Lang::dicLang_bracesOpen);
 				return 5;
 			}
 			tokens.pop(tokens.getSize() - 1);
@@ -542,7 +542,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 			script->addInstruction(Instruction(ByteCode::CMP, operatorTokenStr));
 			return 0;
 
-		} else if (operatorToken->token == Lang::LangFindKeyword("loop-break")) {
+		} else if (operatorToken->token == Lang::dicLangKey_loop_break) {
 
 			//Check for number of breaks:
 			if (rightToken == nullptr) {
@@ -560,7 +560,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 			script->addInstruction(Instruction(ByteCode::BRE));
 			return 0;
 
-        } else if (operatorToken->token == Lang::LangFindKeyword("cond-break")) {
+        } else if (operatorToken->token == Lang::dicLangKey_cond_break) {
 
 			//Check for number of breaks:
 			if (rightToken == nullptr) {
@@ -578,7 +578,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 			script->addInstruction(Instruction(ByteCode::BIF));
 			return 0;
 
-		} else if (operatorToken->token == Lang::LangFindKeyword("return")) {
+		} else if (operatorToken->token == Lang::dicLangKey_return) {
 
             //extract the return value and evaluate it recursively
             if (tokens.getSize() > 1) {
@@ -588,7 +588,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
             }
             script->addInstruction(Instruction(ByteCode::RET));
             return 0; //there is nothing else to be done  
-		} else if (operatorToken->token == Lang::LangFindKeyword("variable")) {
+		} else if (operatorToken->token == Lang::dicLangKey_variable) {
 
 			//Set first variable on the right:
 			if (rightToken->type == TokenType::VAR) {
@@ -603,9 +603,9 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 				//TODO avoid BRACKETS!
 				//Scan to Define all recursivly:
 				std::string t;
-				std::string langCommas = Lang::LangFindDelimiter("comma");
-				std::string langOpenBracket = Lang::LangFindDelimiter("braketOpen");
-				std::string langCloseBracket = Lang::LangFindDelimiter("braketClose");
+				std::string langCommas = Lang::dicLang_comma;
+				std::string langOpenBracket = Lang::dicLang_braketOpen;
+				std::string langCloseBracket = Lang::dicLang_braketClose;
 				int tokenSetSize = (int)tokens.getSize();
 				int nestedBrackets = 0;
 				for (int i = operatorIndex + 1; i < tokenSetSize - 1; i++) {
@@ -655,14 +655,14 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     //------------------------------------------------------------
     // un-mark the end of a function, if, while loop
     //------------------------------------------------------------
-    if (operatorToken->token == Lang::LangFindDelimiter("bracesClose")) {
+    if (operatorToken->token == Lang::dicLang_bracesClose) {
         ParseMark ret = unmark(); //un-mark the grouping make earlier
         if ( ret == ParseMark::WHILE ) { //loop
-            script->addInstruction(Instruction(ByteCode::DONE, Lang::LangFindKeyword("loop-while")));
+            script->addInstruction(Instruction(ByteCode::DONE, Lang::dicLangKey_loop_while));
         } else if ( ret == ParseMark::IF ) {
-            script->addInstruction(Instruction(ByteCode::DONE, Lang::LangFindKeyword("cond-if")));
+            script->addInstruction(Instruction(ByteCode::DONE, Lang::dicLangKey_cond_if));
         } else if ( ret == ParseMark::ELSE ) {
-            script->addInstruction(Instruction(ByteCode::DONE, Lang::LangFindKeyword("cond-else")));
+            script->addInstruction(Instruction(ByteCode::DONE, Lang::dicLangKey_cond_else));
 		} else {
 			//Bad palcement of the barces
 			return 8;
@@ -674,7 +674,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     // Handle parenthetical groupings
     //----------------------------------------------------------
     //if operator is an open parenthesis then extract the content
-    if (operatorToken->token == Lang::LangFindDelimiter("braketOpen")) { //  bracket (
+    if (operatorToken->token == Lang::dicLang_braketOpen) { //  bracket (
         //get the close of this parenthesis
 
         int closeOfParenthesis = tokens.getMatchingCloseParenthesis(operatorIndex);
@@ -713,7 +713,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     //-----------------------------------------------------------
     if (hasCommas(tokens)) {
         for (int i = 0; i<tokens.getSize(); i++) {
-            if (tokens.getToken(i) == Lang::LangFindDelimiter("comma")) {
+            if (tokens.getToken(i) == Lang::dicLang_comma) {
                 Tokens sub = tokens.extractInclusive(0, i - 1, eraseCount, script);
                 operatorIndex -= eraseCount;
                 compiler(script, sub, debug, rCount);
@@ -738,7 +738,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     //multi and division 
     } else if (priortyCode == 80) {	
     
-        if (operatorToken->token == Lang::LangFindDelimiter("multi")) { //Multiple
+        if (operatorToken->token == Lang::dicLang_multi) { //Multiple
             compile_LR_mathLogigBaseOperations(ByteCode::MULT, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
         } else { //Divide
             compile_LR_mathLogigBaseOperations(ByteCode::DIV, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
@@ -747,7 +747,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     //add and subtract
     } else if (priortyCode == 70) { 
     
-        if (operatorToken->token == Lang::LangFindDelimiter("plus")) { // ADD values 
+        if (operatorToken->token == Lang::dicLang_plus) { // ADD values 
             compile_LR_mathLogigBaseOperations(ByteCode::ADD, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
         } else { // Subtract values
             compile_LR_mathLogigBaseOperations(ByteCode::SUB, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
@@ -755,7 +755,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     //greater lesser
     } else if (priortyCode == 60) { 
         
-        if (operatorToken->token == Lang::LangFindDelimiter("greater")) { // Is greater than
+        if (operatorToken->token == Lang::dicLang_greater) { // Is greater than
             compile_LR_mathLogigBaseOperations(ByteCode::GTR, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
         } else { // Is smaller than
             compile_LR_mathLogigBaseOperations(ByteCode::LSR, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
@@ -764,16 +764,22 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     //c-equals ==
     } else if (priortyCode == 59) {
         
-        if (operatorToken->token == Lang::LangFindDelimiter("c-equal")) { // Is Equal to
+        if (operatorToken->token == Lang::dicLang_c_equal) { // Is value Equal to
             compile_LR_mathLogigBaseOperations(ByteCode::CVE, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
-        } else { //
-            
+        } else if (operatorToken->token == Lang::dicLang_c_nequal){ // Is value not Equal to
+			compile_LR_mathLogigBaseOperations(ByteCode::CVN, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
         }
+		else if (operatorToken->token == Lang::dicLang_c_tequal) { // Is type Equal to
+			compile_LR_mathLogigBaseOperations(ByteCode::CTE, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+		}
+		else if (operatorToken->token == Lang::dicLang_c_ntequal) { // Is type not Equal to
+			compile_LR_mathLogigBaseOperations(ByteCode::CTN, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+		}
         
     // matching signs logics
     } else if (priortyCode == 50 || priortyCode == 49) {
         
-        if (operatorToken->token == Lang::LangFindDelimiter("and")) { // Is LOGIC AND
+        if (operatorToken->token == Lang::dicLang_and) { // Is LOGIC AND
             compile_LR_mathLogigBaseOperations(ByteCode::AND, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
         } else { // Is LOGIC OR
             compile_LR_mathLogigBaseOperations(ByteCode::POR, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
@@ -865,12 +871,12 @@ int Parser::evaluateDeclarationSub(Tokens &sub, bool andTypes) {
 		token = sub.getTokenObject(i);
 		switch (i) {
 		case 0:
-			if (token->token == Lang::LangFindDelimiter("comma")) {
+			if (token->token == Lang::dicLang_comma) {
 				return 10;
 			}
 			break;
 		case 1:
-			if (token->token != Lang::LangFindDelimiter("equal")) {
+			if (token->token != Lang::dicLang_equal) {
 				return 9;
 			}
 			break;
@@ -902,10 +908,10 @@ int Parser::evaluateFunctionDeclaration(Tokens &sub) {
 	bool inArguBrackets = false;
 	bool finishedArguBrackets = false;
 	int nestedBrackets = 0;
-	std::string brackOpen = Lang::LangFindDelimiter("braketOpen");
-	std::string brackClose = Lang::LangFindDelimiter("braketClose");
-	std::string bracesOpen = Lang::LangFindDelimiter("bracesOpen");
-	std::string bracesClose = Lang::LangFindDelimiter("bracesClose");
+	std::string brackOpen = Lang::dicLang_braketOpen;
+	std::string brackClose = Lang::dicLang_braketClose;
+	std::string bracesOpen = Lang::dicLang_bracesOpen;
+	std::string bracesClose = Lang::dicLang_bracesClose;
 	for (int i = 0; i < size; i++) {
 		Token* token = sub.getTokenObject(i);
 		if (i == 0 && token->token != brackOpen) {
@@ -960,10 +966,10 @@ bool Parser::isDelimiter(const char& c) {
  * @return boolean
  */
 bool Parser::isSpace(const char& c) {
-    return (std::string(1, c) == Lang::LangFindDelimiter("space")) ? true : false;
+    return (c == Lang::LangGeneralSpace) ? true : false;
 }
 bool Parser::isSpace(const std::string& c) {
-    return (c == Lang::LangFindDelimiter("space")) ? true : false;
+    return (c == Lang::dicLang_space) ? true : false;
 }
 /** Check whether we entering using a string:
  * 
@@ -1033,33 +1039,7 @@ bool Parser::isKeyword(std::string s) {
  * @return integer
  */
 int Parser::getDelimiterPriorty() {
-    if(currentTokenType == KEYWORD) {
-        return 140;
-    } else if (currentToken == Lang::LangFindDelimiter("bracesClose")) {
-        return 130;
-    } else if (currentToken == Lang::LangFindDelimiter("braketOpen")) {
-        return 110;
-    } else if (currentToken == Lang::LangFindDelimiter("power")) {
-        return 90;
-    } else if (currentToken == Lang::LangFindDelimiter("multi") || currentToken == Lang::LangFindDelimiter("divide")) {
-        return 80;
-    } else if (currentToken == Lang::LangFindDelimiter("plus") || currentToken == Lang::LangFindDelimiter("minus")) {
-        return 70;
-    } else if (currentToken == Lang::LangFindDelimiter("smaller") || currentToken == Lang::LangFindDelimiter("greater")) {
-        return 60;
-    } else if (currentToken == Lang::LangFindDelimiter("c-equal")) {
-        return 59;
-    } else if (currentToken == Lang::LangFindDelimiter("and")) {
-        return 50;
-    } else if (currentToken == Lang::LangFindDelimiter("or")) {
-        return 49;
-    } else if (currentToken == Lang::LangFindDelimiter("equal")) {
-        return 40;
-    }  else if (currentToken == Lang::LangFindDelimiter("comma")) {
-        return -100;
-    } else {
-        return 0;
-    }
+	return getDelimiterPriorty(currentToken, currentTokenType);
 }
 /** Translates an delimiter string to a Precedence Priority
  * 
@@ -1068,33 +1048,45 @@ int Parser::getDelimiterPriorty() {
  * @return integer
  */
 int Parser::getDelimiterPriorty(std::string toCheckToken, TokenType toCheckType) {
-    if(toCheckType == KEYWORD) {
-        return 140;
-    } else if (toCheckToken == Lang::LangFindDelimiter("bracesClose")) {
-        return 130;
-    } else if (toCheckToken == Lang::LangFindDelimiter("braketOpen")) {
-        return 110;
-    } else if (toCheckToken == Lang::LangFindDelimiter("power")) {
-        return 90;
-    } else if (toCheckToken == Lang::LangFindDelimiter("multi") || toCheckToken == Lang::LangFindDelimiter("divide")) {
-        return 80;
-    } else if (toCheckToken == Lang::LangFindDelimiter("plus") || toCheckToken == Lang::LangFindDelimiter("minus")) {
-        return 70;
-    } else if (toCheckToken == Lang::LangFindDelimiter("smaller") || toCheckToken == Lang::LangFindDelimiter("greater")) {
-        return 60;
-    } else if (toCheckToken == Lang::LangFindDelimiter("c-equal")) {
-        return 59;
-    } else if (toCheckToken == Lang::LangFindDelimiter("and")) {
-        return 50;
-    } else if (toCheckToken == Lang::LangFindDelimiter("or")) {
-        return 49;
-    } else if (toCheckToken == Lang::LangFindDelimiter("equal")) {
-        return 40;
-    }  else if (toCheckToken == Lang::LangFindDelimiter("comma")) {
-        return -100;
-    } else {
-        return 0;
-    }
+	if (toCheckType == KEYWORD) {
+		return 140;
+	}
+	else if (toCheckToken == Lang::dicLang_bracesClose) {
+		return 130;
+	}
+	else if (toCheckToken == Lang::dicLang_braketOpen) {
+		return 110;
+	}
+	else if (toCheckToken == Lang::dicLang_power) {
+		return 90;
+	}
+	else if (toCheckToken == Lang::dicLang_multi || toCheckToken == Lang::dicLang_divide) {
+		return 80;
+	}
+	else if (toCheckToken == Lang::dicLang_plus || toCheckToken == Lang::dicLang_minus) {
+		return 70;
+	}
+	else if (toCheckToken == Lang::dicLang_smaller || toCheckToken == Lang::dicLang_greater) {
+		return 60;
+	}
+	else if (toCheckToken == Lang::dicLang_c_equal || toCheckToken == Lang::dicLang_c_nequal || toCheckToken == Lang::dicLang_c_tequal || toCheckToken == Lang::dicLang_c_ntequal) {
+		return 59;
+	}
+	else if (toCheckToken == Lang::dicLang_and) {
+		return 50;
+	}
+	else if (toCheckToken == Lang::dicLang_or) {
+		return 49;
+	}
+	else if (toCheckToken == Lang::dicLang_equal) {
+		return 40;
+	}
+	else if (toCheckToken == Lang::dicLang_comma) {
+		return -100;
+	}
+	else {
+		return 0;
+	}
 }
 /** Check to see if a token group has commas in it 
  * 
@@ -1103,9 +1095,8 @@ int Parser::getDelimiterPriorty(std::string toCheckToken, TokenType toCheckType)
  */
 bool Parser::hasCommas(Tokens& tokens) {
     int size = tokens.getSize();
-	std::string comma = Lang::LangFindDelimiter("comma");
     for (int i = 0; i < size; i++){
-        if(tokens.getToken(i) == comma){
+        if(tokens.getToken(i) == Lang::dicLang_comma){
             return true;
         }
     }
@@ -1118,19 +1109,16 @@ bool Parser::hasCommas(Tokens& tokens) {
 */
 bool Parser::hasCommasNotNested(Tokens& tokens) {
 	int size = tokens.getSize();
-	std::string comma = Lang::LangFindDelimiter("comma");
-	std::string langOpenBracket = Lang::LangFindDelimiter("braketOpen");
-	std::string langCloseBracket = Lang::LangFindDelimiter("braketClose");
 	int nested = 0;
 	for (int i = 0; i < size; i++) {
 		std::string t = tokens.getToken(i);
-		if (t == langOpenBracket) {
+		if (t == Lang::dicLang_braketOpen) {
 			nested++;
 		}
-		else if (t == langCloseBracket && nested > 0) {
+		else if (t == Lang::dicLang_braketClose && nested > 0) {
 			nested--;
 		}
-		if (nested < 1 && t == comma) {
+		if (nested < 1 && t == Lang::dicLang_comma) {
 			return true;
 		}
 	}

@@ -102,7 +102,7 @@ bool Tokens::isVar(int index) {
 bool Tokens::isCloseParenthesis(int index) {
     bool isDelim = isDelimiter(index);
     if(!isDelim) return false;
-    if(tokens[index].token == Lang::LangFindDelimiter("braketClose")) {
+    if(tokens[index].token == Lang::dicLang_braketClose) {
         return true;
     }
     return false;
@@ -115,7 +115,7 @@ bool Tokens::isCloseParenthesis(int index) {
 bool Tokens::isOpenParenthesis(int index) {
     bool isDelim = isDelimiter(index);
     if(!isDelim) return false;
-    if(tokens[index].token == Lang::LangFindDelimiter("braketOpen")){
+    if(tokens[index].token == Lang::dicLang_braketOpen){
         return true;
     }
     return false;
@@ -235,10 +235,9 @@ Tokens Tokens::extractSubExpr() {
 	//copy from current token-set to new token-set
 	int i;
 	int count = 0; //the total count of values to extract
-	std::string semi = Lang::LangFindDelimiter("semicolon");
 	for (i = 0; i < (int)tokens.size(); i++) {
 		count++;
-		if (tokens[i].type == TokenType::DELIMITER && tokens[i].token == semi) {
+		if (tokens[i].type == TokenType::DELIMITER && tokens[i].token == Lang::dicLang_semicolon) {
 			break;
 		}
 		newTokenSet.addToken(tokens[i]);
@@ -281,11 +280,11 @@ void Tokens::renderTokenType() {
     for(int i=0; i<getSize(); i++){
         switch(tokens[i].type) {
             case TokenType::DELIMITER:  str = "DLM"; break;
-            case TokenType::NUMBER:	str = "NUM"; break;
-            case TokenType::STRING:	str = "STR"; break;
-            case TokenType::VAR:	str = "VAR"; break;
+            case TokenType::NUMBER:		str = "NUM"; break;
+            case TokenType::STRING:		str = "STR"; break;
+            case TokenType::VAR:		str = "VAR"; break;
             case TokenType::KEYWORD:	str = "KEY"; break;
-            case TokenType::NONE:	str = "NON"; break;
+            case TokenType::NONE:		str = "NON"; break;
             case TokenType::RST:        str = "RST"; break;
             default:
                 str = "UNKNOWN";
@@ -386,14 +385,12 @@ int Tokens::getMatchingCloseParenthesis(int openIndex) {
     int i;
     int nested = 0;
     int size = getSize();
-	std::string bracketOpen = Lang::LangFindDelimiter("braketOpen");
-	std::string bracketClose = Lang::LangFindDelimiter("braketClose");
     for (i = openIndex + 1; i < size; i++ ) {
-        if (tokens[i].token == bracketOpen) {
+        if (tokens[i].token == Lang::dicLang_braketOpen) {
             nested++;
-        } else if (tokens[i].token == bracketClose && nested > 0) {
+        } else if (tokens[i].token == Lang::dicLang_braketClose && nested > 0) {
             nested--;
-        } else if (tokens[i].token == bracketClose && nested == 0 ) {
+        } else if (tokens[i].token == Lang::dicLang_braketClose && nested == 0 ) {
             return i;
             break;
         }

@@ -20,6 +20,7 @@ StackData::StackData() {
 	isOwqArr = false;
     rstPos = -1;
     rst    = false;
+	origin_index = -1;
 }
 /** Construct a Stack Data of some type
  * 
@@ -35,6 +36,7 @@ StackData::StackData(std::string value) {
 	isOwqArr = false;
     rstPos = -1;
     rst    = false;
+	origin_index = -1;
 }
 //A NUMBER from double:
 StackData::StackData(double value) {
@@ -46,6 +48,7 @@ StackData::StackData(double value) {
 	isOwqArr = false;
 	rstPos = -1;
 	rst = false;
+	origin_index = -1;
 }
 //A NUMBER from integer:
 StackData::StackData(int value) {
@@ -55,6 +58,7 @@ StackData::StackData(int value) {
 	bvalue = -1;
     rstPos = -1;
     rst    = false;
+	origin_index = -1;
 }
 /** A special internal type Called RST which indicates a static internal pointer; 
  * 
@@ -68,6 +72,7 @@ StackData::StackData(bool _rst, int _rstPos) {
 	bvalue = -1;
     rst = _rst;
     setRstPos(_rstPos);
+	origin_index = -1;
 }
 /** A boolean value constructor will be an integer but set to a boolean container;
 *
@@ -81,6 +86,7 @@ StackData::StackData(bool value) {
 	bvalue = (int)value;
 	rstPos = -1;
 	rst = false;
+	origin_index = -1;
 }
 StackData::StackData(int value, bool valueBool) {
 	type = SDtype::SD_BOOLEAN;
@@ -89,6 +95,7 @@ StackData::StackData(int value, bool valueBool) {
 	bvalue = value > 0 ? 1 : 0;
 	rstPos = -1;
 	rst = false;
+	origin_index = -1;
 }
 StackData::StackData(double value, bool valueBool) {
 	type = SDtype::SD_BOOLEAN;
@@ -97,6 +104,7 @@ StackData::StackData(double value, bool valueBool) {
 	bvalue = value > 0 ? 1 : 0;
 	rstPos = -1;
 	rst = false;
+	origin_index = -1;
 }
 StackData::StackData(std::string value, bool valueBool) {
 	type = SDtype::SD_BOOLEAN;
@@ -105,6 +113,7 @@ StackData::StackData(std::string value, bool valueBool) {
 	bvalue = value == "true" || value == "TRUE" ? 1 : 0;
 	rstPos = -1;
 	rst = false;
+	origin_index = -1;
 }
 /** Destruct the Stack data element
  * 
@@ -121,6 +130,16 @@ StackData::~StackData() {
 void StackData::setRstPos(int _rstPos) {
     rstPos = _rstPos;
 }
+/** The stack position that the stack data is placed in
+ *
+ */
+void StackData::setOrigin(int _origin_index) {
+	origin_index = _origin_index;
+}
+int StackData::getOrigin() {
+	return origin_index;
+}
+
 /**
 *
 */
@@ -183,6 +202,16 @@ bool StackData::isRstPos(int pos) {
 }
 int StackData::getRstPos() {
     return rstPos;
+}
+
+/* Gc seter and getter:
+ * 
+ */
+bool StackData::isGc() {
+	return type == SDtype::SD_GC ? true : false;
+}
+void StackData::setGc() {
+	type = SDtype::SD_GC;
 }
 /** Returns the Stack Data number value
  * 
@@ -252,17 +281,15 @@ std::string StackData::getAsString() {
 	std::stringstream ss;
 	if (isNumber()) {         // Print a number
 		ss << getNumber();
-	}
-	else if (isString()) {  // Print a string
+	} else if (isString()) {  // Print a string
 		ss << getString();
-	}
-	else if (isBoolean()) {
+	} else if (isBoolean()) {
 		ss << booleanValueToString();
-	}
-	else if (isRst()) {     // Print a rst
+	} else if (isRst()) {     // Print a rst
 		ss << "RST";
-	}
-	else {                  // Print NULL
+	} else if (isGc()) {
+		ss << "GC";
+	} else {                  // Print NULL
 		ss << "NULL";
 	}
 	return ss.str();
@@ -282,7 +309,9 @@ void StackData::render() {
 		std::cout << booleanValueToString();
     } else if (isRst()) {     // Print a rst
 		std::cout << "RST";
-    } else {                  // Print NULL
+	} else if (isGc()) {
+		std::cout << "GC";
+	} else {                  // Print NULL
 		std::cout << "NULL";
         printRst = false;
     }

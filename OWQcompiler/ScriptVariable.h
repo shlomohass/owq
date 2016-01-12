@@ -43,6 +43,7 @@ public:
     //Get methods:
 	std::string getName();
 	StackData getValue();
+	StackData* getValuePointer();
 
     //Set value:
 	bool setValue(StackData& sd);

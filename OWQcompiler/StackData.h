@@ -27,7 +27,8 @@ enum SDtype {
 	SD_OBJ,        
 	SD_OBJpointer,    
 	SD_ARRAY,         
-	SD_RST,  
+	SD_RST,
+	SD_GC,
 };
 
 class StackData {
@@ -49,6 +50,7 @@ class StackData {
 	//Static stack pointers:
     bool   rst;
     int    rstPos;
+	int    origin_index;
 
 public:
     
@@ -63,7 +65,9 @@ public:
     StackData(bool _rst, int _pos); // Asign a pointer stack value
     
     void setRstPos(int _rstPos);
-    
+	void setGc();
+	void setOrigin(int _origin_index);
+
 	SDtype getType();
 	bool isOftype(SDtype t);
 	bool isNull();
@@ -72,9 +76,11 @@ public:
 	bool isNumber(bool alsoBools);
 	bool isBoolean();
     bool isRst();
+	bool isGc();
     bool isRstPos(int pos);
     
-    int         getRstPos();
+    int         getOrigin();
+	int         getRstPos();
     double      getNumber();
 	double      getNumber(bool alsoBools);
 	int         getBoolean();

@@ -45,6 +45,10 @@ StackData ScriptVariable::getValue() {
 	return value;
 }
 
+StackData* ScriptVariable::getValuePointer() {
+	return &value;
+}
+
 bool ScriptVariable::setValue(StackData& sd) {
 	if (!isRegistered) {
 		value = sd;

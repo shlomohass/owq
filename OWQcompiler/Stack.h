@@ -23,8 +23,11 @@ public:
     static void push(StackData data);
     static void push(ScriptVariable& data);
     static int  size();
-    static StackData pop();
-    static StackData extract(int pointer);
+	static StackData* pop();
+    static StackData* pop(int offset);
+    static StackData* extract(int pointer);
+	static void eraseAt(int index);
+	static void runGC();
     static void setTopPointer(int pointer);
     static void Swap();
     static void ShiftTop();

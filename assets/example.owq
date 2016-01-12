@@ -1,3 +1,7 @@
-function test(let a) {
-	print("shlomi");
-}
+#print:print($1);#
+let a = 8,
+    b = 9,
+	c = a;
+
+#print(a,a.type())#
+

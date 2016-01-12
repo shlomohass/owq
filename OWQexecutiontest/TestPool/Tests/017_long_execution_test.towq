@@ -1,0 +1,19 @@
+let str = "abcdefgh" + "efghefgh";
+let imax = 1024 / str.length() * 128 * 4 * 2; // 65536
+
+let i = 0;
+let lngth;
+
+// will loop 65536 times:
+while (i < imax) {
+    lngth = str.length() * i;
+	i = i + 1;
+}
+
+print(" Iterations: " + i + " - Result: " + lngth);
+
+/*
+@expected-output
+Iterations: 65536 - Result: 1.04856e+06
+@end-expected-output
+*/

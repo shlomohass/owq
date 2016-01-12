@@ -24,6 +24,9 @@ std::string byteCode[] = {
     "AND",
     "POR",
     "CVE",
+	"CVN",
+	"CTE",
+	"CTN",
     "ELE",
     "PUSH", 
     "ADD", 
@@ -217,8 +220,8 @@ bool Instruction::isOperandBoolean() {
 bool Instruction::operandHasQuote() {
     return containsQuotes;
 }
-std::string Instruction::getOperand() {
-    return operand;
+std::string* Instruction::getOperand() {
+    return &operand;
 }
 ByteCode Instruction::getCode() {
     return code;

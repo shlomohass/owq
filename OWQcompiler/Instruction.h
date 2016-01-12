@@ -25,6 +25,9 @@ enum ByteCode {
     AND,    //Both are positive;
     POR,    //One OF Two are positive;
     CVE,    //Does the values match! ==
+	CVN,    //Does the values dont match! !=
+	CTE,    //Does the types match! =~
+	CTN,    //Does the types dont match! !~
     ELE,    //The ELSE of a conditions;
     PUSH,   //push the value of a variable onto the stack, push immediate string, or push number
     ADD,    //pop two items off stack and perform operation
@@ -42,7 +45,7 @@ enum ByteCode {
     SHT     //Shift top on stack.
     
 };
-extern std::string byteCode[28];
+extern std::string byteCode[31];
 class Instruction {
     ByteCode		code;
     std::string		operand;
@@ -66,7 +69,7 @@ public:
     double getNumber();
     std::string getString();
 
-    std::string getOperand();
+    std::string* getOperand();
     ByteCode getCode();
     std::string toString();
     std::string byteCodeToShort();
