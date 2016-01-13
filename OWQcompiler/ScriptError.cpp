@@ -11,7 +11,15 @@ ScriptError::ScriptError() {
 }
 
 void ScriptError::msg(std::string event) {
-	std::cout << "Compilation ERROR: " << event << std::endl;
+	std::cout << "OWQ Compilation ERROR ->" << event << std::endl;
+}
+
+void ScriptError::fatal(std::string event) {
+	std::cout << "OWQ Runtime ERROR -> " << event << std::endl;
+}
+
+void ScriptError::warn(std::string event) {
+	std::cout << "OWQ Runtime WARNING -> " << event << std::endl;
 }
 
 void ScriptError::render(std::string msg) {

@@ -1,5 +1,5 @@
 let str = "abcdefgh" + "efghefgh";
-let imax = 1024 / str.length() * 128 * 4 * 2; // 65536
+let imax = 1024 / str.length() * 4 * 128 * 2; // 65536
 
 let i = 0;
 let lngth;
@@ -10,7 +10,7 @@ while (i < imax) {
 	i = i + 1;
 }
 
-print(" Iterations: " + i + " - Result: " + lngth);
+print("Iterations: " + i + " - Result: " + lngth);
 
 /*
 @expected-output

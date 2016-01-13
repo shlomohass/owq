@@ -18,6 +18,8 @@ StackData::StackData() {
 	bvalue = -1;
 	isOwqObj = false;
 	isOwqArr = false;
+	owqObj = nullptr;
+	owqArray = nullptr;
     rstPos = -1;
     rst    = false;
 	origin_index = -1;
@@ -34,6 +36,8 @@ StackData::StackData(std::string value) {
 	bvalue = -1;
 	isOwqObj = false;
 	isOwqArr = false;
+	owqObj = nullptr;
+	owqArray = nullptr;
     rstPos = -1;
     rst    = false;
 	origin_index = -1;
@@ -46,6 +50,8 @@ StackData::StackData(double value) {
 	bvalue = -1;
 	isOwqObj = false;
 	isOwqArr = false;
+	owqObj = nullptr;
+	owqArray = nullptr;
 	rstPos = -1;
 	rst = false;
 	origin_index = -1;
@@ -56,6 +62,10 @@ StackData::StackData(int value) {
     dvalue = (double)value;
     svalue = "null";
 	bvalue = -1;
+	isOwqObj = false;
+	isOwqArr = false;
+	owqObj = nullptr;
+	owqArray = nullptr;
     rstPos = -1;
     rst    = false;
 	origin_index = -1;
@@ -70,6 +80,10 @@ StackData::StackData(bool _rst, int _rstPos) {
     dvalue = OWQ_NAN;
     svalue = "null";
 	bvalue = -1;
+	isOwqObj = false;
+	isOwqArr = false;
+	owqObj = nullptr;
+	owqArray = nullptr;
     rst = _rst;
     setRstPos(_rstPos);
 	origin_index = -1;
@@ -84,6 +98,10 @@ StackData::StackData(bool value) {
 	dvalue = OWQ_NAN;
 	svalue = "null";
 	bvalue = (int)value;
+	isOwqObj = false;
+	isOwqArr = false;
+	owqObj = nullptr;
+	owqArray = nullptr;
 	rstPos = -1;
 	rst = false;
 	origin_index = -1;
@@ -93,6 +111,10 @@ StackData::StackData(int value, bool valueBool) {
 	dvalue = OWQ_NAN;
 	svalue = "null";
 	bvalue = value > 0 ? 1 : 0;
+	isOwqObj = false;
+	isOwqArr = false;
+	owqObj = nullptr;
+	owqArray = nullptr;
 	rstPos = -1;
 	rst = false;
 	origin_index = -1;
@@ -102,6 +124,10 @@ StackData::StackData(double value, bool valueBool) {
 	dvalue = OWQ_NAN;
 	svalue = "null";
 	bvalue = value > 0 ? 1 : 0;
+	isOwqObj = false;
+	isOwqArr = false;
+	owqObj = nullptr;
+	owqArray = nullptr;
 	rstPos = -1;
 	rst = false;
 	origin_index = -1;
@@ -111,6 +137,10 @@ StackData::StackData(std::string value, bool valueBool) {
 	dvalue = OWQ_NAN;
 	svalue = "null";
 	bvalue = value == "true" || value == "TRUE" ? 1 : 0;
+	isOwqObj = false;
+	isOwqArr = false;
+	owqObj = nullptr;
+	owqArray = nullptr;
 	rstPos = -1;
 	rst = false;
 	origin_index = -1;
@@ -119,8 +149,7 @@ StackData::StackData(std::string value, bool valueBool) {
  * 
  */
 StackData::~StackData() {
-	owqArray.clear();
-	owqObj.clear();
+
 }
 
 /** Set the internal static position of the data; 
@@ -278,21 +307,18 @@ std::string StackData::booleanValueToString() {
 }
 
 std::string StackData::getAsString() {
-	std::stringstream ss;
 	if (isNumber()) {         // Print a number
-		ss << getNumber();
+		return numberValueToString();
 	} else if (isString()) {  // Print a string
-		ss << getString();
+		return getString();
 	} else if (isBoolean()) {
-		ss << booleanValueToString();
+		return booleanValueToString();
 	} else if (isRst()) {     // Print a rst
-		ss << "RST";
+		return "RST";
 	} else if (isGc()) {
-		ss << "GC";
-	} else {                  // Print NULL
-		ss << "NULL";
+		return "GC";
 	}
-	return ss.str();
+	return "NULL";
 }
 
 /** Render the Stack Data to the terminal

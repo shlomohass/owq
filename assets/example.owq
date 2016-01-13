@@ -1,7 +1,13 @@
-#print:print($1);#
-let a = 8,
-    b = 9,
-	c = a;
+let str = "abcdefgh" + "efghefgh";
+let imax = 1024 / str.length() * 16 * 4 * 2; // 65536
 
-#print(a,a.type())#
+let i = 0;
+let lngth;
 
+// will loop 65536 times:
+while (i < imax) {
+    lngth = str.length() * i;
+	i = i + 1;
+}
+
+print("Iterations: " + i + " - Result: " + lngth);

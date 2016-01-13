@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClInclude Include="CmdParser\argvparser.h" />
     <ClInclude Include="Argu.h" />
+    <ClInclude Include="OWQcompiler\Compute.h" />
     <ClInclude Include="OWQcompiler\Instruction.h" />
     <ClInclude Include="OWQcompiler\Lang.h" />
     <ClInclude Include="OWQcompiler\Method.h" />
@@ -40,6 +41,7 @@
     <ClCompile Include="Argu.cpp" />
     <ClCompile Include="CmdParser\argvparser.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="OWQcompiler\Compute.cpp" />
     <ClCompile Include="OWQcompiler\Instruction.cpp" />
     <ClCompile Include="OWQcompiler\Lang.cpp" />
     <ClCompile Include="OWQcompiler\Method.cpp" />

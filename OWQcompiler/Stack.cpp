@@ -15,7 +15,7 @@ std::vector<StackData> Stack::stack;
  * 
  */
 Stack::Stack() {
-	stack.reserve(200);
+	stack.reserve(20);
 }
 /** Push a number to the stack
  * 

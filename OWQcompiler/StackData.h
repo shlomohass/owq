@@ -44,8 +44,8 @@ class StackData {
 	//Objects childs:
 	bool isOwqObj; //Flag an object;
 	bool isOwqArr; //Flag an array;
-	std::map<std::string, StackData> owqObj;
-	std::vector<StackData> owqArray;
+	std::map<std::string, StackData>* owqObj;
+	std::vector<StackData>* owqArray;
 
 	//Static stack pointers:
     bool   rst;
