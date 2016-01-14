@@ -20,8 +20,8 @@ const std::string Compute::execute_errors[] = {
 	"Null stack extrcation at operation: " // Ex_NULL_STACK_EXTRACTION
 };
 const std::string Compute::execute_warn[] = {
-	/* 0 */ "Tried To GTR with unsupported types.",
-	/* 1 */ "Tried To LSR with unsupported types.",
+	/* 0 */ "Tried to GTR with unsupported types: ",
+	/* 1 */ "Tried to LSR with unsupported types: ",
 	/* 2 */ "Expected AND evaluation of boolean expression to be defined or boolean.",
 	/* 3 */ "Expected OR evaluation of boolean expression to be defined or boolean.",
 	/* 4 */ "Break loop expected a positive numeric value or none - skipped loop break.",
@@ -29,12 +29,12 @@ const std::string Compute::execute_warn[] = {
 	/* 6 */ "Break condition expected a positive numeric value or none - skipped loop break.",
 	/* 7 */ "Break condition number is bigger than the nested loops.",
 	/* 8 */ "Expected result of condition expression to be boolean or defined.",
-	/* 9 */ "Tried To execute Adition with unsupported types.",
-	/* 10 */ "Tried To execute Subtract with unsupported types.",
-	/* 11 */ "Tried To execute Multiplication with unsupported types.",
+	/* 9 */ "Tried to execute Adition with unsupported types: ",
+	/* 10 */ "Tried to execute Subtract with unsupported types: ",
+	/* 11 */ "Tried to execute Multiplication with unsupported types: ",
 	/* 12 */ "Division by zero prevented, calculation aborted",
-	/* 13 */ "Tried To execute Division with unsupported types.",
-	/* 14 */ "Tried To execute Exponent with unsupported types.",
+	/* 13 */ "Tried to execute Division with unsupported types: ",
+	/* 14 */ "Tried to execute Exponent with unsupported types: ",
 	/* 15 */ "Argument declaration requires execution of method",
 	/* 16 */ "Re-declaration of variable in method",
 	/* 17 */ "Current active function requires sufficient argument",
@@ -138,7 +138,6 @@ ExecReturn Compute::execute_variable_assignment(Instruction &xcode, Script *scri
 
 
 
-
 /** Perform a greater than operation
  *
  */
@@ -159,8 +158,8 @@ ExecReturn Compute::execute_math_gtr(Instruction &xcode) {
 			Stack::push(StackData(a->getString().length() > b->getNumber(true)));
 		} else if (a->isString() && b->isString()) { //a = string AND b = string
 			Stack::push(StackData(a->getString().length() > b->getString().length()));
-		} else {
-			ScriptError::warn(execute_warn[0]);
+		} else { //unsopurted
+			ScriptError::warn(execute_warn[0] + ScriptConsole::stackTypeName(a->getType()) + "," + ScriptConsole::stackTypeName(b->getType()));
 			Stack::push(StackData(false));
 		}
 		//Remove from stack:
@@ -183,8 +182,7 @@ ExecReturn Compute::execute_math_lsr(Instruction &xcode) {
 	if (a == nullptr || b == nullptr) {
 		ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_NULL_STACK_EXTRACTION] + xcode.toString());
 		return ExecReturn::Ex_NULL_STACK_EXTRACTION;
-	}
-	else {
+	} else {
 		int originA = a->getOrigin();
 		int originB = b->getOrigin();
 		if (a->isNumber(true) && b->isNumber(true)) { //a = number AND b = number
@@ -195,8 +193,8 @@ ExecReturn Compute::execute_math_lsr(Instruction &xcode) {
 			Stack::push(StackData(a->getString().length() < b->getNumber(true)));
 		} else if (a->isString() && b->isString()) { //a = string AND b = string
 			Stack::push(StackData(a->getString().length() < b->getString().length()));
-		} else {
-			ScriptError::msg(execute_warn[1]);
+		} else { //unsopurted
+			ScriptError::warn(execute_warn[1] + ScriptConsole::stackTypeName(a->getType()) + "," + ScriptConsole::stackTypeName(b->getType()));
 			Stack::push(StackData(false));
 		}
 		//Remove from stack:
@@ -415,7 +413,7 @@ ExecReturn Compute::execute_math_add(Instruction &xcode) {
 		} else if (a->isString() && b->isString()) { //a = string AND b = string
 			Stack::push(a->getString() + b->getString());
 		} else { //Unsupprted.
-			ScriptError::warn(execute_warn[9]);
+			ScriptError::warn(execute_warn[9] + ScriptConsole::stackTypeName(a->getType()) + "," + ScriptConsole::stackTypeName(b->getType()));
 			Stack::push(0);
 		}
 		//Remove from stack:
@@ -450,7 +448,7 @@ ExecReturn Compute::execute_math_subtract(Instruction &xcode) {
 		} else if (a->isString() && b->isString()) {                                                //a = string AND b = string
 			Stack::push(a->getString().length() - b->getString().length());
 		} else { //Unsupprted.
-			ScriptError::warn(execute_warn[10]);
+			ScriptError::warn(execute_warn[10] + ScriptConsole::stackTypeName(a->getType()) + "," + ScriptConsole::stackTypeName(b->getType()));
 			Stack::push(0);
 		}
 		//Remove from stack:
@@ -485,7 +483,7 @@ ExecReturn Compute::execute_math_mul(Instruction &xcode) {
 		} else if (a->isString() && b->isString()) {  //a = string AND b = string
 			Stack::push(a->getString().length() * b->getString().length());
 		} else { //Unsupprted.
-			ScriptError::warn(execute_warn[11]);
+			ScriptError::warn(execute_warn[11] + ScriptConsole::stackTypeName(a->getType()) + "," + ScriptConsole::stackTypeName(b->getType()));
 			Stack::push(0);
 		}
 		//Remove from stack:
@@ -532,7 +530,7 @@ ExecReturn Compute::execute_math_divide(Instruction &xcode) {
 		} else if (a->isString() && b->isString()) { //a = string AND b = string
 			Stack::push(a->getString().length() / b->getString().length());
 		} else { //Unsupprted.
-			ScriptError::warn(execute_warn[13]);
+			ScriptError::warn(execute_warn[13] + ScriptConsole::stackTypeName(a->getType()) + "," + ScriptConsole::stackTypeName(b->getType()));
 			Stack::push(0);
 		}
 		//Remove from stack:
@@ -564,10 +562,10 @@ ExecReturn Compute::execute_math_expon(Instruction &xcode) {
 			Stack::push(pow(a->getNumber(true), b->getString().length()));
 		} else if (a->isString() && b->isNumber(true)) { //a = string AND b = number
 			Stack::push(pow(a->getString().length(), b->getNumber(true)));
-		} else if (a->isString() && b->isString()) { //a = string AND b = string                                               //a = string AND b = string
+		} else if (a->isString() && b->isString()) { //a = string AND b = string 
 			Stack::push(pow(a->getString().length(), b->getString().length()));
 		} else { //Unsupprted.
-			ScriptError::warn(execute_warn[14]);
+			ScriptError::warn(execute_warn[14] + ScriptConsole::stackTypeName(a->getType()) + "," + ScriptConsole::stackTypeName(b->getType()));
 			Stack::push(0);
 		}
 		//Remove from stack:
@@ -581,11 +579,6 @@ ExecReturn Compute::execute_math_expon(Instruction &xcode) {
 	}
 	return ExecReturn::Ex_OK;
 }
-
-
-
-
-
 
 
 /** Perform a done instruction

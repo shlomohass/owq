@@ -395,7 +395,7 @@ bool Script::isSystemCall(std::string& object, std::string& functionName, Instru
 				}
             }
 			//return the type of a string
-			if (functionName == "type") {
+			else if (functionName == "type") {
 				Stack::push(ScriptConsole::type(sv->getValuePointer()));
 				if (_xcode.getPointer() > 0) {
 					Stack::setTopPointer(_xcode.getPointer());
@@ -403,7 +403,7 @@ bool Script::isSystemCall(std::string& object, std::string& functionName, Instru
 			}
             //return substring of a string
             //definition of substring: object.substring(index, numberOfCharacters)
-            if (functionName == "substr") {
+            else if (functionName == "substr") {
                 if (sv->getValuePointer()->isString()) {
                     Stack::render();
                     StackData* sb = Stack::pop();	//second argument first
@@ -425,8 +425,12 @@ bool Script::isSystemCall(std::string& object, std::string& functionName, Instru
 						Stack::setTopPointer(_xcode.getPointer());
 					}
                 }
-            }
+			} else {
+				return false;
+			}
+
             return true;
+
         } else {
             ScriptError::msg("Unable to find object " + object + " for system call " + functionName);
             return true;

@@ -12,38 +12,56 @@
  * @param string|double value
  */
 StackData::StackData() {
+	MutateToNull();
+}
+void StackData::MutateToNull() {
 	type = SDtype::SD_NULL;
-    dvalue = OWQ_NAN;
-    svalue = "null";
+	dvalue = OWQ_NAN;
+	svalue = "null";
 	bvalue = -1;
 	isOwqObj = false;
 	isOwqArr = false;
 	owqObj = nullptr;
 	owqArray = nullptr;
-    rstPos = -1;
-    rst    = false;
+	rstPos = -1;
+	rst = false;
 	origin_index = -1;
 }
+
 /** Construct a Stack Data of some type
  * 
  * @param string|double value
  */
 //A STRING:
-StackData::StackData(std::string value) {
+StackData::StackData(const std::string& value) {
+	MutateToString(value);
+}
+void StackData::MutateToString(const std::string& value) {
 	type = SDtype::SD_STRING;
-    dvalue = OWQ_NAN;
-    svalue = value;
+	dvalue = OWQ_NAN;
+	svalue = value;
 	bvalue = -1;
 	isOwqObj = false;
 	isOwqArr = false;
 	owqObj = nullptr;
 	owqArray = nullptr;
-    rstPos = -1;
-    rst    = false;
+	rstPos = -1;
+	rst = false;
 	origin_index = -1;
 }
+
 //A NUMBER from double:
 StackData::StackData(double value) {
+	MutateToNumber(value);
+}
+//A NUMBER from integer:
+StackData::StackData(int value) {
+	MutateToNumber((double)value);
+}
+void StackData::MutateToNumber(int value) {
+	MutateToNumber((double)value);
+}
+void StackData::MutateToNumber(double value) {
 	type = SDtype::SD_NUMBER;
 	dvalue = value;
 	svalue = "null";
@@ -56,20 +74,7 @@ StackData::StackData(double value) {
 	rst = false;
 	origin_index = -1;
 }
-//A NUMBER from integer:
-StackData::StackData(int value) {
-	type = SDtype::SD_NUMBER;
-    dvalue = (double)value;
-    svalue = "null";
-	bvalue = -1;
-	isOwqObj = false;
-	isOwqArr = false;
-	owqObj = nullptr;
-	owqArray = nullptr;
-    rstPos = -1;
-    rst    = false;
-	origin_index = -1;
-}
+
 /** A special internal type Called RST which indicates a static internal pointer; 
  * 
  * @param boolean _rst
@@ -94,36 +99,22 @@ StackData::StackData(bool _rst, int _rstPos) {
 * @param bool valueBool
 */
 StackData::StackData(bool value) {
-	type = SDtype::SD_BOOLEAN;
-	dvalue = OWQ_NAN;
-	svalue = "null";
-	bvalue = (int)value;
-	isOwqObj = false;
-	isOwqArr = false;
-	owqObj = nullptr;
-	owqArray = nullptr;
-	rstPos = -1;
-	rst = false;
-	origin_index = -1;
+	MutateToBoolean(value);
 }
 StackData::StackData(int value, bool valueBool) {
-	type = SDtype::SD_BOOLEAN;
-	dvalue = OWQ_NAN;
-	svalue = "null";
-	bvalue = value > 0 ? 1 : 0;
-	isOwqObj = false;
-	isOwqArr = false;
-	owqObj = nullptr;
-	owqArray = nullptr;
-	rstPos = -1;
-	rst = false;
-	origin_index = -1;
+	MutateToBoolean(value);
 }
 StackData::StackData(double value, bool valueBool) {
+	MutateToBoolean(value);
+}
+StackData::StackData(const std::string& value, bool valueBool) {
+	MutateToBoolean(value);
+}
+void StackData::MutateToBoolean(bool value) {
 	type = SDtype::SD_BOOLEAN;
 	dvalue = OWQ_NAN;
 	svalue = "null";
-	bvalue = value > 0 ? 1 : 0;
+	bvalue = value ? 1 : 0;
 	isOwqObj = false;
 	isOwqArr = false;
 	owqObj = nullptr;
@@ -132,19 +123,16 @@ StackData::StackData(double value, bool valueBool) {
 	rst = false;
 	origin_index = -1;
 }
-StackData::StackData(std::string value, bool valueBool) {
-	type = SDtype::SD_BOOLEAN;
-	dvalue = OWQ_NAN;
-	svalue = "null";
-	bvalue = value == "true" || value == "TRUE" ? 1 : 0;
-	isOwqObj = false;
-	isOwqArr = false;
-	owqObj = nullptr;
-	owqArray = nullptr;
-	rstPos = -1;
-	rst = false;
-	origin_index = -1;
+void StackData::MutateToBoolean(int value) {
+	MutateToBoolean(value == 0 ? false : true);
 }
+void StackData::MutateToBoolean(const std::string& value) {
+	MutateToBoolean(value == "true" || value == "TRUE" ? 1 : 0);
+}
+void StackData::MutateToBoolean(double value) {
+	MutateToBoolean(value > 0 ? true : false);
+}
+
 /** Destruct the Stack data element
  * 
  */

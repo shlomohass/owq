@@ -1,5 +1,5 @@
 let str = "abcdefgh" + "efghefgh";
-let imax = 1024 / str.length() * 4 * 128 * 2; // 65536
+let imax = 1024 / str.length() * 4 * 512 * 2; // 262144
 
 let i = 0;
 let lngth;
@@ -14,6 +14,6 @@ print("Iterations: " + i + " - Result: " + lngth);
 
 /*
 @expected-output
-Iterations: 65536 - Result: 1.04856e+06
+Iterations: 262144 - Result: 4.19429e+06
 @end-expected-output
 */

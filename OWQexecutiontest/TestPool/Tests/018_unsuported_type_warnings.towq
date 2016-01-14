@@ -1,0 +1,21 @@
+let a, b, c;
+a = 4;
+c = b < a;
+c = b > a;
+c = b + a;
+c = b - a;
+c = b * a;
+c = b / a;
+c = b ^ a;
+/*
+@expected-output
+OWQ Runtime WARNING -> Tried to LSR with unsupported types: NULL,NUMBER
+OWQ Runtime WARNING -> Tried to GTR with unsupported types: NULL,NUMBER
+OWQ Runtime WARNING -> Tried to execute Adition with unsupported types: NULL,NUMBER
+OWQ Runtime WARNING -> Tried to execute Subtract with unsupported types: NULL,NUMBER
+OWQ Runtime WARNING -> Tried to execute Multiplication with unsupported types: NULL,NUMBER
+OWQ Runtime WARNING -> Tried to execute Division with unsupported types: NULL,NUMBER
+OWQ Runtime WARNING -> Tried to execute Exponent with unsupported types: NULL,NUMBER
+
+@end-expected-output
+*/

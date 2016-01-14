@@ -6,8 +6,6 @@
 
 #include "ScriptVariable.h"
 
-//svalue       = "NaN";
-//dvalue = OWQ_NAN;
 ScriptVariable::ScriptVariable() {
 	value =			StackData();
     name            = ".invalid.null.initialize.";
@@ -51,17 +49,29 @@ StackData* ScriptVariable::getValuePointer() {
 
 bool ScriptVariable::setValue(StackData& sd) {
 	if (!isRegistered) {
-		value = sd;
+		// Try to Mutate the variable otherwise Deep copy the StackData
+		// We do this avoids a object destruction and new copy - this is good for perormance. 
+		if (sd.isNumber()) {
+			value.MutateToNumber(sd.getNumber());
+		} else if (sd.isString()) {
+			value.MutateToString(sd.getString());
+		}
+		else if (sd.isBoolean()) {
+			value.MutateToBoolean(sd.getBoolean());
+		} else if (sd.isNull()) {
+			value.MutateToNull();
+		} else {
+			// Deep Copy
+			value = sd;
+		}
 	} else {
 		if (sd.isNumber() && type == RegisteredVariable::REGISTERED_DOUBLE) {
 			double* v = static_cast<double*>(address);
 			*v = sd.getNumber();
-		}
-		else if (sd.isString() && type == RegisteredVariable::REGISTERED_STRING) {
+		} else if (sd.isString() && type == RegisteredVariable::REGISTERED_STRING) {
 			std::string* v = static_cast<std::string*>(address);
 			*v = sd.getString();
-		}
-		else if (sd.isBoolean() && type == RegisteredVariable::REGISTERED_DOUBLE) {
+		} else if (sd.isBoolean() && type == RegisteredVariable::REGISTERED_DOUBLE) {
 			bool* v = static_cast<bool*>(address);
 			*v = sd.getRealBoolean();
 		} else {

@@ -23,7 +23,8 @@ enum SDtype {
 	SD_NULL,
 	SD_STRING,
 	SD_NUMBER,   
-	SD_BOOLEAN,   
+	SD_BOOLEAN,
+	SD_POINTER,
 	SD_OBJ,        
 	SD_OBJpointer,    
 	SD_ARRAY,         
@@ -54,16 +55,34 @@ class StackData {
 
 public:
     
-    StackData();				// Asign an undefined value
-    StackData(std::string value);	// Asign a string value
-    StackData(double value);    // Asign a double value
-	StackData(int value);       // Asign a double value
-	StackData(bool value);
+	//Null Constructor:
+    StackData();				    // Asign an undefined value
+	void MutateToNull();
+
+	//String Constructor:
+	StackData(const std::string& value);	// Asign a string value
+	void MutateToString(const std::string& value);
+
+	//Number Constructor:
+    StackData(double value);        // Asign a double value
+	StackData(int value);           // Asign a double value
+	void MutateToNumber(double value);
+	void MutateToNumber(int value);
+
+	//Boolean Constructor:
+	StackData(bool value); // Asign a boolean value
 	StackData(int value, bool valueBool); // Asign a boolean value
-	StackData(std::string value, bool valueBool); // Asign a boolean value
+	StackData(const std::string& value, bool valueBool); // Asign a boolean value
 	StackData(double value, bool valueBool); // Asign a boolean value
+	void MutateToBoolean(bool value);
+	void MutateToBoolean(int value);
+	void MutateToBoolean(const std::string& value);
+	void MutateToBoolean(double value);
+
+	//Stack pointer Constructor:
     StackData(bool _rst, int _pos); // Asign a pointer stack value
     
+
     void setRstPos(int _rstPos);
 	void setGc();
 	void setOrigin(int _origin_index);

@@ -1,13 +1,14 @@
-let str = "abcdefgh" + "efghefgh";
-let imax = 1024 / str.length() * 16 * 4 * 2; // 65536
+let a, b, c, d;
+a = 4;
+b = 2;
 
-let i = 0;
-let lngth;
+a = "shlomi";
+b = true;
 
-// will loop 65536 times:
-while (i < imax) {
-    lngth = str.length() * i;
-	i = i + 1;
-}
+print(a);
+print(b);
 
-print("Iterations: " + i + " - Result: " + lngth);
+print(a.type());
+print(b.type());
+print(c.type());
+print(d > " shlomi");

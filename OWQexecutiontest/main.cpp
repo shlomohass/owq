@@ -128,26 +128,21 @@ int main(int argc, char** argv) {
 					++testcount;
 					test_files.push_back(dir_itr->path());
 				}
-			}
-			catch (const std::exception & ex)
-			{
+			} catch (const std::exception & ex) {
 				std::wcout << std::endl << L" * ERROR: When listing test directory: " <<  dir_itr->path().filename() << L" " << ex.what() << std::endl;
 			}
 		}
-
 		//Make sure we have tests:
 		if (testcount > 0) {
-
 			//Parse all tests:
 			for (int i = 0; i < (int)test_files.size(); i++) {
-
 				std::wifstream wifs;
 				std::wstring txtline;
 				int c = 0;
 				wifs.open(test_files[i].wstring());
 				if (!wifs.is_open())
 				{
-					std::wcerr << L"Unable to open file :" << test_files[i].wstring() << std::endl;
+					std::wcerr << L"Unable to open file: " << test_files[i].wstring() << std::endl;
 					expected_results_list[test_files[i].wstring()] = L"@SKIP@";
 					computed_results_list[test_files[i].wstring()] = L"@SKIP@";
 					continue;
@@ -187,12 +182,20 @@ int main(int argc, char** argv) {
 		typedef std::map<std::wstring, std::wstring>::iterator it_type;
 		for (it_type iterator = expected_results_list.begin(); iterator != expected_results_list.end(); iterator++) {
 			std::wstring unescaped = unescape(iterator->second);
-			std::wcout << L" File: " << iterator->first << L" - Expected: " << unescaped << L"  -  Length[ " << iterator->second.length() << L" ]" << std::endl;
+			if (unescaped.length() > 48) {
+				std::wcout << L" File: " << iterator->first << L" - Expected: " << unescaped.substr(0, 45) << L"...  -  Length[ " << iterator->second.length() << L" ]" << std::endl;
+			} else {
+				std::wcout << L" File: " << iterator->first << L" - Expected: " << unescaped << L"  -  Length[ " << iterator->second.length() << L" ]" << std::endl;
+			}
 			if (iterator->second != L"@SKIP@") {
 				clock_t tStart = clock();
 					std::wstring resultbuf = exec((settings.execfile + " -r \"" + std::string(iterator->first.begin(), iterator->first.end()) + "\"").c_str());
 					std::wstring un_escaped_resultbuf = unescape(resultbuf);
-					std::wcout << L"       Result: " << ((resultbuf == iterator->second) ? L"Test PASSED!" : (L"Test FAILLED!  actual result ----> " + un_escaped_resultbuf)) << std::endl;
+					if (un_escaped_resultbuf.length() > 63) {
+						std::wcout << L"       Result: " << ((resultbuf == iterator->second) ? L"Test PASSED!" : (L"Test FAILLED!  actual result ----> " + un_escaped_resultbuf.substr(0, 60) + L"...")) << std::endl;
+					} else {
+						std::wcout << L"       Result: " << ((resultbuf == iterator->second) ? L"Test PASSED!" : (L"Test FAILLED!  actual result ----> " + un_escaped_resultbuf)) << std::endl;
+					}
 					computed_results_list[iterator->first] = resultbuf;
 				clock_t tEnd = clock();
 				printf("       Execution: %.2fs, %dms\n\n", (double)(tEnd - tStart) / CLOCKS_PER_SEC, (tEnd - tStart) / (CLOCKS_PER_SEC / 1000));

@@ -1,0 +1,13 @@
+let a, b, c;
+a = 2;
+c = 0;
+b = 0 / 0;
+b = a / 0;
+print(0);
+/*
+@expected-output
+OWQ Runtime WARNING -> Division by zero prevented, calculation aborted
+OWQ Runtime WARNING -> Division by zero prevented, calculation aborted
+0
+@end-expected-output
+*/

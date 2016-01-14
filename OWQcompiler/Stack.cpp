@@ -116,10 +116,10 @@ void Stack::eraseAt(int index) {
 *
 */
 void Stack::runGC() {
-	for (int i = (int)stack.size() - 1; i > -1; i--) {
+	int last = (int)stack.size() - 1;
+	for (int i = last; i > -1; i--) {
 		if (stack[i].isGc()) {
 			stack.erase(stack.begin() + i);
-			return;
 		}
 	}
 }

@@ -40,33 +40,14 @@ class Script {
 	friend class Compute;
     friend class Tokens;
 
-	/**
-	* Debugger flag:
-	*/
+	// Debugger flag:
 	bool script_debug;
-    /**
-     * The complete listing of instructions that define this script
-     */
 	std::vector<Instruction> code;
-    /**
-     * Created as instructions are added to the Script via addInstruction
-     */
 	std::map<std::string, int> functionTable;
-    /**
-     * only registered variables can be registered
-     */
 	std::unordered_map<std::string, ScriptVariable> variables;
-
-    /**
-     * As a function is executed more reference to it is pushed onto this variable
-     */
+    // As a function is executed more reference to it is pushed onto this variable
 	std::vector<Method> functions;
-    /**
-     * Used to as a tag to remind vm of the method that is being executing
-     * Helpful when exiting a function, so we can clean up variables defined in that function
-     */
 	std::string currentExecutingMethod;
-    
     int internalStaticPointer;
     
     void popActiveMethod();
@@ -86,6 +67,7 @@ class Script {
     
     void addInstruction(Instruction I);
     void addInstruction(Instruction I, bool allowRST);
+
 public:
     Script();
 
@@ -96,8 +78,6 @@ public:
 	bool registerVariable(std::string varName, StackData& sd);
     bool unregisterVariable(std::string varName);
 
-    void render();
-
     void execute(std::string funcCall);
     
 	ExecReturn run();
@@ -107,6 +87,8 @@ public:
     bool loadFile(fs::wpath filename, bool debug);
 
     int getSize();
+	void render();
+
     virtual ~Script();
 };
 
