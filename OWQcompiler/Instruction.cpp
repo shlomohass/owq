@@ -6,6 +6,7 @@
 
 #include <stdlib.h>
 #include "Instruction.h"
+#include "Lang.h"
 #include <math.h>
 
 
@@ -95,7 +96,7 @@ Instruction::Instruction(ByteCode inst, std::string xOperand) {
     operand = xOperand;
     staticPointer = 0;
     isRST = false;
-    if (operand[0] == '"' && operand[operand.size()-1]== '"') {
+    if (operand[0] == Lang::LangStringIndicator && operand[operand.size()-1]== Lang::LangStringIndicator) {
         containsQuotes =true;
         //remove the quotes now
         operand.erase(0,1);//erase beginning quotation
@@ -108,7 +109,7 @@ Instruction::Instruction(ByteCode inst, std::string xOperand, int pointer) {
     code = inst;
     operand = xOperand;
     staticPointer = pointer;
-    if (operand[0] == '"' && operand[operand.size()-1]== '"') {
+    if (operand[0] == Lang::LangStringIndicator && operand[operand.size()-1]== Lang::LangStringIndicator) {
         containsQuotes =true;
         //remove the quotes now
         operand.erase(0,1);//erase beginning quotation
@@ -214,7 +215,19 @@ bool Instruction::isOperandString() {
     return !isOperandNumber();
 }
 bool Instruction::isOperandBoolean() {
-	if (operand == "true" || operand == "TRUE" || operand == "false" || operand == "FALSE") {
+	if (operand == Lang::dicLangValue_true_lower || 
+		operand == Lang::dicLangValue_true_upper || 
+		operand == Lang::dicLangValue_false_lower || 
+		operand == Lang::dicLangValue_false_upper
+	) {
+		return true;
+	}
+	return false;
+}
+bool Instruction::isOperandNull() {
+	if (operand == Lang::dicLangValue_null_lower || 
+		operand == Lang::dicLangValue_null_upper
+	) {
 		return true;
 	}
 	return false;

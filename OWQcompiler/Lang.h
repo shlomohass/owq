@@ -52,6 +52,12 @@ public:
     static bool              LangIsNamingAllowed(const std::string& value);
     static bool              LangIsNamingAllowed(const char& value);
     
+	//Value and types syntax
+	static std::map<std::string, std::string>     LangValues;
+	static std::map<std::string, std::string>     LangInverseValues;
+	static std::string LangFindValueNaming(const std::string& key);
+	static bool LangHasValueNaming(const std::string& key);
+
     //Define constant definition characters this is auto set and will insure speed up drasticly:
     
 	//Char based:
@@ -105,6 +111,14 @@ public:
 	static std::string dicLangKey_loop_break;
 	static std::string dicLangKey_function;
 	static std::string dicLangKey_return;
+
+	//Values based naming:
+	static std::string dicLangValue_true_lower;
+	static std::string dicLangValue_true_upper;
+	static std::string dicLangValue_false_lower;
+	static std::string dicLangValue_false_upper;
+	static std::string dicLangValue_null_lower;
+	static std::string dicLangValue_null_upper;
 
     virtual ~Lang();
     

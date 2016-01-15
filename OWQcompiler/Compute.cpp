@@ -69,12 +69,14 @@ ExecReturn Compute::execute_swap() {
  */
 ExecReturn Compute::execute_push(Instruction& xcode, Script* script) {
 	if (xcode.isOperandString()) { //if operand is string
-		if (xcode.operandHasQuote()) {          //if this operand is in the form---> ["what is this a string literal"]
-			Stack::push(*xcode.getOperand());	//save the string literal
+		if (xcode.operandHasQuote()) { //if this operand is in the form---> ["what is this a string literal"]
+			Stack::push(*xcode.getOperand()); //save the string literal
 		} else if (xcode.isRstPointer() && xcode.getPointer() > 0) { // We are handling with a static stack pointer
 			Stack::push(StackData(true, xcode.getPointer())); //This will push the special type of RST
 		} else if (xcode.isOperandBoolean()) {
 			Stack::push(StackData(*xcode.getOperand(), true)); //This will push a boolean stack data
+		} else if (xcode.isOperandNull()) {
+			Stack::push(StackData());
 		} else {
 			//the operand is in a form --> someWord <<---------no quotes around it, meaning it is a name of variable
 			//find that variable from the function/method stacking

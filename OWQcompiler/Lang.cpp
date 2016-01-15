@@ -10,6 +10,7 @@
 //Initialize maps:
 std::map<std::string, std::string> Lang::LangInverseDelimiter = std::map<std::string, std::string>{};
 std::map<std::string, std::string> Lang::LangInverseKeywords = std::map<std::string, std::string>{};
+std::map<std::string, std::string> Lang::LangInverseValues = std::map<std::string, std::string>{};
 
 //Set Delimiters:
 std::map<std::string, std::string> Lang::LangDelimiter = {
@@ -57,6 +58,17 @@ std::map<std::string, std::string> Lang::LangKeywords = {
     { "return"       , "return" }
 };
 
+//Set Values - set both smaller case and upper case:
+std::map<std::string, std::string> Lang::LangValues = {
+	{ "true-lower"        , "true" },
+	{ "true-upper"        , "TRUE" },
+	{ "false-lower"       , "false" },
+	{ "false-upper"       , "FALSE" },
+	{ "null-lower"		  , "null" },
+	{ "null-upper"        , "NULL" },
+};
+
+
 //Set chars allowed as names:
 //if we do not define '"' as a character, no tokens will be generated for string quoetation marks
 std::vector<char> Lang::LangNamingAllowedChars = {
@@ -81,7 +93,11 @@ Lang::Lang() {
     for(auto const &ent2 : LangKeywords) {
         LangInverseKeywords.insert(std::pair<std::string, std::string>(ent2.second, ent2.first));
     }
-	//Populate the language:
+	//Inverse Values naming:
+	for (auto const &ent3 : LangValues) {
+		LangInverseValues.insert(std::pair<std::string, std::string>(ent3.second, ent3.first));
+	}
+	//Populate the language definition:
 	LangPopulate();
 }
 Lang::Lang(const Lang& orig) {
@@ -142,6 +158,14 @@ std::string Lang::dicLangKey_loop_break = "";
 std::string Lang::dicLangKey_function = "";
 std::string Lang::dicLangKey_return = "";
 
+//Values based naming:
+std::string Lang::dicLangValue_true_lower = "";
+std::string Lang::dicLangValue_true_upper = "";
+std::string Lang::dicLangValue_false_lower = "";
+std::string Lang::dicLangValue_false_upper = "";
+std::string Lang::dicLangValue_null_lower = "";
+std::string Lang::dicLangValue_null_upper = "";
+
 /** Populate the language to cache symbols:
  *
  */
@@ -198,6 +222,15 @@ void Lang::LangPopulate() {
 	dicLangKey_loop_break = LangFindKeyword("loop-break");
 	dicLangKey_function = LangFindKeyword("function");
 	dicLangKey_return = LangFindKeyword("return");
+
+	//Values based naming:
+	dicLangValue_true_lower = LangFindValueNaming("true-lower");
+	dicLangValue_true_upper = LangFindValueNaming("true-upper");
+	dicLangValue_false_lower = LangFindValueNaming("false-lower");
+	dicLangValue_false_upper = LangFindValueNaming("false-upper");
+	dicLangValue_null_lower = LangFindValueNaming("null-lower");
+	dicLangValue_null_upper = LangFindValueNaming("null-upper");
+
 }
 /** Find the character that represent a delimiter name:
  * 
@@ -217,6 +250,25 @@ std::string Lang::LangFindDelimiter(const std::string& key) {
  */
 bool Lang::LangHasKeyDelimiter(const std::string& key) {
     return LangDelimiter.count(key) == 1;
+}
+/** Find the character that represent a delimiter name:
+*
+* @param string key
+* @return char
+*/
+std::string Lang::LangFindValueNaming(const std::string& key) {
+	if (LangHasValueNaming(key)) {
+		return LangValues.at(key);
+	}
+	return "";
+}
+/** Check whether a key delimiter is set:
+*
+* @param string key key name
+* @return bool
+*/
+bool Lang::LangHasValueNaming(const std::string& key) {
+	return LangValues.count(key) == 1;
 }
 /** Check whether a char delimiter is an actual register delimiter:
  * 

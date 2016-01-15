@@ -64,6 +64,7 @@ public:
     bool isOperandNumber();
     bool isOperandString();
 	bool isOperandBoolean();
+	bool isOperandNull();
     bool operandHasQuote();
     void setPointer(int pointer);
     int getPointer();

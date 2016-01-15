@@ -1,15 +1,13 @@
-let a, b, c, d;
-a = "owq";
-b -> a;
-c -> b;
+let a = null,
+	b = NULL,
+	c, d;
 
-print(a.isPointer() + ","); // FALSE
-print(a.isPointed() + ","); // TRUE
-print(b.isPointer() + ","); // TRUE
-print(b.isPointed() + ","); // TRUE
-print(c.isPointed() + ","); // FALSE
-print(c.isNull() + ",");   // FALSE
-print(d.isNull() + ",");   // TRUE
-print(d.type() + ",");			// NULL
-unset b, c;
-print(a.isPointed()); // FALSE
+c = a =~ b;
+d = a == b; // Null is not a value and cannot be compared or claculated
+
+print(a.isNull() + ","); // TRUE
+print(a.type() + ",");   // NULL
+print(b.isNull() + ","); // TRUE
+print(b.type() + ",");   // NULL
+print(c); // TRUE
+print(d); // FALSE
