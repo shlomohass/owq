@@ -1,0 +1,21 @@
+let a = null,
+	b = NULL,
+	c, d;
+
+c = a =~ b;
+// Null is not a value and cannot be compared or claculated
+// This will always be false:
+d = a == b; 
+
+print(a.isNull() + ","); // TRUE
+print(a.type() + ",");   // NULL
+print(b.isNull() + ","); // TRUE
+print(b.type() + ",");   // NULL
+print(c + ","); // TRUE
+print(d); // FALSE
+
+/*
+@expected-output
+TRUE,NULL,TRUE,NULL,TRUE,FALSE
+@end-expected-output
+*/
