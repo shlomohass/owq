@@ -1,0 +1,12 @@
+let a, b, c;
+a = "shlomi";
+b -> a;
+c -> b;
+print(c.type() + ",");
+unset a;
+print(c.type());
+/*
+@expected-output
+STRING,NULL
+@end-expected-output
+*/

@@ -1,0 +1,12 @@
+let a, b, c;
+a = "owq";
+b -> a;
+c -> b;
+b = "scripting " + c;
+
+print(c);
+/*
+@expected-output
+scripting owq
+@end-expected-output
+*/
