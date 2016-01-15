@@ -55,6 +55,7 @@ public:
 	static ExecReturn execute_arguments_declaration(Instruction &xcode, Script *script);
 	static ExecReturn execute_arguments_count_check(Instruction &xcode, Script *script);
 	static ExecReturn execute_variable_declaration(Instruction &xcode, Script *script);
+	static ExecReturn execute_variable_unset(Instruction &xcode, Script *script);
 	static ExecReturn execute_function_call(Instruction &xcode, Script *script, int& instructionPointer);
 };
 

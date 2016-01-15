@@ -167,7 +167,9 @@ ExecReturn Script::executeInstruction(Instruction &xcode, int& instructionPointe
 			return Compute::execute_variable_assignment(xcode, this);
 		case ByteCode::POI:
 			return Compute::execute_pointer_assignment(xcode, this, instructionPointer);
-        case ByteCode::GTR:
+		case ByteCode::UNS:
+			return Compute::execute_variable_unset(xcode, this);
+		case ByteCode::GTR:
 			return Compute::execute_math_gtr(xcode);
         case ByteCode::LSR:
 			return Compute::execute_math_lsr(xcode);
@@ -283,7 +285,7 @@ bool Script::registerVariable(std::string& name, StackData& sd) {
 	return false;
 }
 int Script::pointerVariable(std::string& name, std::string& pointTo) {
-	//Register a variable pointer:
+	//Set a variable pointer:
 	std::unordered_map<std::string, ScriptVariable>::iterator itT = variables.find(pointTo);
 	if (itT != variables.end()) {
 		//Check for infinite reference:
@@ -300,16 +302,37 @@ int Script::pointerVariable(std::string& name, std::string& pointTo) {
  * @param string name
  * @return boolean
 */
-bool Script::unregisterVariable(std::string name) {
+bool Script::unregisterVariable(std::string& name) {
+	return unregisterVariable(name, false);
+}
+bool Script::unregisterVariable(std::string& name, bool notSys) {
 	std::unordered_map<std::string, ScriptVariable>::iterator it;
-    it = variables.find(name);
-    if (it != variables.end()) {
-        variables.erase(it);
+	std::unordered_map<std::string, ScriptVariable>::iterator it_r;
+	ScriptVariable* candid;
+	it = variables.find(name);
+	if (it != variables.end()) {
+		candid = &it->second;
+		if (notSys && candid->isRegister()) {
+			return false;
+		}
+		// remove from what it points to:
+		if (candid->getPointer() != nullptr) {
+			candid->getPointer()->remHasPointers();
+		}
+		// deref backwards:
+		if (candid->isPointed()) {
+			for (it_r = variables.begin(); it_r != variables.end(); it_r++) {
+				if (it_r->second.getPointer() != nullptr && it_r->second.getPointer()->getName() == candid->getName()) {
+					it_r->second.deref();
+				}
+			}
+		}
+		//Finaly delete.
+		variables.erase(it);
 		return true;
-    }
+	}
 	return false;
 }
-
 /**
  *
  * Returns the method that is on top of the stack.
@@ -502,6 +525,7 @@ std::string errors[] = {
 	"16 Braces should be use after function argument brackets.",
 	"17 Unexpected bracket close - missing a bracket open char?",
 	"18 Function declaratin is missing a function name.",
+	"19 Unset - unset expression is not legal you should unset only variables."
 };
 
 /** Loads and precompiles a script:

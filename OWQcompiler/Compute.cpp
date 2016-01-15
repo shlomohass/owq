@@ -139,7 +139,6 @@ ExecReturn Compute::execute_variable_assignment(Instruction &xcode, Script *scri
 	}
 	return ExecReturn::Ex_OK;
 }
-
 /** Perform a pointer assignment
 *
 */
@@ -172,6 +171,7 @@ ExecReturn Compute::execute_pointer_assignment(Instruction &xcode, Script *scrip
 	}
 	return ExecReturn::Ex_OK;
 }
+
 
 
 /** Perform a greater than operation
@@ -864,7 +864,21 @@ ExecReturn Compute::execute_variable_declaration(Instruction &xcode, Script *scr
 	}
 	return ExecReturn::Ex_OK;
 }
-
+/** Perform a variable unset
+*
+*/
+ExecReturn Compute::execute_variable_unset(Instruction &xcode, Script *script) {
+	Method *m = script->getActiveMethod();
+	bool ret = true;
+	if (m == NULL) {
+		//Unset in global scope: only script vars are allowed:
+		ret = script->unregisterVariable(*xcode.getOperand(), true);
+	} else {
+		//Assign in method scope:
+		//m->addVariable(*xcode.getOperand());
+	}
+	return ret ? ExecReturn::Ex_OK : ExecReturn::Ex_VAR_RESOLVE;
+}
 /** Perform a function execution call
 *
 */

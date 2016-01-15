@@ -46,18 +46,26 @@ public:
 	ScriptVariable(std::string xName, RegisteredVariable type, void*  xAddress);
 
     //Get methods:
-	std::string getName();
+	std::string getName(); // Self name even if its a pointer.
 	StackData getValue();
 	StackData* getValuePointer();
+	ScriptVariable* getPointer();
 
 	//Validation check:
 	bool inPointerPath(const std::string& xName);
-
-    //Set value:
+	bool isRegister();
+	bool isPointed();
+    
+	//Set value:
 	bool setValue(StackData& sd);
 
+	//Deref the pointer:
+	void deref();
+
 	//Set pointer flag:
-	void setHasPointers();
+	void setHasPointers(); // Will increase self even if its a pointer.
+	void remHasPointers(); // Will decrease self even if its a pointer.
+
     //Render a variable for debugging:
 	std::string renderVariable();
 

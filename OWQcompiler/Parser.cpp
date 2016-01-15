@@ -649,7 +649,37 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 				compiler(script, tokens, debug, rCount);
 			} 
             return 0;
-        }
+
+		} else if (operatorToken->token == Lang::dicLangKey_unset) {
+			//Unset first variable on the right:
+			if (rightToken != nullptr && rightToken->type == TokenType::VAR) {
+				if (evaluateVarNotObjectCall(rightToken)) {
+					script->addInstruction(Instruction(ByteCode::UNS, rightToken->token));
+				} else {
+					return 19;
+				}
+			} else {
+				//ERROR - tried to unset badly:
+				return 7;
+			}
+			//This removes the define key word and the unset variable:
+			tokens.pop(operatorIndex);
+			tokens.pop(operatorIndex);
+			//Scan to allow bulk unset:
+			if (hasCommasNotNested(tokens)) {
+				//Scan to Unset all:
+				Token* t;
+				int tokenSetSize = (int)tokens.getSize();
+				for (int i = operatorIndex; i < tokenSetSize; i++) {
+					t = tokens.getTokenObject(i);
+					if (t->token == Lang::dicLang_comma) { continue; }
+					if (t->type != TokenType::VAR) { return 19; }
+					if (!evaluateVarNotObjectCall(t)) { return 19; }
+					script->addInstruction(Instruction(ByteCode::UNS, t->token));
+				}
+			}
+			return 0;
+		}
     } //end of keywords
 
     //------------------------------------------------------------
@@ -942,7 +972,21 @@ int Parser::evaluateFunctionDeclaration(Tokens &sub) {
 	}
 	return 13;
 }
-
+/** Evaluate a var token to make sure its a variable name and not something else.
+ *
+ */
+bool Parser::evaluateVarNotObjectCall(Token* token) {
+	if (token == nullptr) { return false; }
+	if (token->type != TokenType::VAR) { return false; }
+	std::string candid = token->token;
+	int size = (int)candid.length();
+	for (int i = 0; i < size; i++) {
+		if (candid[i] == Lang::LangSubObject) { continue; }
+		if (Lang::LangIsNamingAllowed(candid[i])) { continue; }
+		return false;
+	}
+	return true;
+}
 
 
 /** loop condition to find all until delimiter

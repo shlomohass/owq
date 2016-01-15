@@ -57,6 +57,7 @@ public:
 	//Char based:
 	static char LangGeneralSpace;
 	static char LangStringIndicator;
+	static char LangSubObject;
     static char LangFunctionOpenArguChar;
     static char LangFunctionCloseArguChar;
     static char LangBlockOpenChar;
@@ -91,8 +92,11 @@ public:
 	static std::string dicLang_and;
 	static std::string dicLang_or;
 	static std::string dicLang_semicolon;
+
 	//String based keywords:
 	static std::string dicLangKey_variable;
+	static std::string dicLangKey_unset;
+	static std::string dicLangKey_sub_object;
 	static std::string dicLangKey_cond_if;
 	static std::string dicLangKey_cond_else;
 	static std::string dicLangKey_cond_break;

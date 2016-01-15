@@ -37,6 +37,7 @@ std::string byteCode[] = {
     "EXPON", 
     "FUNC", 
     "DEF", 
+	"UNS",
     "ARG", 
     "ARGC_CHECK", 
     "CALL",

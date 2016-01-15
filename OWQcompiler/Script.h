@@ -78,8 +78,8 @@ public:
     bool registerVariable(std::string& varName); //intialize variable
 	bool registerVariable(std::string& varName, StackData& sd); // variable
 	int pointerVariable(std::string& varName, std::string& pointTo); // variable pointer
-    bool unregisterVariable(std::string varName);
-
+    bool unregisterVariable(std::string& varName);
+	bool unregisterVariable(std::string& varName, bool notSys);
     void execute(std::string funcCall);
     
 	ExecReturn run();

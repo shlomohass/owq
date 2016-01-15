@@ -53,9 +53,6 @@ ScriptVariable::ScriptVariable(std::string xName, RegisteredVariable xType, void
 }
 
 std::string ScriptVariable::getName() {
-	if (type == RegisteredVariable::GLOBAL_POINTER && pointer != nullptr) {
-		return pointer->getName();
-	}
 	return name;
 }
 
@@ -71,6 +68,10 @@ StackData* ScriptVariable::getValuePointer() {
 		return pointer->getValuePointer();
 	}
 	return &value;
+}
+
+ScriptVariable* ScriptVariable::getPointer() {
+	return pointer;
 }
 
 bool ScriptVariable::setValue(StackData& sd) {
@@ -110,8 +111,17 @@ bool ScriptVariable::setValue(StackData& sd) {
 	return true;
 }
 
+void ScriptVariable::deref() {
+	type = RegisteredVariable::GLOBAL_FLEX;
+	pointer = nullptr;
+}
+
 void ScriptVariable::setHasPointers() {
 	hasPointers++;
+}
+
+void ScriptVariable::remHasPointers() {
+	hasPointers--;
 }
 
 bool ScriptVariable::inPointerPath(const std::string& nameTocheck) {
@@ -124,6 +134,12 @@ bool ScriptVariable::inPointerPath(const std::string& nameTocheck) {
 	return false;
 }
 
+bool ScriptVariable::isRegister() {
+	return isRegistered;
+}
+bool ScriptVariable::isPointed() {
+	return hasPointers > 0;
+}
 std::string ScriptVariable::renderVariable() {
 	if (type == RegisteredVariable::GLOBAL_POINTER && pointer != nullptr) {
 		return pointer->renderVariable();

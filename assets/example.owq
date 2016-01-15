@@ -1,11 +1,13 @@
 let a, b, c;
-
 a = "shlomi";
+
 b -> a;
-c -> a;
+c -> b;
 
-c = b + " Hassid";
+print(c.type());
 
-print(b);
+unset a;
+
+print(c.type());
 
 

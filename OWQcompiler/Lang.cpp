@@ -44,15 +44,17 @@ std::map<std::string, std::string> Lang::LangDelimiter = {
 
 //Set Keywords:
 std::map<std::string, std::string> Lang::LangKeywords = {
-    {"variable"     , "let"},
-    {"cond-if"      , "if"},
-    {"cond-else"    , "else"},
-	{"cond-break"   , "breakif" },
-    {"loop-while"   , "while"},
-    {"loop-do"      , "do"},
-	{"loop-break"   , "break" },
-	{"function"     , "function" },
-    {"return"       , "return"},
+    { "variable"     , "let" },
+	{ "unset"        , "unset" },
+	{ "sub-object"   , "." },
+    { "cond-if"      , "if" },
+    { "cond-else"    , "else" },
+	{ "cond-break"   , "breakif" },
+    { "loop-while"   , "while"},
+    { "loop-do"      , "do" },
+	{ "loop-break"   , "break" },
+	{ "function"     , "function" },
+    { "return"       , "return" }
 };
 
 //Set chars allowed as names:
@@ -92,6 +94,7 @@ Lang::~Lang() {
 
 char Lang::LangGeneralSpace = ' ';
 char Lang::LangStringIndicator = ' ';
+char Lang::LangSubObject = ' ';
 char Lang::LangFunctionOpenArguChar = ' ';
 char Lang::LangFunctionCloseArguChar = ' ';
 char Lang::LangBlockOpenChar = ' ';
@@ -128,6 +131,8 @@ std::string Lang::dicLang_semicolon = "";
 
 //String based keywords:
 std::string Lang::dicLangKey_variable = "";
+std::string Lang::dicLangKey_unset = "";
+std::string Lang::dicLangKey_sub_object = "";
 std::string Lang::dicLangKey_cond_if = "";
 std::string Lang::dicLangKey_cond_else = "";
 std::string Lang::dicLangKey_cond_break = "";
@@ -145,6 +150,7 @@ void Lang::LangPopulate() {
 	//Char based:
 	LangGeneralSpace = LangFindDelimiter("space")[0];
 	LangStringIndicator = LangFindDelimiter("string")[0];
+	LangSubObject = LangFindKeyword("sub-object")[0];
 	LangFunctionOpenArguChar = LangFindDelimiter("braketOpen")[0];
 	LangFunctionCloseArguChar = LangFindDelimiter("braketClose")[0];
 	LangBlockOpenChar = LangFindDelimiter("bracesOpen")[0];
@@ -182,6 +188,8 @@ void Lang::LangPopulate() {
 
 	//Keywords:
 	dicLangKey_variable = LangFindKeyword("variable");
+	dicLangKey_unset = LangFindKeyword("unset");
+	dicLangKey_sub_object = LangFindKeyword("sub-object");
 	dicLangKey_cond_if = LangFindKeyword("cond-if");
 	dicLangKey_cond_else = LangFindKeyword("cond-else");
 	dicLangKey_cond_break = LangFindKeyword("cond-break");

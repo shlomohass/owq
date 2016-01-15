@@ -38,6 +38,7 @@ enum ByteCode {
     EXPON,  //pop two items off stack and perform operation
     FUNC,   //push a method onto the function stack
     DEF,    // Define a variable
+	UNS,    // Unset a variable
     ARG,    //define a variable and assign it a value from the stack
     ARGC, 
     CALL,
@@ -46,7 +47,7 @@ enum ByteCode {
     SHT     //Shift top on stack.
     
 };
-extern std::string byteCode[32];
+extern std::string byteCode[33];
 class Instruction {
     ByteCode		code;
     std::string		operand;
