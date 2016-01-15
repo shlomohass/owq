@@ -10,6 +10,11 @@ print(b.isPointed() + ","); // TRUE
 print(c.isPointed() + ","); // FALSE
 print(c.isNull() + ",");   // FALSE
 print(d.isNull() + ",");   // TRUE
-print(d.type() + ",");			// NULL
+print(d.type() + ",");	   // NULL
 unset b, c;
 print(a.isPointed()); // FALSE
+/*
+@expected-output
+FALSE,TRUE,TRUE,TRUE,FALSE,FALSE,TRUE,NULL,FALSE
+@end-expected-output
+*/
