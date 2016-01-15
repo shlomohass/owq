@@ -24,7 +24,6 @@ enum SDtype {
 	SD_STRING,
 	SD_NUMBER,   
 	SD_BOOLEAN,
-	SD_POINTER,
 	SD_OBJ,        
 	SD_OBJpointer,    
 	SD_ARRAY,         

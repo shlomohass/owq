@@ -785,12 +785,16 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
             compile_LR_mathLogigBaseOperations(ByteCode::POR, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
         }
         
-    } else if (priortyCode == 40) { //equal sign
+    } else if (priortyCode == 40) { //equal sign OR pointer assignment
 
         //extract from 1 past the equal sign to the end of the tokens
         Tokens sub = tokens.extractInclusive(operatorIndex+1, tokens.getSize()-1, eraseCount, script);
         compiler(script, sub, debug, rCount);
-        script->addInstruction(Instruction(ByteCode::ASN, leftToken->token));
+		if (operatorToken->token == Lang::dicLang_equal) {
+			script->addInstruction(Instruction(ByteCode::ASN, leftToken->token));
+		} else {
+			script->addInstruction(Instruction(ByteCode::POI, leftToken->token));
+		}
         tokens.extractInclusive(operatorIndex-1, operatorIndex+1, eraseCount, script);
         operatorIndex -= eraseCount;
             
@@ -876,7 +880,7 @@ int Parser::evaluateDeclarationSub(Tokens &sub, bool andTypes) {
 			}
 			break;
 		case 1:
-			if (token->token != Lang::dicLang_equal) {
+			if (token->token != Lang::dicLang_equal && token->token != Lang::dicLang_pointer) {
 				return 9;
 			}
 			break;
@@ -1078,7 +1082,7 @@ int Parser::getDelimiterPriorty(std::string toCheckToken, TokenType toCheckType)
 	else if (toCheckToken == Lang::dicLang_or) {
 		return 49;
 	}
-	else if (toCheckToken == Lang::dicLang_equal) {
+	else if (toCheckToken == Lang::dicLang_equal || toCheckToken == Lang::dicLang_pointer) {
 		return 40;
 	}
 	else if (toCheckToken == Lang::dicLang_comma) {

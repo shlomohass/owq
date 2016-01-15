@@ -1,14 +1,11 @@
-let a, b, c, d;
-a = 4;
-b = 2;
+let a, b, c;
 
 a = "shlomi";
-b = true;
+b -> a;
+c -> a;
 
-print(a);
+c = b + " Hassid";
+
 print(b);
 
-print(a.type());
-print(b.type());
-print(c.type());
-print(d > " shlomi");
+

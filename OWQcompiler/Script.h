@@ -34,6 +34,7 @@ enum ExecReturn {
 namespace fs = boost::filesystem;
 
 class Parser;
+
 class Script {
     
     friend class Parser;
@@ -72,10 +73,11 @@ public:
     Script();
 
     //Register variable to global scope from Application layer:
-    bool registerVariable(std::string varName, RegisteredVariable type, void* address);
+    bool registerVariable(std::string& varName, RegisteredVariable type, void* address);
     //Register variable to global scope by execution runtime:
-    bool registerVariable(std::string varName);
-	bool registerVariable(std::string varName, StackData& sd);
+    bool registerVariable(std::string& varName); //intialize variable
+	bool registerVariable(std::string& varName, StackData& sd); // variable
+	int pointerVariable(std::string& varName, std::string& pointTo); // variable pointer
     bool unregisterVariable(std::string varName);
 
     void execute(std::string funcCall);

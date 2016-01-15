@@ -28,6 +28,7 @@ public:
 	static ExecReturn execute_push(Instruction &xcode, Script *script);
 	static ExecReturn execute_function_return(Instruction &xcode, Script *script, int& instructionPointer);
 	static ExecReturn execute_variable_assignment(Instruction &xcode, Script *script);
+	static ExecReturn execute_pointer_assignment(Instruction &xcode, Script *script, int& instructionPointer);
 	
 	//Compute methods - Math and comparison:
 	static ExecReturn execute_math_gtr(Instruction &xcode); // >

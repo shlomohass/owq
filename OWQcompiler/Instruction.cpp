@@ -13,6 +13,7 @@ std::string byteCode[] = {
     "NOP", 
     "RET", 
     "ASN", 
+	"POI",
     "GTR", 
     "LSR", 
     "LOOP", 

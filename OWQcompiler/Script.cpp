@@ -165,6 +165,8 @@ ExecReturn Script::executeInstruction(Instruction &xcode, int& instructionPointe
 			return Compute::execute_function_return(xcode, this, instructionPointer);
         case ByteCode::ASN:
 			return Compute::execute_variable_assignment(xcode, this);
+		case ByteCode::POI:
+			return Compute::execute_pointer_assignment(xcode, this, instructionPointer);
         case ByteCode::GTR:
 			return Compute::execute_math_gtr(xcode);
         case ByteCode::LSR:
@@ -255,14 +257,14 @@ void Script::popActiveMethod() {
  *  @param void* address
  *  @return boolean
  */
-bool Script::registerVariable(std::string name, RegisteredVariable type, void* address) {
+bool Script::registerVariable(std::string& name, RegisteredVariable type, void* address) {
 	if (variables.find(name) == variables.end()) {
 		variables[name] = ScriptVariable(name, type, address);
 		return true;
 	}
 	return false;
 }
-bool Script::registerVariable(std::string name) {
+bool Script::registerVariable(std::string& name) {
     //Will register a global scope value but without a pointer address should
     //not be unregistered at the end of execution:
 	if (variables.find(name) == variables.end()) {
@@ -271,7 +273,7 @@ bool Script::registerVariable(std::string name) {
 	}
 	return false;
 }
-bool Script::registerVariable(std::string name, StackData& sd) {
+bool Script::registerVariable(std::string& name, StackData& sd) {
 	//Will register a global scope value but without a pointer address should
 	//not be unregistered at the end of execution:
 	if (variables.find(name) == variables.end()) {
@@ -280,11 +282,25 @@ bool Script::registerVariable(std::string name, StackData& sd) {
 	}
 	return false;
 }
+int Script::pointerVariable(std::string& name, std::string& pointTo) {
+	//Register a variable pointer:
+	std::unordered_map<std::string, ScriptVariable>::iterator itT = variables.find(pointTo);
+	if (itT != variables.end()) {
+		//Check for infinite reference:
+		if (pointTo == name || variables[pointTo].inPointerPath(name)) {
+			return 2;
+		}
+		variables[name] = ScriptVariable(name, &variables[pointTo]);
+		variables[pointTo].setHasPointers();
+		return 0;
+	}
+	return 1;
+}
 /** Unregister a variable only if it exists:
  * @param string name
  * @return boolean
 */
-bool Script::unregisterVariable(std::string name){
+bool Script::unregisterVariable(std::string name) {
 	std::unordered_map<std::string, ScriptVariable>::iterator it;
     it = variables.find(name);
     if (it != variables.end()) {

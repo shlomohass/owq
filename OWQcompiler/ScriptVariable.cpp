@@ -11,6 +11,8 @@ ScriptVariable::ScriptVariable() {
     name            = ".invalid.null.initialize.";
     isRegistered    = false;
     address         = NULL;
+	hasPointers		= 0;
+	pointer			= nullptr;
     type            = RegisteredVariable::GLOBAL_FLEX;
 }
 ScriptVariable::ScriptVariable(std::string xName) {
@@ -18,6 +20,8 @@ ScriptVariable::ScriptVariable(std::string xName) {
 	name = xName;
 	isRegistered = false;
 	address = NULL;
+	hasPointers = 0;
+	pointer = nullptr;
 	type = RegisteredVariable::GLOBAL_FLEX;
 }
 ScriptVariable::ScriptVariable(std::string xName, StackData& sd) {
@@ -25,29 +29,54 @@ ScriptVariable::ScriptVariable(std::string xName, StackData& sd) {
 	name = xName;
 	isRegistered = false;
 	address = NULL;
+	hasPointers = 0;
+	pointer = nullptr;
 	type = RegisteredVariable::GLOBAL_FLEX;
+}
+ScriptVariable::ScriptVariable(std::string xName, ScriptVariable* sv) {
+	value = StackData();
+	name = xName;
+	isRegistered = false;
+	address = NULL;
+	hasPointers = 0;
+	pointer = sv;
+	type = RegisteredVariable::GLOBAL_POINTER;
 }
 ScriptVariable::ScriptVariable(std::string xName, RegisteredVariable xType, void* xAddress) {
 	value		 = StackData();
     name         = xName;
     isRegistered = true;
     address      = xAddress;
+	hasPointers	 = false;
+	pointer		 = nullptr;
     type         = xType;
 }
 
 std::string ScriptVariable::getName() {
+	if (type == RegisteredVariable::GLOBAL_POINTER && pointer != nullptr) {
+		return pointer->getName();
+	}
 	return name;
 }
 
 StackData ScriptVariable::getValue() {
+	if (type == RegisteredVariable::GLOBAL_POINTER && pointer != nullptr) {
+		return pointer->getValue();
+	}
 	return value;
 }
 
 StackData* ScriptVariable::getValuePointer() {
+	if (type == RegisteredVariable::GLOBAL_POINTER && pointer != nullptr) {
+		return pointer->getValuePointer();
+	}
 	return &value;
 }
 
 bool ScriptVariable::setValue(StackData& sd) {
+	if (type == RegisteredVariable::GLOBAL_POINTER && pointer != nullptr) {
+		return pointer->setValue(sd);
+	}
 	if (!isRegistered) {
 		// Try to Mutate the variable otherwise Deep copy the StackData
 		// We do this avoids a object destruction and new copy - this is good for perormance. 
@@ -81,7 +110,24 @@ bool ScriptVariable::setValue(StackData& sd) {
 	return true;
 }
 
+void ScriptVariable::setHasPointers() {
+	hasPointers++;
+}
+
+bool ScriptVariable::inPointerPath(const std::string& nameTocheck) {
+	if (type == RegisteredVariable::GLOBAL_POINTER && pointer != nullptr) {
+		if (name == nameTocheck) {
+			return true;
+		} 
+		return pointer->inPointerPath(nameTocheck);
+	}
+	return false;
+}
+
 std::string ScriptVariable::renderVariable() {
+	if (type == RegisteredVariable::GLOBAL_POINTER && pointer != nullptr) {
+		return pointer->renderVariable();
+	}
 	return "";
 }
 

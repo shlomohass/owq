@@ -21,6 +21,7 @@ std::map<std::string, std::string> Lang::LangDelimiter = {
     { "multi"             , "*" },
     { "divide"            , "/" },
     { "equal"             , "=" },
+	{ "pointer"           , "->" },
     { "braketOpen"        , "(" },
     { "braketClose"       , ")" },
     { "bracesOpen"        , "{" },
@@ -107,6 +108,7 @@ std::string Lang::dicLang_minus = "";
 std::string Lang::dicLang_multi = "";
 std::string Lang::dicLang_divide = "";
 std::string Lang::dicLang_equal = "";
+std::string Lang::dicLang_pointer = "";
 std::string Lang::dicLang_braketOpen = "";
 std::string Lang::dicLang_braketClose = "";
 std::string Lang::dicLang_bracesOpen = "";
@@ -160,6 +162,7 @@ void Lang::LangPopulate() {
 	dicLang_multi = LangFindDelimiter("multi");
 	dicLang_divide = LangFindDelimiter("divide");
 	dicLang_equal = LangFindDelimiter("equal");
+	dicLang_pointer = LangFindDelimiter("pointer");
 	dicLang_braketOpen = LangFindDelimiter("braketOpen");
 	dicLang_braketClose = LangFindDelimiter("braketClose");
 	dicLang_bracesOpen = LangFindDelimiter("bracesOpen");
@@ -219,6 +222,7 @@ bool Lang::LangIsDelimiter(const std::string& value) {
 	if (value[0] == dicLang_multi[0] && value == dicLang_multi) return true;
 	if (value[0] == dicLang_divide[0] && value == dicLang_divide) return true;
 	if (value[0] == dicLang_equal[0] && value == dicLang_equal) return true;
+	if (value[0] == dicLang_pointer[0] && value == dicLang_pointer) return true;
 	if (value[0] == dicLang_braketOpen[0] && value == dicLang_braketOpen) return true;
 	if (value[0] == dicLang_braketClose[0] && value == dicLang_braketClose) return true;
 	if (value[0] == dicLang_bracesOpen[0] && value == dicLang_bracesOpen) return true;

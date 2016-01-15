@@ -19,6 +19,7 @@ const std::string Compute::execute_errors[] = {
 	"Unable to assign to native variable", // Ex_NVAR_ASN
 	"Null stack extrcation at operation: " // Ex_NULL_STACK_EXTRACTION
 };
+
 const std::string Compute::execute_warn[] = {
 	/* 0 */ "Tried to GTR with unsupported types: ",
 	/* 1 */ "Tried to LSR with unsupported types: ",
@@ -38,7 +39,10 @@ const std::string Compute::execute_warn[] = {
 	/* 15 */ "Argument declaration requires execution of method",
 	/* 16 */ "Re-declaration of variable in method",
 	/* 17 */ "Current active function requires sufficient argument",
-	/* 18 */ "Unable to find function: "
+	/* 18 */ "Unable to find function: ",
+	/* 19 */ "Pointer must point to a declared valid variable in pointer: ",
+	/* 20 */ "Pointer self reference is not alowed (infinite reference): "
+
 };
 Compute::Compute() {
 
@@ -136,6 +140,38 @@ ExecReturn Compute::execute_variable_assignment(Instruction &xcode, Script *scri
 	return ExecReturn::Ex_OK;
 }
 
+/** Perform a pointer assignment
+*
+*/
+ExecReturn Compute::execute_pointer_assignment(Instruction &xcode, Script *script, int& instructionPointer) {
+	StackData* sd = Stack::pop(0); //pop and get the value it wont be needed but we need to earase it.
+	ScriptVariable* sv = script->getVariable(*xcode.getOperand()); //get the variable we wish to sign to
+	int ret = 0;
+	if (sv == NULL || sd == nullptr) {
+		ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_VAR_RESOLVE] + *xcode.getOperand());
+		return ExecReturn::Ex_VAR_RESOLVE;
+	}
+	if (script->code[instructionPointer - 1].getCode() == ByteCode::PUSH
+		&& script->code[instructionPointer - 1].isOperandString()
+		&& !script->code[instructionPointer - 1].isRstPointer()
+		&& !script->code[instructionPointer - 1].isOperandBoolean()
+	) {
+		ret = script->pointerVariable(*xcode.getOperand(), *script->code[instructionPointer - 1].getOperand());
+	} else {
+		ret = 1;
+	}
+	int originSD = sd->getOrigin();
+	Stack::eraseAt(originSD);
+	Stack::runGC();
+	if (ret > 0) {
+		if (ret == 1) {
+			ScriptError::warn(execute_warn[19] + *xcode.getOperand());
+		} else {
+			ScriptError::warn(execute_warn[20] + *xcode.getOperand());
+		}
+	}
+	return ExecReturn::Ex_OK;
+}
 
 
 /** Perform a greater than operation
@@ -828,6 +864,7 @@ ExecReturn Compute::execute_variable_declaration(Instruction &xcode, Script *scr
 	}
 	return ExecReturn::Ex_OK;
 }
+
 /** Perform a function execution call
 *
 */

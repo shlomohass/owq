@@ -74,6 +74,7 @@ public:
 	static std::string dicLang_multi;
 	static std::string dicLang_divide;
 	static std::string dicLang_equal;
+	static std::string dicLang_pointer;
 	static std::string dicLang_braketOpen;
 	static std::string dicLang_braketClose;
 	static std::string dicLang_bracesOpen;
