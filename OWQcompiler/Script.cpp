@@ -440,8 +440,25 @@ bool Script::isSystemCall(std::string& object, std::string& functionName, Instru
 					Stack::setTopPointer(_xcode.getPointer());
 				}
 			}
+			else if (functionName == "isNull") {
+				Stack::push(ScriptConsole::isNull(sv->getValuePointer()));
+				if (_xcode.getPointer() > 0) {
+					Stack::setTopPointer(_xcode.getPointer());
+				}
+			}
+			else if (functionName == "isPointer") {
+				Stack::push(ScriptConsole::isPointer(sv));
+				if (_xcode.getPointer() > 0) {
+					Stack::setTopPointer(_xcode.getPointer());
+				}
+			}
+			else if (functionName == "isPointed") {
+				Stack::push(ScriptConsole::isPointed(sv));
+				if (_xcode.getPointer() > 0) {
+					Stack::setTopPointer(_xcode.getPointer());
+				}
+			}
             //return substring of a string
-            //definition of substring: object.substring(index, numberOfCharacters)
             else if (functionName == "substr") {
                 if (sv->getValuePointer()->isString()) {
                     Stack::render();

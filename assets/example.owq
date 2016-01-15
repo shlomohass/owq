@@ -1,13 +1,13 @@
-let a, b, c;
+let a, b, c, d;
 a = "shlomi";
-
 b -> a;
 c -> b;
 
-print(c.type());
-
-unset a;
-
-print(c.type());
-
-
+print(a.isPointer()); // FALSE
+print(a.isPointed()); // TRUE
+print(b.isPointer()); // TRUE
+print(b.isPointed()); // TRUE
+print(c.isPointed()); // FALSE
+print(c.isNull());   // FALSE
+print(d.isNull());   // TRUE
+print(d);			// NULL

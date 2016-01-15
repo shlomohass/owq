@@ -8,6 +8,7 @@
 
 #include "Setowq.h"
 #include "StackData.h"
+#include "ScriptVariable.h"
 #include <iostream>
 #include <sstream>
 
@@ -20,6 +21,9 @@ public:
     static void print(StackData* sd, bool debug);
 	static StackData length(StackData* sd);
 	static StackData type(StackData* sd);
+	static StackData isNull(StackData* sd);
+	static StackData isPointer(ScriptVariable* sv);
+	static StackData isPointed(ScriptVariable* sv);
     static std::string toString(double number);
 
 	//Helpers 

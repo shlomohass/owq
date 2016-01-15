@@ -42,6 +42,15 @@ StackData ScriptConsole::type(StackData* sd) {
 	return StackData(littype);
 }
 
+StackData ScriptConsole::isNull(StackData* sd) {
+	return StackData(sd->getType() == SDtype::SD_NULL);
+}
+StackData ScriptConsole::isPointer(ScriptVariable* sv) {
+	return StackData(sv->getPointer() != nullptr);
+}
+StackData ScriptConsole::isPointed(ScriptVariable* sv) {
+	return StackData(sv->isPointed());
+}
 std::string ScriptConsole::toString(double number) {
 	std::stringstream ss;
     ss << number;
