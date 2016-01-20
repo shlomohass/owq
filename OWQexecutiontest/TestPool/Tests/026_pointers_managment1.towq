@@ -1,0 +1,18 @@
+let a, b, c, d;
+a = "owq";
+b = "test";
+c = 1;
+d -> b;
+while (c < 2) {
+	let g = "yep";
+	b -> g;
+	c = c + 1;
+	print(b + ",");
+}
+print(b.type() + ",");
+print(d.type());
+/*
+@expected-output
+yep,NULL,NULL
+@end-expected-output
+*/

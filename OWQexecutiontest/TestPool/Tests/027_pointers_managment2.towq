@@ -1,0 +1,27 @@
+let a, b, c, d, e;
+a = "owq1";
+b = "test";
+c = 1;
+e -> b;
+d -> e;
+while (c < 2) {
+	let g = "yep";
+	b -> g;
+	unset e;
+	print(b + ",");
+	while (c < 2) {
+		let a = "owq2";
+		unset g;
+		c = c + 1;
+		print(a + ",");
+	}
+	print(b.type() + ",");
+	print(a + ",");
+}
+print(b.type() + ",");
+print(d.type());
+/*
+@expected-output
+yep,owq2,NULL,owq1,NULL,NULL
+@end-expected-output
+*/

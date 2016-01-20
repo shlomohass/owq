@@ -1,0 +1,9 @@
+let i = 0;
+while (i < 500000) {
+	i = i + 1;
+}
+/*
+@expected-output
+
+@end-expected-output
+*/
