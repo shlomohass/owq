@@ -46,7 +46,7 @@ public:
 	ScriptVariable(std::string xName, RegisteredVariable type, void*  xAddress);
 
     //Get methods:
-	std::string getName(); // Self name even if its a pointer.
+	std::string& getName(); // Self name even if its a pointer.
 	StackData getValue();
 	StackData* getValuePointer();
 	ScriptVariable* getPointer();
@@ -63,6 +63,8 @@ public:
 	void deref();
 
 	//Set pointer flag:
+	int  getPointedCounter();
+	void setPointedCounter(int num);
 	void setHasPointers(); // Will increase self even if its a pointer.
 	void remHasPointers(); // Will decrease self even if its a pointer.
 

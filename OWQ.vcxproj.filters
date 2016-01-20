@@ -78,6 +78,9 @@
     <ClInclude Include="OWQcompiler\Compute.h">
       <Filter>Header Files\OWQcompiler</Filter>
     </ClInclude>
+    <ClInclude Include="OWQcompiler\Loop.h">
+      <Filter>Header Files\OWQcompiler</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="OWQcompiler\Instruction.cpp">
@@ -129,6 +132,9 @@
       <Filter>Source Files\OWQcompiler</Filter>
     </ClCompile>
     <ClCompile Include="OWQcompiler\Compute.cpp">
+      <Filter>Source Files\OWQcompiler</Filter>
+    </ClCompile>
+    <ClCompile Include="OWQcompiler\Loop.cpp">
       <Filter>Source Files\OWQcompiler</Filter>
     </ClCompile>
   </ItemGroup>

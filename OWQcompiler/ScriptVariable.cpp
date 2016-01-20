@@ -47,12 +47,12 @@ ScriptVariable::ScriptVariable(std::string xName, RegisteredVariable xType, void
     name         = xName;
     isRegistered = true;
     address      = xAddress;
-	hasPointers	 = false;
+	hasPointers	 = 0;
 	pointer		 = nullptr;
     type         = xType;
 }
 
-std::string ScriptVariable::getName() {
+std::string& ScriptVariable::getName() {
 	return name;
 }
 
@@ -115,7 +115,12 @@ void ScriptVariable::deref() {
 	type = RegisteredVariable::GLOBAL_FLEX;
 	pointer = nullptr;
 }
-
+int  ScriptVariable::getPointedCounter() {
+	return hasPointers;
+}
+void ScriptVariable::setPointedCounter(int num) {
+	hasPointers = num;
+}
 void ScriptVariable::setHasPointers() {
 	hasPointers++;
 }
@@ -125,10 +130,10 @@ void ScriptVariable::remHasPointers() {
 }
 
 bool ScriptVariable::inPointerPath(const std::string& nameTocheck) {
+	if (name[0] == nameTocheck[0] && name == nameTocheck) {
+		return true;
+	}
 	if (type == RegisteredVariable::GLOBAL_POINTER && pointer != nullptr) {
-		if (name == nameTocheck) {
-			return true;
-		} 
 		return pointer->inPointerPath(nameTocheck);
 	}
 	return false;
@@ -137,6 +142,7 @@ bool ScriptVariable::inPointerPath(const std::string& nameTocheck) {
 bool ScriptVariable::isRegister() {
 	return isRegistered;
 }
+
 bool ScriptVariable::isPointed() {
 	return hasPointers > 0;
 }

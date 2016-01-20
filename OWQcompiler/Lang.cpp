@@ -11,61 +11,67 @@
 std::map<std::string, std::string> Lang::LangInverseDelimiter = std::map<std::string, std::string>{};
 std::map<std::string, std::string> Lang::LangInverseKeywords = std::map<std::string, std::string>{};
 std::map<std::string, std::string> Lang::LangInverseValues = std::map<std::string, std::string>{};
+std::map<std::string, int> Lang::LangInverseSystemLib = std::map<std::string, int>{};
 
 //Set Delimiters:
 std::map<std::string, std::string> Lang::LangDelimiter = {
-	{ "string"            , "\"" },
-	{ "string-esc"        , "\\" },
-    { "space"             , " " },
-    { "plus"              , "+" },
-    { "minus"             , "-" },
-    { "multi"             , "*" },
-    { "divide"            , "/" },
-    { "equal"             , "=" },
-	{ "pointer"           , "->" },
-    { "braketOpen"        , "(" },
-    { "braketClose"       , ")" },
-    { "bracesOpen"        , "{" },
-    { "bracesClose"       , "}" },
-    { "power"             , "^" },
-    { "exclamation"       , "!" },
-    { "greater"           , ">" },
-    { "smaller"           , "<" },
-    { "comma"             , "," },
-	{ "c-tequal"          , "=~" },
-	{ "c-ntequal"         , "!~" },
-    { "c-equal"           , "==" },
-	{ "c-nequal"          , "!=" },
-    { "and"               , "&&" },
-    { "or"                , "||" },
-    { "semicolon"         , ";" },
-	{ "macro-def"		  , "#" },
-	{ "macro-set"		  , ":" }
+	{ "string"            , "\""	},
+	{ "string-esc"        , "\\"	},
+    { "space"             , " "		},
+    { "plus"              , "+"		},
+    { "minus"             , "-"		},
+    { "multi"             , "*"		},
+    { "divide"            , "/"		},
+    { "equal"             , "="		},
+	{ "pointer"           , "->"	},
+    { "braketOpen"        , "("		},
+    { "braketClose"       , ")"		},
+    { "bracesOpen"        , "{"		},
+    { "bracesClose"       , "}"		},
+    { "power"             , "^"		},
+    { "exclamation"       , "!"		},
+    { "greater"           , ">"		},
+    { "smaller"           , "<"		},
+    { "comma"             , ","		},
+	{ "c-tequal"          , "=~"	},
+	{ "c-ntequal"         , "!~"	},
+    { "c-equal"           , "=="	},
+	{ "c-nequal"          , "!="	},
+    { "and"               , "&&"	},
+    { "or"                , "||"	},
+    { "semicolon"         , ";"		},
+	{ "macro-def"		  , "#"		},
+	{ "macro-set"		  , ":"		}
 };
 
 //Set Keywords:
 std::map<std::string, std::string> Lang::LangKeywords = {
-    { "variable"     , "let" },
-	{ "unset"        , "unset" },
-	{ "sub-object"   , "." },
-    { "cond-if"      , "if" },
-    { "cond-else"    , "else" },
-	{ "cond-break"   , "breakif" },
-    { "loop-while"   , "while"},
-    { "loop-do"      , "do" },
-	{ "loop-break"   , "break" },
-	{ "function"     , "function" },
-    { "return"       , "return" }
+    { "variable"     , "let"		},
+	{ "unset"        , "unset"		},
+	{ "sub-object"   , "."			},
+    { "cond-if"      , "if"			},
+    { "cond-else"    , "else"		},
+	{ "cond-break"   , "breakif"	},
+    { "loop-while"   , "while"		},
+    { "loop-for"     , "for"		},
+	{ "loop-break"   , "break"		},
+	{ "function"     , "function"	},
+    { "return"       , "return"		}
 };
 
 //Set Values - set both smaller case and upper case:
 std::map<std::string, std::string> Lang::LangValues = {
-	{ "true-lower"        , "true" },
-	{ "true-upper"        , "TRUE" },
+	{ "true-lower"        , "true"	},
+	{ "true-upper"        , "TRUE"	},
 	{ "false-lower"       , "false" },
 	{ "false-upper"       , "FALSE" },
-	{ "null-lower"		  , "null" },
-	{ "null-upper"        , "NULL" },
+	{ "null-lower"		  , "null"	},
+	{ "null-upper"        , "NULL"	},
+
+	{ "garbage-lower"     , "GC"	},
+	{ "garbage-upper"     , "gc"	},
+	{ "rst-lower"		  , "rst"	},
+	{ "rst-upper"         , "RST"	}
 };
 
 
@@ -84,6 +90,18 @@ std::vector<std::string> Lang::extensionLib = {
 	".towq"
 };
 
+//Set systemCalls extensions:
+std::map<int, std::string> Lang::LangSystemLib = {
+	{ 1, "print"	},
+	{ 2, "rep"		},
+	{ 3, "length"	},
+	{ 4, "type"		},
+	{ 5, "isNull"	},
+	{ 6, "isPointer"},
+	{ 7, "isPointed"},
+	{ 8, "substr"	}
+};
+
 Lang::Lang() {
     //Inverse Delimiter:    
     for(auto const &ent1 : LangDelimiter) {
@@ -97,6 +115,11 @@ Lang::Lang() {
 	for (auto const &ent3 : LangValues) {
 		LangInverseValues.insert(std::pair<std::string, std::string>(ent3.second, ent3.first));
 	}
+	//Inverse System functions:
+	for (auto const &ent4 : LangSystemLib) {
+		LangInverseSystemLib.insert(std::pair<std::string, int>(ent4.second, ent4.first));
+	}
+
 	//Populate the language definition:
 	LangPopulate();
 }
@@ -153,7 +176,7 @@ std::string Lang::dicLangKey_cond_if = "";
 std::string Lang::dicLangKey_cond_else = "";
 std::string Lang::dicLangKey_cond_break = "";
 std::string Lang::dicLangKey_loop_while = "";
-std::string Lang::dicLangKey_loop_do = "";
+std::string Lang::dicLangKey_loop_for = "";
 std::string Lang::dicLangKey_loop_break = "";
 std::string Lang::dicLangKey_function = "";
 std::string Lang::dicLangKey_return = "";
@@ -165,6 +188,12 @@ std::string Lang::dicLangValue_false_lower = "";
 std::string Lang::dicLangValue_false_upper = "";
 std::string Lang::dicLangValue_null_lower = "";
 std::string Lang::dicLangValue_null_upper = "";
+
+//Internal values naming:
+std::string Lang::dicLangValue_garbage_upper = "GC";
+std::string Lang::dicLangValue_garbage_lower = "gc";
+std::string Lang::dicLangValue_rst_upper = "RST";
+std::string Lang::dicLangValue_rst_lower = "rst";
 
 /** Populate the language to cache symbols:
  *
@@ -218,7 +247,7 @@ void Lang::LangPopulate() {
 	dicLangKey_cond_else = LangFindKeyword("cond-else");
 	dicLangKey_cond_break = LangFindKeyword("cond-break");
 	dicLangKey_loop_while = LangFindKeyword("loop-while");
-	dicLangKey_loop_do = LangFindKeyword("loop-do");
+	dicLangKey_loop_for = LangFindKeyword("loop-for");
 	dicLangKey_loop_break = LangFindKeyword("loop-break");
 	dicLangKey_function = LangFindKeyword("function");
 	dicLangKey_return = LangFindKeyword("return");
@@ -230,6 +259,12 @@ void Lang::LangPopulate() {
 	dicLangValue_false_upper = LangFindValueNaming("false-upper");
 	dicLangValue_null_lower = LangFindValueNaming("null-lower");
 	dicLangValue_null_upper = LangFindValueNaming("null-upper");
+
+	//Internal values naming:
+	dicLangValue_garbage_lower = LangFindValueNaming("garbage-lower");
+	dicLangValue_garbage_upper = LangFindValueNaming("garbage-upper");
+	dicLangValue_rst_lower = LangFindValueNaming("rst-lower");
+	dicLangValue_rst_upper = LangFindValueNaming("rst-upper");
 
 }
 /** Find the character that represent a delimiter name:
@@ -251,7 +286,7 @@ std::string Lang::LangFindDelimiter(const std::string& key) {
 bool Lang::LangHasKeyDelimiter(const std::string& key) {
     return LangDelimiter.count(key) == 1;
 }
-/** Find the character that represent a delimiter name:
+/** Find the string that represent a value name:
 *
 * @param string key
 * @return char
@@ -262,7 +297,7 @@ std::string Lang::LangFindValueNaming(const std::string& key) {
 	}
 	return "";
 }
-/** Check whether a key delimiter is set:
+/** Check whether a string value name is set:
 *
 * @param string key key name
 * @return bool
@@ -270,6 +305,29 @@ std::string Lang::LangFindValueNaming(const std::string& key) {
 bool Lang::LangHasValueNaming(const std::string& key) {
 	return LangValues.count(key) == 1;
 }
+
+/** Find the int that represent a function name:
+*
+* @param string key
+* @return char
+*/
+int Lang::LangFindSystemLib(const std::string& key) {
+	if (key.empty()) return -1;
+	if (LangHasSystemLib(key)) {
+		return LangInverseSystemLib.at(key);
+	}
+	return -1;
+}
+/** Check whether a string function name is set:
+*
+* @param string key key name
+* @return bool
+*/
+bool Lang::LangHasSystemLib(const std::string& key) {
+	return LangInverseSystemLib.count(key) == 1;
+}
+
+
 /** Check whether a char delimiter is an actual register delimiter:
  * 
  * @param string key key name

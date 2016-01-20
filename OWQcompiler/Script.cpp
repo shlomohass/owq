@@ -13,8 +13,9 @@
 namespace fs = boost::filesystem;
 
 Script::Script() {
-    code.reserve(300);	//pre-allocate 100 instruction space for byte-codes
-    functions.reserve(50);	//pre allocate 50 spaces for functions
+    code.reserve(300);	//pre-allocate 300 instruction space for byte-codes
+	scope.reserve(50);	//pre allocate 50 spaces for scopes
+	scopeStore.reserve(50);
     internalStaticPointer = 0;
 	script_debug = OWQ_DEBUG;
 }
@@ -24,7 +25,7 @@ void Script::addInstruction(Instruction I) {
 }
 void Script::addInstruction(Instruction I, bool allowRST) {
     //reject instructions with RST operands
-    if (!allowRST && *I.getOperand() == "RST") {
+    if (!allowRST && *I.getOperand() == Lang::dicLangValue_rst_upper) {
         return;
     }
     code.push_back(I);
@@ -223,34 +224,45 @@ ExecReturn Script::executeInstruction(Instruction &xcode, int& instructionPointe
 	return ExecReturn::Ex_OK;
 }
 
-/**
- *
- * Push/Create a method and push it onto the stack
- *
- * This scheme helps to determine when to quit executing the script as a whole and return
- * control over to the main/non-scripted application.  Additionally, as pushMethod is call
- * the return address to which when this method is done executing will return to is passed
- *
+/** Push/Create a method and push it onto the scope
  * @param retAddress
+ * @param name
  */
-void Script::pushMethod(int retAddress, std::string name) {
-    functions.push_back(Method(retAddress, name));
+void Script::pushMethodScope(int address, int retAddress, std::string name) {
+	OWQScope* scopePtr = scopeStoreHas(address);
+	if (scopePtr == nullptr) {
+		scopeStore[address] = OWQScope(Method(address, retAddress, name));
+		scopePtr = &scopeStore[address];
+	}
+	scope.push_back(scopePtr);
 }
 
-/**
- *
- *
- * Remove the actively executing script method of the calling stack/method stack
- *
+/** Push/Create a loop and push it onto the scope
+*/
+void Script::pushLoopScope(int address) {
+	OWQScope* scopePtr = scopeStoreHas(address);
+	if (scopePtr == nullptr) {
+		scopeStore[address] = OWQScope(Loop(address));
+		scopePtr = &scopeStore[address];
+	}
+	scope.push_back(scopePtr);
+}
+
+OWQScope* Script::scopeStoreHas(int scopeAddress) {
+	std::unordered_map<int, OWQScope>::iterator itS = scopeStore.find(scopeAddress);
+	if (itS == scopeStore.end()) {
+		return nullptr;
+	}
+	return &itS->second;
+}
+/** Remove the actively executing script method of the calling stack/method stack
  *
  */
-void Script::popActiveMethod() {
-    if (functions.size() == 0) {
-        ScriptError::msg("return from function requires stack popping, however method stack is empty");
+void Script::popActiveScope() {
+    if (scope.size() == 0) {
         return;
-    } else {
-        functions.pop_back();
     }
+    scope.pop_back();
 }
 /** Assign a global variable scope from Application layer 
  *  This means that a pointer address will be passed to the global.
@@ -267,8 +279,15 @@ bool Script::registerVariable(std::string& name, RegisteredVariable type, void* 
 	return false;
 }
 bool Script::registerVariable(std::string& name) {
-    //Will register a global scope value but without a pointer address should
-    //not be unregistered at the end of execution:
+	OWQScope* s = getActiveScope(0);
+	ScriptVariable *sv = nullptr;
+	if (s != nullptr) { //if there is a valid and active scope
+		if (s->type == ScopeType::ST_LOOP) {
+			return s->l.addVariable(name);
+		} else {
+			return s->m.addVariable(name);
+		}
+	}
 	if (variables.find(name) == variables.end()) {
 		variables[name] = ScriptVariable(name);
 		return true;
@@ -276,8 +295,15 @@ bool Script::registerVariable(std::string& name) {
 	return false;
 }
 bool Script::registerVariable(std::string& name, StackData& sd) {
-	//Will register a global scope value but without a pointer address should
-	//not be unregistered at the end of execution:
+	OWQScope* s = getActiveScope(0);
+	ScriptVariable *sv = nullptr;
+	if (s != nullptr) { //if there is a valid and active scope
+		if (s->type == ScopeType::ST_LOOP) {
+			return s->l.addVariable(name, sd);
+		} else {
+			return s->m.addVariable(name, sd);
+		}
+	}
 	if (variables.find(name) == variables.end()) {
 		variables[name] = ScriptVariable(name, sd);
 		return true;
@@ -286,14 +312,22 @@ bool Script::registerVariable(std::string& name, StackData& sd) {
 }
 int Script::pointerVariable(std::string& name, std::string& pointTo) {
 	//Set a variable pointer:
-	std::unordered_map<std::string, ScriptVariable>::iterator itT = variables.find(pointTo);
-	if (itT != variables.end()) {
+	bool isFound = true;
+	std::unordered_map<std::string, ScriptVariable>::iterator itT = getVariableIt(pointTo, 0, isFound);
+	if (isFound) {
 		//Check for infinite reference:
-		if (pointTo == name || variables[pointTo].inPointerPath(name)) {
+		if (pointTo == name || itT->second.inPointerPath(name)) {
 			return 2;
 		}
-		variables[name] = ScriptVariable(name, &variables[pointTo]);
-		variables[pointTo].setHasPointers();
+		std::unordered_map<std::string, ScriptVariable>::iterator itS = getVariableIt(name);
+		//if its a pointer remove ispointed by -1;
+		if (itS->second.getPointer() != nullptr) {
+			itS->second.getPointer()->remHasPointers();
+		}
+		int cacheHasPointers = itS->second.getPointedCounter();
+		itS->second = ScriptVariable(name, &itT->second);
+		itS->second.setPointedCounter(cacheHasPointers);
+		itT->second.setHasPointers();
 		return 0;
 	}
 	return 1;
@@ -306,12 +340,8 @@ bool Script::unregisterVariable(std::string& name) {
 	return unregisterVariable(name, false);
 }
 bool Script::unregisterVariable(std::string& name, bool notSys) {
-	std::unordered_map<std::string, ScriptVariable>::iterator it;
-	std::unordered_map<std::string, ScriptVariable>::iterator it_r;
-	ScriptVariable* candid;
-	it = variables.find(name);
-	if (it != variables.end()) {
-		candid = &it->second;
+	ScriptVariable* candid = getVariable(name);
+	if (candid != nullptr) {
 		if (notSys && candid->isRegister()) {
 			return false;
 		}
@@ -321,56 +351,164 @@ bool Script::unregisterVariable(std::string& name, bool notSys) {
 		}
 		// deref backwards:
 		if (candid->isPointed()) {
-			for (it_r = variables.begin(); it_r != variables.end(); it_r++) {
-				if (it_r->second.getPointer() != nullptr && it_r->second.getPointer()->getName() == candid->getName()) {
-					it_r->second.deref();
-				}
-			}
+			derefBackwordsInScopes(name);
 		}
 		//Finaly delete.
-		variables.erase(it);
-		return true;
+		return deleteInScopes(name);
 	}
 	return false;
+}
+
+void Script::derefBackwordsInScopes(std::string& name) {
+//Deref in nested scopes:
+	for (int i = (int)scope.size() - 1; i >= 0; i--) {
+		if (scope[i]->type == ScopeType::ST_LOOP) {
+			scope[i]->l.derefInScope(name);
+		}
+		else {
+			scope[i]->m.derefInScope(name);
+		}
+	}
+	//Deref in global scope:
+	std::unordered_map<std::string, ScriptVariable>::iterator it_r;
+	for (it_r = variables.begin(); it_r != variables.end(); it_r++) {
+		if (it_r->second.getPointer() != nullptr && it_r->second.getPointer()->getName() == name) {
+			it_r->second.deref();
+		}
+	}
+}
+bool Script::deleteInScopes(std::string& name) {
+	std::unordered_map<std::string, ScriptVariable>::iterator it;
+	bool deleted = false;
+	for (int i = (int)scope.size() - 1; i >= 0; i--) {
+		if (scope[i]->type == ScopeType::ST_LOOP) {
+			it = scope[i]->l.getVariableIt(name);
+			if (it != scope[i]->l.getVariableContainerEnd()) {
+				scope[i]->l.deleteFromScope(it);
+				deleted = true;
+				break;
+			}
+		}
+		else {
+			it = scope[i]->m.getVariableIt(name);
+			if (it != scope[i]->m.getVariableContainerEnd()) {
+				scope[i]->l.deleteFromScope(it);
+				deleted = true;
+				break;
+			}
+		}
+	}
+	if (!deleted) {
+		it = getGlobalVariableIt(name);
+		if (it != variables.end()) {
+			variables.erase(it);
+		}
+		else {
+			return false;
+		}
+	}
+	return true;
 }
 /**
  *
  * Returns the method that is on top of the stack.
- *
- * It represents the method that is currently running, the
- * method the cpu is executing.
- *
- * If null is returned, it indicates that we are executing the "loader opcodes", which were
- * injected into the main script code and are responsible for the entry to function defined in our
- * main script code
  * @return
  */
-Method* Script::getActiveMethod() {
-    if (functions.size() == 0) {
-        return NULL;
-    } else {
-        return &functions[functions.size()-1];
-    }
+OWQScope* Script::getActiveScope() {
+	return getActiveScope(0);
 }
-
+OWQScope* Script::getActiveScope(int scopeOffset) {
+	int size = (int)scope.size() - 1;
+    if (size < 0 || scopeOffset > size) {
+        return nullptr;
+    }
+    return scope[size - scopeOffset];
+}
+/** Get variable scope iterator
+*  For the variable name. and finaly in the Global scope
+* @param varName
+* @param scopeOffset
+* @return
+*/
+std::unordered_map<std::string, ScriptVariable>::iterator Script::getVariableIt(std::string& varName) {
+	return getVariableIt(varName, 0);
+}
+std::unordered_map<std::string, ScriptVariable>::iterator Script::getVariableIt(std::string& varName, int scopeOffset) {
+	OWQScope* s = getActiveScope(scopeOffset);
+	std::unordered_map<std::string, ScriptVariable>::iterator it;
+	if (s != nullptr) { //if there is a valid and active method
+		if (s->type == ScopeType::ST_LOOP) {
+			it = s->l.getVariableIt(varName);
+			if (it == s->l.getVariableContainerEnd()) {
+				return getVariableIt(varName, scopeOffset + 1);
+			}
+		} else {
+			it = s->m.getVariableIt(varName);
+			if (it == s->m.getVariableContainerEnd()) {
+				return getVariableIt(varName, scopeOffset + 1);
+			}
+		}
+	} else {
+		//Not in scope so search in global scope
+		it = getGlobalVariableIt(varName);
+	}
+	return it;
+}
+std::unordered_map<std::string, ScriptVariable>::iterator Script::getVariableIt(std::string& varName, int scopeOffset, bool& flag) {
+	OWQScope* s = getActiveScope(scopeOffset);
+	std::unordered_map<std::string, ScriptVariable>::iterator it;
+	if (s != nullptr) { //if there is a valid and active method
+		if (s->type == ScopeType::ST_LOOP) {
+			it = s->l.getVariableIt(varName);
+			if (it == s->l.getVariableContainerEnd()) {
+				return getVariableIt(varName, scopeOffset + 1, flag);
+			}
+		} else {
+			it = s->m.getVariableIt(varName);
+			if (it == s->m.getVariableContainerEnd()) {
+				return getVariableIt(varName, scopeOffset + 1, flag);
+			}
+		}
+	} else {
+		//Not in scope so search in global scope
+		it = getGlobalVariableIt(varName);
+		if (it == variables.end()) {
+			flag = false;
+		}
+	}
+	return it;
+}
 /**
- * Searches the current method the script is executing for the variable indicated by string varName.
- * If such a variable is not found, searches registered script variables.  If no such variable is found
- * anywhere, null is returned
+* Seraches variable is GLOBAL scope.
+* @param varName
+* @return
+*/
+std::unordered_map<std::string, ScriptVariable>::iterator Script::getGlobalVariableIt(std::string& varName) {
+	//------- Search in global scope:
+	std::unordered_map<std::string, ScriptVariable>::iterator it;
+	return variables.find(varName);
+}
+/** Get variable is scope sensitive it will recursivly search the scoped que 
+ *  For the variable name. and finaly in the Global scope
  * @param varName
+ * @param scopeOffset
  * @return
  */
-ScriptVariable* Script::getVariable(std::string varName) {
-
-    //Get and handle of the current executing method
-    Method* m = getActiveMethod();
-    //sv points the to variable to be returned to caller
-    ScriptVariable *sv = NULL;
-    if (m != NULL) { //if there is a valid and active method
-        sv = m->getVariable(varName); //search for the variable we are interested in
-        if ( sv == NULL ) {	 //if not found, se variable to the return value of possible registered variable
-            sv = getGlobalVariable(varName);
-        }
+ScriptVariable* Script::getVariable(std::string& varName) {
+	return getVariable(varName, 0);
+}
+ScriptVariable* Script::getVariable(std::string& varName, int scopeOffset) {
+	OWQScope* s = getActiveScope(scopeOffset);
+    ScriptVariable *sv = nullptr;
+    if (s != nullptr) { //if there is a valid and active method
+		if (s->type == ScopeType::ST_LOOP) {
+			sv = s->l.getVariable(varName);
+		} else {
+			sv = s->m.getVariable(varName);
+		}
+		if (sv == nullptr) {
+			return getVariable(varName, scopeOffset + 1);
+		}
     } else {
         //Not in scope so search in global scope
         sv = getGlobalVariable(varName);
@@ -382,15 +520,14 @@ ScriptVariable* Script::getVariable(std::string varName) {
  * @param varName
  * @return
  */
-ScriptVariable* Script::getGlobalVariable(std::string varName) {
+ScriptVariable* Script::getGlobalVariable(std::string& varName) {
     //------- Search in global scope:
 	std::unordered_map<std::string, ScriptVariable>::iterator it;
-    ScriptVariable *sv = NULL;
     it = variables.find(varName);
     if (it != variables.end()) {
-        sv = &it->second; //return the address of the ScriptVariable
+        return &it->second; //return the address of the ScriptVariable
     }
-    return sv;
+    return nullptr;
 }
 
 /**
@@ -408,7 +545,8 @@ int Script::injectScript(Script* script) {
 bool Script::isSystemCall(std::string& object, std::string& functionName, Instruction& _xcode) {
     
     //Console print:
-    if (functionName == "rep" || functionName == "print") {
+	int sysCall = Lang::LangFindSystemLib(functionName);
+    if (sysCall == 1 || sysCall == 2) { // Print
         StackData* sd = Stack::pop(0);
 		if (sd != nullptr) {
 			ScriptConsole::print(sd, this->script_debug);
@@ -425,41 +563,39 @@ bool Script::isSystemCall(std::string& object, std::string& functionName, Instru
          * on the variables behavior
          */
         ScriptVariable* sv = getVariable(object);
-        if (sv != NULL) {
-            //return the length of a string
-            if (functionName == "length") {
+        if (sv != nullptr) {
+            if (sysCall == 3) { // Length
 				Stack::push(ScriptConsole::length(sv->getValuePointer()));
 				if (_xcode.getPointer() > 0) {
 					Stack::setTopPointer(_xcode.getPointer());
 				}
             }
-			//return the type of a string
-			else if (functionName == "type") {
+			else if (sysCall == 4) { //type
 				Stack::push(ScriptConsole::type(sv->getValuePointer()));
 				if (_xcode.getPointer() > 0) {
 					Stack::setTopPointer(_xcode.getPointer());
 				}
 			}
-			else if (functionName == "isNull") {
+			else if (sysCall == 5) { //isNull
 				Stack::push(ScriptConsole::isNull(sv->getValuePointer()));
 				if (_xcode.getPointer() > 0) {
 					Stack::setTopPointer(_xcode.getPointer());
 				}
 			}
-			else if (functionName == "isPointer") {
+			else if (sysCall == 6) { //isPointer
 				Stack::push(ScriptConsole::isPointer(sv));
 				if (_xcode.getPointer() > 0) {
 					Stack::setTopPointer(_xcode.getPointer());
 				}
 			}
-			else if (functionName == "isPointed") {
+			else if (sysCall == 7) { //isPointed
 				Stack::push(ScriptConsole::isPointed(sv));
 				if (_xcode.getPointer() > 0) {
 					Stack::setTopPointer(_xcode.getPointer());
 				}
 			}
             //return substring of a string
-            else if (functionName == "substr") {
+            else if (sysCall == 8) { //substr
                 if (sv->getValuePointer()->isString()) {
                     Stack::render();
                     StackData* sb = Stack::pop();	//second argument first
@@ -484,9 +620,7 @@ bool Script::isSystemCall(std::string& object, std::string& functionName, Instru
 			} else {
 				return false;
 			}
-
             return true;
-
         } else {
             ScriptError::msg("Unable to find object " + object + " for system call " + functionName);
             return true;

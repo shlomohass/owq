@@ -28,14 +28,14 @@ void Stack::push(double data) {
  * 
  * @param string data
  */
-void Stack::push(std::string data) {
+void Stack::push(std::string& data) {
     push(StackData(data));
 }
 /** Push a stack data to the stack
  * 
  * @param StackData data
  */
-void Stack::push(StackData data) {
+void Stack::push(StackData& data) {
     stack.push_back(data);
 }
 /**  Push a variable value to the stack

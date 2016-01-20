@@ -21,7 +21,13 @@ enum ExecReturn {
 	Ex_NULL_STACK_EXTRACTION
 };
 
+enum ScopeType {
+	ST_METHOD,
+	ST_LOOP
+};
+
 #include "Instruction.h"
+#include "Loop.h"
 #include "Method.h"
 #include "Stack.h"
 #include "ScriptConsole.h"
@@ -35,9 +41,20 @@ namespace fs = boost::filesystem;
 
 class Parser;
 
+struct OWQScope {
+	ScopeType type;
+	Method m;
+	Loop   l;
+	OWQScope() { }
+	OWQScope(Method _m) { m = _m; type = ScopeType::ST_METHOD; }
+	OWQScope(Loop _l) { l = _l; type = ScopeType::ST_LOOP; }
+};
+
 class Script {
     
     friend class Parser;
+	friend class Loop;
+	friend class Method;
 	friend class Compute;
     friend class Tokens;
 
@@ -46,26 +63,45 @@ class Script {
 	std::vector<Instruction> code;
 	std::map<std::string, int> functionTable;
 	std::unordered_map<std::string, ScriptVariable> variables;
-    // As a function is executed more reference to it is pushed onto this variable
-	std::vector<Method> functions;
-	std::string currentExecutingMethod;
-    int internalStaticPointer;
     
-    void popActiveMethod();
-    void pushMethod(int retAddress, std::string name);
+	// Scope tracker:
+	std::unordered_map<int, OWQScope> scopeStore;
+	std::vector<OWQScope*> scope;
+    
+	int internalStaticPointer;
+    
+    void popActiveScope();
+    void pushMethodScope(int address, int retAddress, std::string name);
+	void pushLoopScope(int address);
+	
+	OWQScope* scopeStoreHas(int scopeAddress);
+
+	int getFunctionAddress(std::string funcName);
+	OWQScope* getActiveScope();
+	OWQScope* getActiveScope(int scopeOffset);
+
     ExecReturn executeInstruction(Instruction &code, int& instructionPointer);
     ExecReturn executeInstruction(Instruction &code, int& instructionPointer, bool debug);
-    int getFunctionAddress(std::string funcName);
-    Method* getActiveMethod();
+
 
     int injectScript(Script* script);
 
     bool isSystemCall(std::string& object, std::string& functionName, Instruction& _xcode);
     bool validateExtension(std::wstring extension);
     int  mergeLinesAndCompile(Source* source, Parser* parser, int linenum, bool debug);
-    ScriptVariable *getVariable(std::string varName);
-    ScriptVariable *getGlobalVariable(std::string varName);
+
+	std::unordered_map<std::string, ScriptVariable>::iterator getVariableIt(std::string& varName);
+	std::unordered_map<std::string, ScriptVariable>::iterator getVariableIt(std::string& varName, int scopeOffset);
+	std::unordered_map<std::string, ScriptVariable>::iterator getVariableIt(std::string& varName, int scopeOffset, bool& flag);
+	std::unordered_map<std::string, ScriptVariable>::iterator getGlobalVariableIt(std::string& varName);
+
+    ScriptVariable *getVariable(std::string& varName);
+	ScriptVariable *getVariable(std::string& varName, int scopeOffset);
+    ScriptVariable *getGlobalVariable(std::string& varName);
     
+	void derefBackwordsInScopes(std::string& name);
+	bool deleteInScopes(std::string& name);
+
     void addInstruction(Instruction I);
     void addInstruction(Instruction I, bool allowRST);
 

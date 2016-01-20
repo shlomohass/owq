@@ -5,6 +5,7 @@
  *
  */
 
+#include "Lang.h"
 #include "StackData.h"
 
 /** Construct a Stack Data that is undefined
@@ -17,7 +18,7 @@ StackData::StackData() {
 void StackData::MutateToNull() {
 	type = SDtype::SD_NULL;
 	dvalue = OWQ_NAN;
-	svalue = "null";
+	svalue = Lang::dicLangValue_null_upper;
 	bvalue = -1;
 	isOwqObj = false;
 	isOwqArr = false;
@@ -64,7 +65,7 @@ void StackData::MutateToNumber(int value) {
 void StackData::MutateToNumber(double value) {
 	type = SDtype::SD_NUMBER;
 	dvalue = value;
-	svalue = "null";
+	svalue = Lang::dicLangValue_null_upper;
 	bvalue = -1;
 	isOwqObj = false;
 	isOwqArr = false;
@@ -83,7 +84,7 @@ void StackData::MutateToNumber(double value) {
 StackData::StackData(bool _rst, int _rstPos) {
 	type = SDtype::SD_RST;
     dvalue = OWQ_NAN;
-    svalue = "null";
+    svalue = Lang::dicLangValue_null_upper;
 	bvalue = -1;
 	isOwqObj = false;
 	isOwqArr = false;
@@ -113,7 +114,7 @@ StackData::StackData(const std::string& value, bool valueBool) {
 void StackData::MutateToBoolean(bool value) {
 	type = SDtype::SD_BOOLEAN;
 	dvalue = OWQ_NAN;
-	svalue = "null";
+	svalue = Lang::dicLangValue_null_upper;
 	bvalue = value ? 1 : 0;
 	isOwqObj = false;
 	isOwqArr = false;
@@ -127,17 +128,10 @@ void StackData::MutateToBoolean(int value) {
 	MutateToBoolean(value == 0 ? false : true);
 }
 void StackData::MutateToBoolean(const std::string& value) {
-	MutateToBoolean(value == "true" || value == "TRUE" ? 1 : 0);
+	MutateToBoolean(value == Lang::dicLangValue_true_lower || value == Lang::dicLangValue_true_upper ? 1 : 0);
 }
 void StackData::MutateToBoolean(double value) {
 	MutateToBoolean(value > 0 ? true : false);
-}
-
-/** Destruct the Stack data element
- * 
- */
-StackData::~StackData() {
-
 }
 
 /** Set the internal static position of the data; 
@@ -248,7 +242,7 @@ double StackData::getNumber(bool alsoBools) {
  * 
  * @return string
  */
-std::string StackData::getString() {
+std::string& StackData::getString() {
     return svalue;
 }
 /** Returns the Stack Data boolean value
@@ -287,26 +281,26 @@ std::string StackData::numberValueToString(double number) {
 *
 * @return string
 */
-std::string StackData::booleanValueToString() {
+std::string& StackData::booleanValueToString() {
 	if (bvalue > 0) {
-		return "TRUE";
+		return Lang::dicLangValue_true_upper;
 	}
-	return "FALSE";
+	return Lang::dicLangValue_false_upper;
 }
 
 std::string StackData::getAsString() {
-	if (isNumber()) {         // Print a number
+	if (type == SDtype::SD_NUMBER) {         // Print a number
 		return numberValueToString();
-	} else if (isString()) {  // Print a string
+	} else if (type == SDtype::SD_STRING) {  // Print a string
 		return getString();
-	} else if (isBoolean()) {
+	} else if (type == SDtype::SD_BOOLEAN) {
 		return booleanValueToString();
-	} else if (isRst()) {     // Print a rst
-		return "RST";
-	} else if (isGc()) {
-		return "GC";
+	} else if (type == SDtype::SD_RST) {     // Print a rst
+		return Lang::dicLangValue_rst_upper;
+	} else if (type == SDtype::SD_GC) {
+		return Lang::dicLangValue_garbage_upper;
 	}
-	return "NULL";
+	return Lang::dicLangValue_null_upper;
 }
 
 /** Render the Stack Data to the terminal
@@ -322,11 +316,11 @@ void StackData::render() {
 	} else if (isBoolean()) {
 		std::cout << booleanValueToString();
     } else if (isRst()) {     // Print a rst
-		std::cout << "RST";
+		std::cout << Lang::dicLangValue_rst_upper;
 	} else if (isGc()) {
-		std::cout << "GC";
+		std::cout << Lang::dicLangValue_garbage_upper;
 	} else {                  // Print NULL
-		std::cout << "NULL";
+		std::cout << Lang::dicLangValue_null_upper;
         printRst = false;
     }
     //Handle output of rst positions:

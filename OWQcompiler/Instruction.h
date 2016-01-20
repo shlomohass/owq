@@ -49,17 +49,20 @@ enum ByteCode {
 };
 extern std::string byteCode[33];
 class Instruction {
+
     ByteCode		code;
     std::string		operand;
+	int				jmpCache;
     int				staticPointer;
     bool			isRST;
     bool			containsQuotes;
+
 public:
     
     Instruction();
     Instruction(ByteCode inst);
-    Instruction(ByteCode inst, std::string xOperand);
-    Instruction(ByteCode inst, std::string xOperand, int pointer);
+    Instruction(ByteCode inst, const std::string& xOperand);
+    Instruction(ByteCode inst, const std::string& xOperand, int pointer);
     
     bool isOperandNumber();
     bool isOperandString();
@@ -68,6 +71,8 @@ public:
     bool operandHasQuote();
     void setPointer(int pointer);
     int getPointer();
+	void setJmpCache(int i);
+	int getJmpCache();
     bool isRstPointer();
     double getNumber();
     std::string getString();
@@ -76,7 +81,7 @@ public:
     ByteCode getCode();
     std::string toString();
     std::string byteCodeToShort();
-    virtual ~Instruction();
+
 };
 
 #endif	/* INSTRUCTIONS_H */

@@ -524,7 +524,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 		else if (operatorToken->token == Lang::dicLangKey_loop_while) {
 
 			//while(expression){
-			script->addInstruction(Instruction(ByteCode::LOOP));
+			script->addInstruction(Instruction(ByteCode::LOOP, operatorTokenStr));
 			tokens.pop(0);	//erase the while keyword
 			//(expression){
 			if (tokens.getToken(tokens.getSize() - 1) != Lang::dicLang_bracesOpen) {

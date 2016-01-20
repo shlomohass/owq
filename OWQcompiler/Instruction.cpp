@@ -48,8 +48,8 @@ std::string byteCode[] = {
 
 Instruction::Instruction() {
     code = ByteCode::NOP;
-    operand = ".none.";
     containsQuotes = false;
+	jmpCache = -1;
     staticPointer = 0;
     isRST = false;
 }
@@ -61,7 +61,7 @@ std::string Instruction::toString() {
     if(operandHasQuote()) {
         display += "\"";
     }
-    display += (operand == ".none.") ? " " : operand;
+    display += operand;
     //display properly
     if(operandHasQuote()) { 
         display += "\"";
@@ -91,10 +91,11 @@ std::string Instruction::byteCodeToShort() {
     }
     return ret;
 }
-Instruction::Instruction(ByteCode inst, std::string xOperand) {
+Instruction::Instruction(ByteCode inst, const std::string& xOperand) {
     code = inst;
     operand = xOperand;
     staticPointer = 0;
+	jmpCache = -1;
     isRST = false;
     if (operand[0] == Lang::LangStringIndicator && operand[operand.size()-1]== Lang::LangStringIndicator) {
         containsQuotes =true;
@@ -105,9 +106,10 @@ Instruction::Instruction(ByteCode inst, std::string xOperand) {
         containsQuotes = false;
     }
 }
-Instruction::Instruction(ByteCode inst, std::string xOperand, int pointer) {
+Instruction::Instruction(ByteCode inst, const std::string& xOperand, int pointer) {
     code = inst;
     operand = xOperand;
+	jmpCache = -1;
     staticPointer = pointer;
     if (operand[0] == Lang::LangStringIndicator && operand[operand.size()-1]== Lang::LangStringIndicator) {
         containsQuotes =true;
@@ -116,14 +118,14 @@ Instruction::Instruction(ByteCode inst, std::string xOperand, int pointer) {
         operand.erase(operand.size()-1,1);//erase the ending quotation
     } else {
         containsQuotes = false;
-        if (operand == "RST") {
+        if (operand == Lang::dicLangValue_rst_upper) {
             isRST = true;
         }
     }
 }
 Instruction::Instruction(ByteCode inst) {
     code = inst;
-    operand = ".none.";
+	jmpCache = -1;
     containsQuotes =false;
     staticPointer = 0;
     isRST = true;
@@ -133,6 +135,12 @@ void Instruction::setPointer(int pointer) {
 }
 int Instruction::getPointer() {
     return staticPointer;
+}
+void Instruction::setJmpCache(int i) {
+	jmpCache = i;
+}
+int Instruction::getJmpCache() {
+	return jmpCache;
 }
 bool Instruction::isRstPointer() {
     return isRST;
@@ -215,18 +223,18 @@ bool Instruction::isOperandString() {
     return !isOperandNumber();
 }
 bool Instruction::isOperandBoolean() {
-	if (operand == Lang::dicLangValue_true_lower || 
-		operand == Lang::dicLangValue_true_upper || 
-		operand == Lang::dicLangValue_false_lower || 
-		operand == Lang::dicLangValue_false_upper
+	if ((operand[0] == Lang::dicLangValue_true_lower[0] && operand == Lang::dicLangValue_true_lower) ||
+		(operand[0] == Lang::dicLangValue_true_upper[0] && operand == Lang::dicLangValue_true_upper) ||
+		(operand[0] == Lang::dicLangValue_false_lower[0] && operand == Lang::dicLangValue_false_lower) ||
+		(operand[0] == Lang::dicLangValue_false_upper[0] && operand == Lang::dicLangValue_false_upper)
 	) {
 		return true;
 	}
 	return false;
 }
 bool Instruction::isOperandNull() {
-	if (operand == Lang::dicLangValue_null_lower || 
-		operand == Lang::dicLangValue_null_upper
+	if ((operand[0] == Lang::dicLangValue_null_lower[0] && operand == Lang::dicLangValue_null_lower) ||
+		(operand[0] == Lang::dicLangValue_null_upper[0] && operand == Lang::dicLangValue_null_upper)
 	) {
 		return true;
 	}
@@ -247,8 +255,6 @@ double Instruction::getNumber() {
 std::string Instruction::getString() {
     return operand;
 }
-Instruction::~Instruction() {
-	// TODO Auto-generated destructor stub
-}
+
 
 

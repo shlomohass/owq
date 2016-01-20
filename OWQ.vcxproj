@@ -24,6 +24,7 @@
     <ClInclude Include="OWQcompiler\Compute.h" />
     <ClInclude Include="OWQcompiler\Instruction.h" />
     <ClInclude Include="OWQcompiler\Lang.h" />
+    <ClInclude Include="OWQcompiler\Loop.h" />
     <ClInclude Include="OWQcompiler\Method.h" />
     <ClInclude Include="OWQcompiler\Parser.h" />
     <ClInclude Include="OWQcompiler\Script.h" />
@@ -44,6 +45,7 @@
     <ClCompile Include="OWQcompiler\Compute.cpp" />
     <ClCompile Include="OWQcompiler\Instruction.cpp" />
     <ClCompile Include="OWQcompiler\Lang.cpp" />
+    <ClCompile Include="OWQcompiler\Loop.cpp" />
     <ClCompile Include="OWQcompiler\Method.cpp" />
     <ClCompile Include="OWQcompiler\Parser.cpp" />
     <ClCompile Include="OWQcompiler\Script.cpp" />
@@ -147,11 +149,12 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)\OWQcompiler;$(SolutionDir)\CmdParser;S:\programms\boost\boost_1_60_0-32</AdditionalIncludeDirectories>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>

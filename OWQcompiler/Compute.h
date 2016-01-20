@@ -31,19 +31,19 @@ public:
 	static ExecReturn execute_pointer_assignment(Instruction &xcode, Script *script, int& instructionPointer);
 	
 	//Compute methods - Math and comparison:
-	static ExecReturn execute_math_gtr(Instruction &xcode); // >
-	static ExecReturn execute_math_lsr(Instruction &xcode); // <
-	static ExecReturn execute_math_cve(Instruction &xcode); // ==
-	static ExecReturn execute_math_cvn(Instruction &xcode); // !=
-	static ExecReturn execute_math_cte(Instruction &xcode); // =~
-	static ExecReturn execute_math_ctn(Instruction &xcode); // !~
-	static ExecReturn execute_math_and(Instruction &xcode); // &&
-	static ExecReturn execute_math_por(Instruction &xcode); // ||
-	static ExecReturn execute_math_add(Instruction &xcode); // +
-	static ExecReturn execute_math_subtract(Instruction &xcode); // -
-	static ExecReturn execute_math_mul(Instruction &xcode); // *
-	static ExecReturn execute_math_divide(Instruction &xcode); // /
-	static ExecReturn execute_math_expon(Instruction &xcode); // ^
+	static ExecReturn execute_math_gtr(Instruction &xcode);			// >
+	static ExecReturn execute_math_lsr(Instruction &xcode);			// <
+	static ExecReturn execute_math_cve(Instruction &xcode);			// ==
+	static ExecReturn execute_math_cvn(Instruction &xcode);			// !=
+	static ExecReturn execute_math_cte(Instruction &xcode);			// =~
+	static ExecReturn execute_math_ctn(Instruction &xcode);			// !~
+	static ExecReturn execute_math_and(Instruction &xcode);			// &&
+	static ExecReturn execute_math_por(Instruction &xcode);			// ||
+	static ExecReturn execute_math_add(Instruction &xcode);			// +
+	static ExecReturn execute_math_subtract(Instruction &xcode);	// -
+	static ExecReturn execute_math_mul(Instruction &xcode);			// *
+	static ExecReturn execute_math_divide(Instruction &xcode);		// /
+	static ExecReturn execute_math_expon(Instruction &xcode);		// ^
 
 	//Compute methods - Loops and functions:
 	static ExecReturn execute_done_block(Instruction &xcode, Script *script, int& instructionPointer);

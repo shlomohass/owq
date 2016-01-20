@@ -1,13 +1,29 @@
-let a = null,
-	b = NULL,
-	c, d;
-
-c = a =~ b;
-d = a == b; // Null is not a value and cannot be compared or claculated
-
-print(a.isNull() + ","); // TRUE
-print(a.type() + ",");   // NULL
-print(b.isNull() + ","); // TRUE
-print(b.type() + ",");   // NULL
-print(c); // TRUE
-print(d); // FALSE
+let a, b, c, d, e;
+a = 0;
+while (a < 10) {
+	while (a < 10) {
+		let g = 99;
+		b = 0;
+		c = 0;
+		while(b < 4) {
+			if (b > 2 && a > 2) {
+				d -> c;
+				e -> g;
+				a = e;
+				break 2;
+			}
+			c = c + 2;
+			b = b + 1;
+		}
+		a = a + 1;
+	}
+	if (d.isPointer()) {
+		b = b * d;	
+		break;
+	}
+}
+print(a);
+print(b);
+print(c);
+print(d);
+print(e);

@@ -24,7 +24,7 @@ public:
     
     //Allowed extensions:
     static std::vector<std::string> extensionLib;
-    
+
     //Delimiters Definition and functions:
     static std::map<std::string, std::string> LangDelimiter;
     static std::map<std::string, std::string> LangInverseDelimiter;
@@ -57,6 +57,12 @@ public:
 	static std::map<std::string, std::string>     LangInverseValues;
 	static std::string LangFindValueNaming(const std::string& key);
 	static bool LangHasValueNaming(const std::string& key);
+
+	//System function constants:
+	static std::map<int, std::string> LangSystemLib;
+	static std::map<std::string, int> LangInverseSystemLib;
+	static int LangFindSystemLib(const std::string& key);
+	static bool LangHasSystemLib(const std::string& key);
 
     //Define constant definition characters this is auto set and will insure speed up drasticly:
     
@@ -107,7 +113,7 @@ public:
 	static std::string dicLangKey_cond_else;
 	static std::string dicLangKey_cond_break;
 	static std::string dicLangKey_loop_while;
-	static std::string dicLangKey_loop_do;
+	static std::string dicLangKey_loop_for;
 	static std::string dicLangKey_loop_break;
 	static std::string dicLangKey_function;
 	static std::string dicLangKey_return;
@@ -119,6 +125,12 @@ public:
 	static std::string dicLangValue_false_upper;
 	static std::string dicLangValue_null_lower;
 	static std::string dicLangValue_null_upper;
+
+	//Internal values naming:
+	static std::string dicLangValue_garbage_upper;
+	static std::string dicLangValue_garbage_lower;
+	static std::string dicLangValue_rst_upper;
+	static std::string dicLangValue_rst_lower;
 
     virtual ~Lang();
     

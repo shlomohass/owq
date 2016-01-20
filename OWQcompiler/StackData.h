@@ -103,16 +103,15 @@ public:
 	double      getNumber(bool alsoBools);
 	int         getBoolean();
 	bool        getRealBoolean();
-	std::string getString();
+	std::string& getString();
 	std::string getAsString();
     
 	std::string numberValueToString(double number);
 	std::string numberValueToString(bool alsoBools);
 	std::string numberValueToString();
-	std::string booleanValueToString();
+	std::string& booleanValueToString();
     void render();
-    
-    virtual ~StackData();
+
 };
 
 #endif	/* STACKDATA_H */
