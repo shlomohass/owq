@@ -760,8 +760,33 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     //		Handle math operations in accordance with order of operations
     //---------------------------------------------------------------------------------
     
-    //exponent ^
-    if (priortyCode == 90) { 
+	//increment decrement ++ --
+	if (priortyCode == 91) {
+		if (leftToken != nullptr && ( leftToken->type == TokenType::VAR)) {
+			//Is of type Postfix
+			if (operatorToken->token == Lang::dicLang_dec) {
+				script->addInstruction(Instruction(ByteCode::DECL, leftToken->token, leftToken->rstPos), true);
+			} else {
+				script->addInstruction(Instruction(ByteCode::INCL, leftToken->token, leftToken->rstPos), true);
+				
+			}
+			tokens.extractInclusive(operatorIndex - 1, operatorIndex, eraseCount, script, true);
+		} else if (rightToken != nullptr && (rightToken->type == TokenType::VAR)) {
+			//Is of type Prefix
+			if (operatorToken->token == Lang::dicLang_dec) {
+				script->addInstruction(Instruction(ByteCode::DECR, rightToken->token, rightToken->rstPos), true);
+			} else {
+				script->addInstruction(Instruction(ByteCode::INCR, rightToken->token, rightToken->rstPos), true);
+
+			}
+			tokens.extractInclusive(operatorIndex, operatorIndex + 1, eraseCount, script, true);
+		} else {
+			//Error with increment decrement operator:
+			return 20;
+		}
+		operatorIndex -= eraseCount;
+	//exponent ^
+	} else if (priortyCode == 90) { 
 
         compile_LR_mathLogigBaseOperations(ByteCode::EXPON, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
     
@@ -1104,6 +1129,9 @@ int Parser::getDelimiterPriorty(std::string toCheckToken, TokenType toCheckType)
 	}
 	else if (toCheckToken == Lang::dicLang_braketOpen) {
 		return 110;
+	}
+	else if (toCheckToken == Lang::dicLang_dec || toCheckToken == Lang::dicLang_inc) {
+		return 91;
 	}
 	else if (toCheckToken == Lang::dicLang_power) {
 		return 90;

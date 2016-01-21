@@ -1,29 +1,11 @@
-let a, b, c, d, e;
-a = 0;
-while (a < 10) {
-	while (a < 10) {
-		let g = 99;
-		b = 0;
-		c = 0;
-		while(b < 4) {
-			if (b > 2 && a > 2) {
-				d -> c;
-				e -> g;
-				a = e;
-				break 2;
-			}
-			c = c + 2;
-			b = b + 1;
-		}
-		a = a + 1;
-	}
-	if (d.isPointer()) {
-		b = b * d;	
-		break;
-	}
-}
+let a = 9, 
+    b, 
+	c;
+a++;
+b = a--;
+c = --a + 1;
+
+// a = 8, b = 10 c = 9
 print(a);
 print(b);
 print(c);
-print(d);
-print(e);

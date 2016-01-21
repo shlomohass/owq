@@ -18,6 +18,7 @@ const std::string Compute::execute_errors[] = {
 	"Unable to resolve variable name: ",  // Ex_VAR_RESOLVE
 	"Unable to assign to native variable", // Ex_NVAR_ASN
 	"Null stack extrcation at operation: " // Ex_NULL_STACK_EXTRACTION
+	"Increment / decrement operation un supported type - expected numeric: " // Ex_UNSUPPORTED_VAR_TYPE
 };
 
 const std::string Compute::execute_warn[] = {
@@ -616,6 +617,49 @@ ExecReturn Compute::execute_math_expon(Instruction &xcode) {
 	return ExecReturn::Ex_OK;
 }
 
+
+//Variables operations:
+ExecReturn Compute::execute_math_inc_dec(Instruction &xcode, Script *script) {
+	ScriptVariable* sv = script->getVariable(*xcode.getOperand());
+	//complain if variable is not found
+	if (sv == nullptr) {
+		ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_VAR_RESOLVE] + *xcode.getOperand());
+		return ExecReturn::Ex_VAR_RESOLVE;
+	}
+	if (!sv->getValuePointer()->isNumber()) {
+		ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_UNSUPPORTED_VAR_TYPE] + *xcode.getOperand());
+		return ExecReturn::Ex_UNSUPPORTED_VAR_TYPE;
+	}
+	switch (xcode.getCode()) {
+		case ByteCode::INCR:
+			// ++$
+			sv->getValuePointer()->getNumber()++;
+			Stack::push(*sv);
+		break;
+		case ByteCode::INCL:
+			// $++
+			Stack::push(*sv);
+			sv->getValuePointer()->getNumber()++;
+			break;
+		case ByteCode::DECR:
+			// --$
+			sv->getValuePointer()->getNumber()--;
+			Stack::push(*sv);			
+			break;
+		case ByteCode::DECL:
+			// $--
+			Stack::push(*sv);
+			sv->getValuePointer()->getNumber()--;
+			break;
+		default:
+			Stack::push(*sv);
+	}
+	//Set static pointer if needed:
+	if (xcode.getPointer() > 0) {
+		Stack::setTopPointer(xcode.getPointer());
+	}
+	return ExecReturn::Ex_OK;
+}
 
 /** Perform a done instruction
 *

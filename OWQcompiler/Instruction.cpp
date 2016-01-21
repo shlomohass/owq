@@ -42,6 +42,10 @@ std::string byteCode[] = {
     "ARG", 
     "ARGC_CHECK", 
     "CALL",
+	"INCL",
+	"INCR",
+	"DECL",
+	"DECR",
     "SWA",
     "SHT"
 };
@@ -86,6 +90,10 @@ std::string Instruction::byteCodeToShort() {
         case FUNC: ret  = "FUN"; break;
         case ARGC: ret  = "ARC"; break;
         case CALL: ret  = "CAL"; break;
+		case INCL: ret  = "INL"; break;
+		case INCR: ret  = "INR"; break;
+		case DECL: ret  = "DEL"; break;
+		case DECR: ret  = "DER"; break;
         default:
             ret = byteCode[code];                                  
     }

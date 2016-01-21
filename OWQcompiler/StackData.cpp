@@ -229,8 +229,8 @@ void StackData::setGc() {
  * @param boolean alsoBools DEFAULT : FALSE
  * @return double 
  */
-double StackData::getNumber() {
-    return getNumber(false);
+double& StackData::getNumber() {
+    return dvalue;
 }
 double StackData::getNumber(bool alsoBools) {
 	if (isBoolean() && alsoBools) {

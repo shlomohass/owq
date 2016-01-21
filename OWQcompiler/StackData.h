@@ -99,7 +99,7 @@ public:
     
     int         getOrigin();
 	int         getRstPos();
-    double      getNumber();
+    double&      getNumber();
 	double      getNumber(bool alsoBools);
 	int         getBoolean();
 	bool        getRealBoolean();

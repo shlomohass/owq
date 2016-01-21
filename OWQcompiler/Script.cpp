@@ -170,6 +170,11 @@ ExecReturn Script::executeInstruction(Instruction &xcode, int& instructionPointe
 			return Compute::execute_pointer_assignment(xcode, this, instructionPointer);
 		case ByteCode::UNS:
 			return Compute::execute_variable_unset(xcode, this);
+		case ByteCode::INCL:
+		case ByteCode::INCR:
+		case ByteCode::DECL:
+		case ByteCode::DECR:
+			return Compute::execute_math_inc_dec(xcode, this);
 		case ByteCode::GTR:
 			return Compute::execute_math_gtr(xcode);
         case ByteCode::LSR:
@@ -677,6 +682,7 @@ std::string errors[] = {
 	"17 Unexpected bracket close - missing a bracket open char?",
 	"18 Function declaratin is missing a function name.",
 	"19 Unset - unset expression is not legal you should unset only variables."
+	"20 Missuse of Increment / Decrement operator - should be attached to a variable name only."
 };
 
 /** Loads and precompiles a script:

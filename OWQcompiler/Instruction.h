@@ -43,11 +43,16 @@ enum ByteCode {
     ARGC, 
     CALL,
     
+	INCL,
+	INCR,
+	DECL,
+	DECR,
+
     SWA,    //Swap stack
     SHT     //Shift top on stack.
     
 };
-extern std::string byteCode[33];
+extern std::string byteCode[37];
 class Instruction {
 
     ByteCode		code;

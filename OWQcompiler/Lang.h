@@ -85,6 +85,8 @@ public:
 	static std::string dicLang_plus;
 	static std::string dicLang_minus;
 	static std::string dicLang_multi;
+	static std::string dicLang_inc;
+	static std::string dicLang_dec;
 	static std::string dicLang_divide;
 	static std::string dicLang_equal;
 	static std::string dicLang_pointer;

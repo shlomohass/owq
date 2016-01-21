@@ -45,6 +45,9 @@ public:
 	static ExecReturn execute_math_divide(Instruction &xcode);		// /
 	static ExecReturn execute_math_expon(Instruction &xcode);		// ^
 
+	//Variables operations:
+	static ExecReturn execute_math_inc_dec(Instruction &xcode, Script *script); // ++$
+
 	//Compute methods - Loops and functions:
 	static ExecReturn execute_done_block(Instruction &xcode, Script *script, int& instructionPointer);
 	static ExecReturn execute_loop_break(Instruction &xcode, Script *script, int& instructionPointer);

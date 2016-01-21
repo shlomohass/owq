@@ -20,6 +20,8 @@ std::map<std::string, std::string> Lang::LangDelimiter = {
     { "space"             , " "		},
     { "plus"              , "+"		},
     { "minus"             , "-"		},
+	{ "inc"			      , "++"	},
+	{ "dec"				  , "--"	},
     { "multi"             , "*"		},
     { "divide"            , "/"		},
     { "equal"             , "="		},
@@ -147,6 +149,8 @@ char Lang::LangMacroSetChar = ' ';
 std::string Lang::dicLang_space = "";
 std::string Lang::dicLang_plus = "";
 std::string Lang::dicLang_minus = "";
+std::string Lang::dicLang_inc = "";
+std::string Lang::dicLang_dec = "";
 std::string Lang::dicLang_multi = "";
 std::string Lang::dicLang_divide = "";
 std::string Lang::dicLang_equal = "";
@@ -218,6 +222,8 @@ void Lang::LangPopulate() {
 	dicLang_space = LangFindDelimiter("space");
 	dicLang_plus = LangFindDelimiter("plus");
 	dicLang_minus = LangFindDelimiter("minus");
+	dicLang_inc = LangFindDelimiter("inc");
+	dicLang_dec = LangFindDelimiter("dec");
 	dicLang_multi = LangFindDelimiter("multi");
 	dicLang_divide = LangFindDelimiter("divide");
 	dicLang_equal = LangFindDelimiter("equal");
@@ -337,6 +343,8 @@ bool Lang::LangIsDelimiter(const std::string& value) {
 	if (value[0] == dicLang_space[0] && value == dicLang_space) return true;
 	if (value[0] == dicLang_plus[0] && value == dicLang_plus) return true;
 	if (value[0] == dicLang_minus[0] && value == dicLang_minus) return true;
+	if (value[0] == dicLang_inc[0] && value == dicLang_inc) return true;
+	if (value[0] == dicLang_dec[0] && value == dicLang_dec) return true;
 	if (value[0] == dicLang_multi[0] && value == dicLang_multi) return true;
 	if (value[0] == dicLang_divide[0] && value == dicLang_divide) return true;
 	if (value[0] == dicLang_equal[0] && value == dicLang_equal) return true;

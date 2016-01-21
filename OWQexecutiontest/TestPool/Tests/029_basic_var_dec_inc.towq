@@ -1,0 +1,14 @@
+let a = 9, 
+    b, 
+	c;
+a++;
+b = a--;
+c = --a + 1;
+print(a + ",");
+print(b + ",");
+print(c);
+/*
+@expected-output
+8,10,9
+@end-expected-output
+*/
