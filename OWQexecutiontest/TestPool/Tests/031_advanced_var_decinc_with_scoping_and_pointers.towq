@@ -1,10 +1,7 @@
-
 let a, b, c;
-
 c = 0;
 a = 0;
 b -> a;
-
 while (a < 3) {
 	let a = 0;
 	while (a < 3) {
@@ -13,5 +10,9 @@ while (a < 3) {
 	}
 	b++;
 }
-
 print(c);
+/*
+@expected-output
+9
+@end-expected-output
+*/

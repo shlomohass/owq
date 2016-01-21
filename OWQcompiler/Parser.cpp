@@ -727,6 +727,9 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
         if (tokens.getSize() > 1 && operatorIndex >= 0 && leftToken != nullptr) { //two or more
             //if previous token before the parenthesis has a non zero priority of 2 then make function call
             if (tokens.getTokenPriorty(operatorIndex) && leftToken->type != TokenType::KEYWORD && leftToken->type != TokenType::DELIMITER) {
+				if (operatorIndex == 0 && rCount == 1) { // A garbage preventor:
+					script->addInstruction(Instruction(ByteCode::DPUSH, "CALL"));
+				}
 				std::string funcName = leftToken->token;
 				script->addInstruction(Instruction(ByteCode::CALL, funcName, tokens.tokens[operatorIndex + 1].rstPos));
                 tokens.pop(operatorIndex); //removes function name, operatorIndex points to function name
@@ -764,6 +767,9 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 	if (priortyCode == 91) {
 		if (leftToken != nullptr && ( leftToken->type == TokenType::VAR)) {
 			//Is of type Postfix
+			if (operatorIndex == 1 && rCount == 1) { // A garbage preventor:
+				script->addInstruction(Instruction(ByteCode::DPUSH, operatorToken->token));
+			}
 			if (operatorToken->token == Lang::dicLang_dec) {
 				script->addInstruction(Instruction(ByteCode::DECL, leftToken->token, leftToken->rstPos), true);
 			} else {
@@ -773,6 +779,9 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 			tokens.extractInclusive(operatorIndex - 1, operatorIndex, eraseCount, script, true);
 		} else if (rightToken != nullptr && (rightToken->type == TokenType::VAR)) {
 			//Is of type Prefix
+			if (operatorIndex == 0) { // A garbage preventor:
+				script->addInstruction(Instruction(ByteCode::DPUSH, operatorToken->token));
+			}
 			if (operatorToken->token == Lang::dicLang_dec) {
 				script->addInstruction(Instruction(ByteCode::DECR, rightToken->token, rightToken->rstPos), true);
 			} else {

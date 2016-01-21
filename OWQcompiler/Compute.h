@@ -19,6 +19,8 @@ class Compute {
 	static const std::string execute_warn[];
 public:
 
+	static bool flagPush;
+
 	Compute();
 	virtual ~Compute();
 

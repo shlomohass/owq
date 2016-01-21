@@ -48,11 +48,12 @@ enum ByteCode {
 	DECL,
 	DECR,
 
+	DPUSH,  //Prevent next push. -> this is for Garbage preventing on un assigned or chained returns and variable operations.
     SWA,    //Swap stack
     SHT     //Shift top on stack.
     
 };
-extern std::string byteCode[37];
+extern std::string byteCode[38];
 class Instruction {
 
     ByteCode		code;

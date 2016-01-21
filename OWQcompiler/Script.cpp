@@ -225,6 +225,8 @@ ExecReturn Script::executeInstruction(Instruction &xcode, int& instructionPointe
 			return Compute::execute_variable_declaration(xcode, this);
         case ByteCode::CALL:
 			return Compute::execute_function_call(xcode, this, instructionPointer);
+		case ByteCode::DPUSH:
+			Compute::flagPush = true;
     }
 	return ExecReturn::Ex_OK;
 }
@@ -558,6 +560,7 @@ bool Script::isSystemCall(std::string& object, std::string& functionName, Instru
 			Stack::eraseAt(sd->getOrigin());
 			Stack::runGC();
 		}
+		if (Compute::flagPush) { Compute::flagPush = false;  }
         return true;
     }
     
@@ -570,64 +573,77 @@ bool Script::isSystemCall(std::string& object, std::string& functionName, Instru
         ScriptVariable* sv = getVariable(object);
         if (sv != nullptr) {
             if (sysCall == 3) { // Length
-				Stack::push(ScriptConsole::length(sv->getValuePointer()));
-				if (_xcode.getPointer() > 0) {
-					Stack::setTopPointer(_xcode.getPointer());
-				}
-            }
-			else if (sysCall == 4) { //type
-				Stack::push(ScriptConsole::type(sv->getValuePointer()));
-				if (_xcode.getPointer() > 0) {
-					Stack::setTopPointer(_xcode.getPointer());
-				}
-			}
-			else if (sysCall == 5) { //isNull
-				Stack::push(ScriptConsole::isNull(sv->getValuePointer()));
-				if (_xcode.getPointer() > 0) {
-					Stack::setTopPointer(_xcode.getPointer());
-				}
-			}
-			else if (sysCall == 6) { //isPointer
-				Stack::push(ScriptConsole::isPointer(sv));
-				if (_xcode.getPointer() > 0) {
-					Stack::setTopPointer(_xcode.getPointer());
-				}
-			}
-			else if (sysCall == 7) { //isPointed
-				Stack::push(ScriptConsole::isPointed(sv));
-				if (_xcode.getPointer() > 0) {
-					Stack::setTopPointer(_xcode.getPointer());
-				}
-			}
-            //return substring of a string
-            else if (sysCall == 8) { //substr
-                if (sv->getValuePointer()->isString()) {
-                    Stack::render();
-                    StackData* sb = Stack::pop();	//second argument first
-                    StackData* sa = Stack::pop();	//first argument
-					if (sb == nullptr || sa == nullptr) {
-						ScriptError::msg("WARNINIG -> substr expects 2 arguments");
-						Stack::push(sv->getValuePointer()->getString());
-					} else {
-						int a = (int)sa->getNumber(true);
-						int b = (int)sb->getNumber(true);
-						int originSB = sb->getOrigin();
-						int originSA = sa->getOrigin();
-						Stack::push(sv->getValuePointer()->getString().substr(a, b));
-						Stack::eraseAt(originSB);
-						Stack::eraseAt(originSA);
-						Stack::runGC();
-					}
+				if (!Compute::flagPush) {
+					Stack::push(ScriptConsole::length(sv->getValuePointer()));
 					if (_xcode.getPointer() > 0) {
 						Stack::setTopPointer(_xcode.getPointer());
 					}
-                }
+				}
+            }
+			else if (sysCall == 4) { //type
+				if (!Compute::flagPush) {
+					Stack::push(ScriptConsole::type(sv->getValuePointer()));
+					if (_xcode.getPointer() > 0) {
+						Stack::setTopPointer(_xcode.getPointer());
+					}
+				}
+			}
+			else if (sysCall == 5) { //isNull
+				if (!Compute::flagPush) {
+					Stack::push(ScriptConsole::isNull(sv->getValuePointer()));
+					if (_xcode.getPointer() > 0) {
+						Stack::setTopPointer(_xcode.getPointer());
+					}
+				}
+			}
+			else if (sysCall == 6) { //isPointer
+				if (!Compute::flagPush) {
+					Stack::push(ScriptConsole::isPointer(sv));
+					if (_xcode.getPointer() > 0) {
+						Stack::setTopPointer(_xcode.getPointer());
+					}
+				}
+			}
+			else if (sysCall == 7) { //isPointed
+				if (!Compute::flagPush) {
+					Stack::push(ScriptConsole::isPointed(sv));
+					if (_xcode.getPointer() > 0) {
+						Stack::setTopPointer(_xcode.getPointer());
+					}
+				}
+			}
+            else if (sysCall == 8) { //substr
+				if (!Compute::flagPush) {
+					if (sv->getValuePointer()->isString()) {
+						Stack::render();
+						StackData* sb = Stack::pop();	//second argument first
+						StackData* sa = Stack::pop();	//first argument
+						if (sb == nullptr || sa == nullptr) {
+							ScriptError::msg("WARNINIG -> substr expects 2 arguments");
+							Stack::push(sv->getValuePointer()->getString());
+						} else {
+							int a = (int)sa->getNumber(true);
+							int b = (int)sb->getNumber(true);
+							int originSB = sb->getOrigin();
+							int originSA = sa->getOrigin();
+							Stack::push(sv->getValuePointer()->getString().substr(a, b));
+							Stack::eraseAt(originSB);
+							Stack::eraseAt(originSA);
+							Stack::runGC();
+						}
+						if (_xcode.getPointer() > 0) {
+							Stack::setTopPointer(_xcode.getPointer());
+						}
+					}
+				}
 			} else {
 				return false;
 			}
+			if (Compute::flagPush) { Compute::flagPush = false; }
             return true;
         } else {
             ScriptError::msg("Unable to find object " + object + " for system call " + functionName);
+			if (Compute::flagPush) { Compute::flagPush = false; }
             return true;
         }
     }

@@ -46,6 +46,7 @@ std::string byteCode[] = {
 	"INCR",
 	"DECL",
 	"DECR",
+	"DPUSH",
     "SWA",
     "SHT"
 };
@@ -82,18 +83,19 @@ std::string Instruction::toString() {
 std::string Instruction::byteCodeToShort() {
     std::string ret;
     switch (code) {
-        case LOOP: ret  = "LOO"; break;
-        case DONE: ret  = "DON"; break;
-        case PUSH: ret  = "PUS"; break;
-        case MULT: ret  = "MUL"; break;
-        case EXPON: ret = "POW"; break;
-        case FUNC: ret  = "FUN"; break;
-        case ARGC: ret  = "ARC"; break;
-        case CALL: ret  = "CAL"; break;
-		case INCL: ret  = "INL"; break;
-		case INCR: ret  = "INR"; break;
-		case DECL: ret  = "DEL"; break;
-		case DECR: ret  = "DER"; break;
+        case LOOP:  ret  = "LOO"; break;
+        case DONE:  ret  = "DON"; break;
+        case PUSH:  ret  = "PUS"; break;
+        case MULT:  ret  = "MUL"; break;
+        case EXPON: ret  = "POW"; break;
+        case FUNC:  ret  = "FUN"; break;
+        case ARGC:  ret  = "ARC"; break;
+        case CALL:  ret  = "CAL"; break;
+		case INCL:  ret  = "INL"; break;
+		case INCR:  ret  = "INR"; break;
+		case DECL:  ret  = "DEL"; break;
+		case DECR:  ret  = "DER"; break;
+		case DPUSH: ret  = "DPU"; break;
         default:
             ret = byteCode[code];                                  
     }

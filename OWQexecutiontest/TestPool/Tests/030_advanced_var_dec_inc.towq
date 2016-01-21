@@ -1,0 +1,26 @@
+let a = 9, 
+    b, 
+	c,
+	d = "shlomiii",
+	e,
+	h;
+
+a++; 			// 10 
+e = d.length(); // 8
+h -> e; 		// 8
+b = (a--); 		// 10, 9
+c = --a + 1; 	// 9, 8
+h++; 			// 9
+b = h++ + b; 	// 19, 10
+
+print(a + ","); // 8
+print(b + ","); // 19
+print(c + ","); // 9
+print(e + ","); // 10
+print(h); 		// 10
+
+/*
+@expected-output
+8,19,9,10,10
+@end-expected-output
+*/

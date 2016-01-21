@@ -9,6 +9,8 @@
 #include "Stack.h"
 #include "Lang.h"
 
+bool Compute::flagPush = false;
+
 /** Execution error messages:
  *
  */
@@ -634,29 +636,32 @@ ExecReturn Compute::execute_math_inc_dec(Instruction &xcode, Script *script) {
 		case ByteCode::INCR:
 			// ++$
 			sv->getValuePointer()->getNumber()++;
-			Stack::push(*sv);
-		break;
+			if (!flagPush) { Stack::push(*sv); }
+			break;
 		case ByteCode::INCL:
 			// $++
-			Stack::push(*sv);
+			if (!flagPush) { Stack::push(*sv); }
 			sv->getValuePointer()->getNumber()++;
 			break;
 		case ByteCode::DECR:
 			// --$
 			sv->getValuePointer()->getNumber()--;
-			Stack::push(*sv);			
+			if (!flagPush) { Stack::push(*sv); }
 			break;
 		case ByteCode::DECL:
 			// $--
-			Stack::push(*sv);
+			if (!flagPush) { Stack::push(*sv); }
 			sv->getValuePointer()->getNumber()--;
 			break;
 		default:
-			Stack::push(*sv);
+			if (!flagPush) { Stack::push(*sv); }
 	}
+
 	//Set static pointer if needed:
-	if (xcode.getPointer() > 0) {
+	if (xcode.getPointer() > 0 && !flagPush) {
 		Stack::setTopPointer(xcode.getPointer());
+	} else {
+		flagPush = false;
 	}
 	return ExecReturn::Ex_OK;
 }
