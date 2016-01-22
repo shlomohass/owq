@@ -35,6 +35,8 @@ public:
 	//Compute methods - Math and comparison:
 	static ExecReturn execute_math_gtr(Instruction &xcode);			// >
 	static ExecReturn execute_math_lsr(Instruction &xcode);			// <
+	static ExecReturn execute_math_gtre(Instruction &xcode);		// >=
+	static ExecReturn execute_math_lsre(Instruction &xcode);		// <=
 	static ExecReturn execute_math_cve(Instruction &xcode);			// ==
 	static ExecReturn execute_math_cvn(Instruction &xcode);			// !=
 	static ExecReturn execute_math_cte(Instruction &xcode);			// =~

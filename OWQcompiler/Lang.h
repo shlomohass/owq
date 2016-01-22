@@ -98,6 +98,8 @@ public:
 	static std::string dicLang_exclamation;
 	static std::string dicLang_greater;
 	static std::string dicLang_smaller;
+	static std::string dicLang_greater_equal;
+	static std::string dicLang_smaller_equal;
 	static std::string dicLang_comma;
 	static std::string dicLang_c_tequal;
 	static std::string dicLang_c_ntequal;

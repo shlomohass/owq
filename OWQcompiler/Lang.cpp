@@ -34,6 +34,8 @@ std::map<std::string, std::string> Lang::LangDelimiter = {
     { "exclamation"       , "!"		},
     { "greater"           , ">"		},
     { "smaller"           , "<"		},
+	{ "greater-equal"     , ">="	},
+	{ "smaller-equal"     , "<="	},
     { "comma"             , ","		},
 	{ "c-tequal"          , "=~"	},
 	{ "c-ntequal"         , "!~"	},
@@ -133,71 +135,73 @@ Lang::~Lang() {
 }
 
 
-char Lang::LangGeneralSpace = ' ';
-char Lang::LangStringIndicator = ' ';
-char Lang::LangSubObject = ' ';
-char Lang::LangFunctionOpenArguChar = ' ';
-char Lang::LangFunctionCloseArguChar = ' ';
-char Lang::LangBlockOpenChar = ' ';
-char Lang::LangBlockCloseChar = ' ';
-char Lang::LangArgumentSpacer = ' ';
-char Lang::LangStringEscape = ' ';
-char Lang::LangOperationEnd = ' ';
-char Lang::LangMacroIndicator = ' ';
-char Lang::LangMacroSetChar = ' ';
+char Lang::LangGeneralSpace		= ' ';
+char Lang::LangStringIndicator	= ' ';
+char Lang::LangSubObject		= ' ';
+char Lang::LangFunctionOpenArguChar		= ' ';
+char Lang::LangFunctionCloseArguChar	= ' ';
+char Lang::LangBlockOpenChar	= ' ';
+char Lang::LangBlockCloseChar	= ' ';
+char Lang::LangArgumentSpacer	= ' ';
+char Lang::LangStringEscape		= ' ';
+char Lang::LangOperationEnd		= ' ';
+char Lang::LangMacroIndicator	= ' ';
+char Lang::LangMacroSetChar		= ' ';
 
-std::string Lang::dicLang_space = "";
-std::string Lang::dicLang_plus = "";
-std::string Lang::dicLang_minus = "";
-std::string Lang::dicLang_inc = "";
-std::string Lang::dicLang_dec = "";
-std::string Lang::dicLang_multi = "";
-std::string Lang::dicLang_divide = "";
-std::string Lang::dicLang_equal = "";
-std::string Lang::dicLang_pointer = "";
-std::string Lang::dicLang_braketOpen = "";
-std::string Lang::dicLang_braketClose = "";
-std::string Lang::dicLang_bracesOpen = "";
-std::string Lang::dicLang_bracesClose = "";
-std::string Lang::dicLang_power = "";
-std::string Lang::dicLang_exclamation = "";
-std::string Lang::dicLang_greater = "";
-std::string Lang::dicLang_smaller = "";
-std::string Lang::dicLang_comma = "";
-std::string Lang::dicLang_c_tequal = "";
-std::string Lang::dicLang_c_ntequal = "";
-std::string Lang::dicLang_c_equal = "";
-std::string Lang::dicLang_c_nequal = "";
-std::string Lang::dicLang_and = "";
-std::string Lang::dicLang_or = "";
-std::string Lang::dicLang_semicolon = "";
+std::string Lang::dicLang_space			= "";
+std::string Lang::dicLang_plus			= "";
+std::string Lang::dicLang_minus			= "";
+std::string Lang::dicLang_inc			= "";
+std::string Lang::dicLang_dec			= "";
+std::string Lang::dicLang_multi			= "";
+std::string Lang::dicLang_divide		= "";
+std::string Lang::dicLang_equal			= "";
+std::string Lang::dicLang_pointer		= "";
+std::string Lang::dicLang_braketOpen	= "";
+std::string Lang::dicLang_braketClose	= "";
+std::string Lang::dicLang_bracesOpen	= "";
+std::string Lang::dicLang_bracesClose	= "";
+std::string Lang::dicLang_power			= "";
+std::string Lang::dicLang_exclamation	= "";
+std::string Lang::dicLang_greater		= "";
+std::string Lang::dicLang_smaller		= "";
+std::string Lang::dicLang_greater_equal = "";
+std::string Lang::dicLang_smaller_equal = "";
+std::string Lang::dicLang_comma			= "";
+std::string Lang::dicLang_c_tequal		= "";
+std::string Lang::dicLang_c_ntequal		= "";
+std::string Lang::dicLang_c_equal		= "";
+std::string Lang::dicLang_c_nequal		= "";
+std::string Lang::dicLang_and			= "";
+std::string Lang::dicLang_or			= "";
+std::string Lang::dicLang_semicolon		= "";
 
 //String based keywords:
-std::string Lang::dicLangKey_variable = "";
-std::string Lang::dicLangKey_unset = "";
+std::string Lang::dicLangKey_variable	= "";
+std::string Lang::dicLangKey_unset		= "";
 std::string Lang::dicLangKey_sub_object = "";
-std::string Lang::dicLangKey_cond_if = "";
-std::string Lang::dicLangKey_cond_else = "";
+std::string Lang::dicLangKey_cond_if	= "";
+std::string Lang::dicLangKey_cond_else	= "";
 std::string Lang::dicLangKey_cond_break = "";
 std::string Lang::dicLangKey_loop_while = "";
-std::string Lang::dicLangKey_loop_for = "";
+std::string Lang::dicLangKey_loop_for	= "";
 std::string Lang::dicLangKey_loop_break = "";
-std::string Lang::dicLangKey_function = "";
-std::string Lang::dicLangKey_return = "";
+std::string Lang::dicLangKey_function	= "";
+std::string Lang::dicLangKey_return		= "";
 
 //Values based naming:
-std::string Lang::dicLangValue_true_lower = "";
-std::string Lang::dicLangValue_true_upper = "";
-std::string Lang::dicLangValue_false_lower = "";
-std::string Lang::dicLangValue_false_upper = "";
-std::string Lang::dicLangValue_null_lower = "";
-std::string Lang::dicLangValue_null_upper = "";
+std::string Lang::dicLangValue_true_lower	= "";
+std::string Lang::dicLangValue_true_upper	= "";
+std::string Lang::dicLangValue_false_lower	= "";
+std::string Lang::dicLangValue_false_upper	= "";
+std::string Lang::dicLangValue_null_lower	= "";
+std::string Lang::dicLangValue_null_upper	= "";
 
 //Internal values naming:
 std::string Lang::dicLangValue_garbage_upper = "GC";
 std::string Lang::dicLangValue_garbage_lower = "gc";
-std::string Lang::dicLangValue_rst_upper = "RST";
-std::string Lang::dicLangValue_rst_lower = "rst";
+std::string Lang::dicLangValue_rst_upper	= "RST";
+std::string Lang::dicLangValue_rst_lower	= "rst";
 
 /** Populate the language to cache symbols:
  *
@@ -205,72 +209,74 @@ std::string Lang::dicLangValue_rst_lower = "rst";
 void Lang::LangPopulate() {
 
 	//Char based:
-	LangGeneralSpace = LangFindDelimiter("space")[0];
+	LangGeneralSpace	= LangFindDelimiter("space")[0];
 	LangStringIndicator = LangFindDelimiter("string")[0];
-	LangSubObject = LangFindKeyword("sub-object")[0];
-	LangFunctionOpenArguChar = LangFindDelimiter("braketOpen")[0];
+	LangSubObject		= LangFindKeyword("sub-object")[0];
+	LangFunctionOpenArguChar  = LangFindDelimiter("braketOpen")[0];
 	LangFunctionCloseArguChar = LangFindDelimiter("braketClose")[0];
-	LangBlockOpenChar = LangFindDelimiter("bracesOpen")[0];
-	LangBlockCloseChar = LangFindDelimiter("bracesClose")[0];
-	LangArgumentSpacer = LangFindDelimiter("comma")[0];
-	LangStringEscape = LangFindDelimiter("string-esc")[0];
-	LangOperationEnd = LangFindDelimiter("semicolon")[0];
-	LangMacroIndicator = LangFindDelimiter("macro-def")[0];
-	LangMacroSetChar = LangFindDelimiter("macro-set")[0];
+	LangBlockOpenChar	= LangFindDelimiter("bracesOpen")[0];
+	LangBlockCloseChar	= LangFindDelimiter("bracesClose")[0];
+	LangArgumentSpacer	= LangFindDelimiter("comma")[0];
+	LangStringEscape	= LangFindDelimiter("string-esc")[0];
+	LangOperationEnd	= LangFindDelimiter("semicolon")[0];
+	LangMacroIndicator	= LangFindDelimiter("macro-def")[0];
+	LangMacroSetChar	= LangFindDelimiter("macro-set")[0];
 
 	//String based:
-	dicLang_space = LangFindDelimiter("space");
-	dicLang_plus = LangFindDelimiter("plus");
-	dicLang_minus = LangFindDelimiter("minus");
-	dicLang_inc = LangFindDelimiter("inc");
-	dicLang_dec = LangFindDelimiter("dec");
-	dicLang_multi = LangFindDelimiter("multi");
-	dicLang_divide = LangFindDelimiter("divide");
-	dicLang_equal = LangFindDelimiter("equal");
-	dicLang_pointer = LangFindDelimiter("pointer");
-	dicLang_braketOpen = LangFindDelimiter("braketOpen");
+	dicLang_space		= LangFindDelimiter("space");
+	dicLang_plus		= LangFindDelimiter("plus");
+	dicLang_minus		= LangFindDelimiter("minus");
+	dicLang_inc			= LangFindDelimiter("inc");
+	dicLang_dec			= LangFindDelimiter("dec");
+	dicLang_multi		= LangFindDelimiter("multi");
+	dicLang_divide		= LangFindDelimiter("divide");
+	dicLang_equal		= LangFindDelimiter("equal");
+	dicLang_pointer		= LangFindDelimiter("pointer");
+	dicLang_braketOpen	= LangFindDelimiter("braketOpen");
 	dicLang_braketClose = LangFindDelimiter("braketClose");
-	dicLang_bracesOpen = LangFindDelimiter("bracesOpen");
+	dicLang_bracesOpen	= LangFindDelimiter("bracesOpen");
 	dicLang_bracesClose = LangFindDelimiter("bracesClose");
-	dicLang_power = LangFindDelimiter("power");
+	dicLang_power		= LangFindDelimiter("power");
 	dicLang_exclamation = LangFindDelimiter("exclamation");
-	dicLang_greater = LangFindDelimiter("greater");
-	dicLang_smaller = LangFindDelimiter("smaller");
-	dicLang_comma = LangFindDelimiter("comma");
-	dicLang_c_tequal = LangFindDelimiter("c-tequal");
-	dicLang_c_ntequal = LangFindDelimiter("c-ntequal");
-	dicLang_c_equal = LangFindDelimiter("c-equal");
-	dicLang_c_nequal = LangFindDelimiter("c-nequal");
-	dicLang_and = LangFindDelimiter("and");
-	dicLang_or = LangFindDelimiter("or");
-	dicLang_semicolon = LangFindDelimiter("semicolon");
+	dicLang_greater		= LangFindDelimiter("greater");
+	dicLang_smaller		= LangFindDelimiter("smaller");
+	dicLang_greater_equal = LangFindDelimiter("greater-equal");
+	dicLang_smaller_equal = LangFindDelimiter("smaller-equal");
+	dicLang_comma		= LangFindDelimiter("comma");
+	dicLang_c_tequal	= LangFindDelimiter("c-tequal");
+	dicLang_c_ntequal	= LangFindDelimiter("c-ntequal");
+	dicLang_c_equal		= LangFindDelimiter("c-equal");
+	dicLang_c_nequal	= LangFindDelimiter("c-nequal");
+	dicLang_and			= LangFindDelimiter("and");
+	dicLang_or			= LangFindDelimiter("or");
+	dicLang_semicolon	= LangFindDelimiter("semicolon");
 
 	//Keywords:
-	dicLangKey_variable = LangFindKeyword("variable");
-	dicLangKey_unset = LangFindKeyword("unset");
-	dicLangKey_sub_object = LangFindKeyword("sub-object");
-	dicLangKey_cond_if = LangFindKeyword("cond-if");
-	dicLangKey_cond_else = LangFindKeyword("cond-else");
-	dicLangKey_cond_break = LangFindKeyword("cond-break");
-	dicLangKey_loop_while = LangFindKeyword("loop-while");
-	dicLangKey_loop_for = LangFindKeyword("loop-for");
-	dicLangKey_loop_break = LangFindKeyword("loop-break");
-	dicLangKey_function = LangFindKeyword("function");
-	dicLangKey_return = LangFindKeyword("return");
+	dicLangKey_variable		= LangFindKeyword("variable");
+	dicLangKey_unset		= LangFindKeyword("unset");
+	dicLangKey_sub_object	= LangFindKeyword("sub-object");
+	dicLangKey_cond_if		= LangFindKeyword("cond-if");
+	dicLangKey_cond_else	= LangFindKeyword("cond-else");
+	dicLangKey_cond_break	= LangFindKeyword("cond-break");
+	dicLangKey_loop_while	= LangFindKeyword("loop-while");
+	dicLangKey_loop_for		= LangFindKeyword("loop-for");
+	dicLangKey_loop_break	= LangFindKeyword("loop-break");
+	dicLangKey_function		= LangFindKeyword("function");
+	dicLangKey_return		= LangFindKeyword("return");
 
 	//Values based naming:
-	dicLangValue_true_lower = LangFindValueNaming("true-lower");
-	dicLangValue_true_upper = LangFindValueNaming("true-upper");
-	dicLangValue_false_lower = LangFindValueNaming("false-lower");
-	dicLangValue_false_upper = LangFindValueNaming("false-upper");
-	dicLangValue_null_lower = LangFindValueNaming("null-lower");
-	dicLangValue_null_upper = LangFindValueNaming("null-upper");
+	dicLangValue_true_lower		= LangFindValueNaming("true-lower");
+	dicLangValue_true_upper		= LangFindValueNaming("true-upper");
+	dicLangValue_false_lower	= LangFindValueNaming("false-lower");
+	dicLangValue_false_upper	= LangFindValueNaming("false-upper");
+	dicLangValue_null_lower		= LangFindValueNaming("null-lower");
+	dicLangValue_null_upper		= LangFindValueNaming("null-upper");
 
 	//Internal values naming:
-	dicLangValue_garbage_lower = LangFindValueNaming("garbage-lower");
-	dicLangValue_garbage_upper = LangFindValueNaming("garbage-upper");
-	dicLangValue_rst_lower = LangFindValueNaming("rst-lower");
-	dicLangValue_rst_upper = LangFindValueNaming("rst-upper");
+	dicLangValue_garbage_lower	= LangFindValueNaming("garbage-lower");
+	dicLangValue_garbage_upper	= LangFindValueNaming("garbage-upper");
+	dicLangValue_rst_lower		= LangFindValueNaming("rst-lower");
+	dicLangValue_rst_upper		= LangFindValueNaming("rst-upper");
 
 }
 /** Find the character that represent a delimiter name:
@@ -357,6 +363,8 @@ bool Lang::LangIsDelimiter(const std::string& value) {
 	if (value[0] == dicLang_exclamation[0] && value == dicLang_exclamation) return true;
 	if (value[0] == dicLang_greater[0] && value == dicLang_greater) return true;
 	if (value[0] == dicLang_smaller[0] && value == dicLang_smaller) return true;
+	if (value[0] == dicLang_greater_equal[0] && value == dicLang_greater_equal) return true;
+	if (value[0] == dicLang_smaller_equal[0] && value == dicLang_smaller_equal) return true;
 	if (value[0] == dicLang_comma[0] && value == dicLang_comma) return true;
 	if (value[0] == dicLang_c_tequal[0] && value == dicLang_c_tequal) return true;
 	if (value[0] == dicLang_c_ntequal[0] && value == dicLang_c_ntequal) return true;

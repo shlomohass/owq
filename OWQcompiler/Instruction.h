@@ -15,9 +15,13 @@ enum ByteCode {
     RET,    //return from a function, change instruction pointer, pop off method from function stack
     ASN,    //assign value to variable
 	POI,    //assign pointer to variable
+
     GTR,    //greater
     LSR,    //lesser
-    LOOP,
+	GTRE,   //greater equal
+	LSRE,   //lesser equal
+    
+	LOOP,
 	BRE,    //break loop
 	BIF,    //break if statement;
     DONE,   //End of block
@@ -53,7 +57,7 @@ enum ByteCode {
     SHT     //Shift top on stack.
     
 };
-extern std::string byteCode[38];
+extern std::string byteCode[40];
 class Instruction {
 
     ByteCode		code;

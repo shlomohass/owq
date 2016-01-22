@@ -81,26 +81,27 @@ std::string Instruction::toString() {
 }
 
 std::string Instruction::byteCodeToShort() {
-    std::string ret;
     switch (code) {
-        case LOOP:  ret  = "LOO"; break;
-        case DONE:  ret  = "DON"; break;
-        case PUSH:  ret  = "PUS"; break;
-        case MULT:  ret  = "MUL"; break;
-        case EXPON: ret  = "POW"; break;
-        case FUNC:  ret  = "FUN"; break;
-        case ARGC:  ret  = "ARC"; break;
-        case CALL:  ret  = "CAL"; break;
-		case INCL:  ret  = "INL"; break;
-		case INCR:  ret  = "INR"; break;
-		case DECL:  ret  = "DEL"; break;
-		case DECR:  ret  = "DER"; break;
-		case DPUSH: ret  = "DPU"; break;
+		case ByteCode::GTRE:  return "GTE";
+		case ByteCode::LSRE:  return "LSE";
+        case ByteCode::LOOP:  return "LOO";
+        case ByteCode::DONE:  return "DON";
+        case ByteCode::PUSH:  return "PUS";
+        case ByteCode::MULT:  return "MUL";
+        case ByteCode::EXPON: return "POW";
+        case ByteCode::FUNC:  return "FUN";
+        case ByteCode::ARGC:  return "ARC";
+        case ByteCode::CALL:  return "CAL";
+		case ByteCode::INCL:  return "INL";
+		case ByteCode::INCR:  return "INR";
+		case ByteCode::DECL:  return "DEL";
+		case ByteCode::DECR:  return "DER";
+		case ByteCode::DPUSH: return "DPU";
         default:
-            ret = byteCode[code];                                  
+            return byteCode[code];                                  
     }
-    return ret;
 }
+
 Instruction::Instruction(ByteCode inst, const std::string& xOperand) {
     code = inst;
     operand = xOperand;
@@ -133,6 +134,7 @@ Instruction::Instruction(ByteCode inst, const std::string& xOperand, int pointer
         }
     }
 }
+
 Instruction::Instruction(ByteCode inst) {
     code = inst;
 	jmpCache = -1;
@@ -140,6 +142,7 @@ Instruction::Instruction(ByteCode inst) {
     staticPointer = 0;
     isRST = true;
 }
+
 void Instruction::setPointer(int pointer) {
     staticPointer = pointer;
 }

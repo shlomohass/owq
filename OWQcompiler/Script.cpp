@@ -179,6 +179,10 @@ ExecReturn Script::executeInstruction(Instruction &xcode, int& instructionPointe
 			return Compute::execute_math_gtr(xcode);
         case ByteCode::LSR:
 			return Compute::execute_math_lsr(xcode);
+		case ByteCode::GTRE:
+			return Compute::execute_math_gtre(xcode);
+		case ByteCode::LSRE:
+			return Compute::execute_math_lsre(xcode);
         case ByteCode::CVE:
 			return Compute::execute_math_cve(xcode);
 		case ByteCode::CVN:

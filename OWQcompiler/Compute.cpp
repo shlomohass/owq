@@ -44,7 +44,9 @@ const std::string Compute::execute_warn[] = {
 	/* 17 */ "Current active function requires sufficient argument",
 	/* 18 */ "Unable to find function: ",
 	/* 19 */ "Pointer must point to a declared valid variable in pointer: ",
-	/* 20 */ "Pointer self reference is not alowed (infinite reference): "
+	/* 20 */ "Pointer self reference is not alowed (infinite reference): ",
+	/* 21  */ "Tried to GTR or EQUAL with unsupported types: ",
+	/* 22  */ "Tried to LSR or EQUAL with unsupported types: ",
 };
 Compute::Compute() {
 
@@ -234,6 +236,86 @@ ExecReturn Compute::execute_math_lsr(Instruction &xcode) {
 			Stack::push(StackData(a->getString().length() < b->getString().length()));
 		} else { //unsopurted
 			ScriptError::warn(execute_warn[1] + ScriptConsole::stackTypeName(a->getType()) + "," + ScriptConsole::stackTypeName(b->getType()));
+			Stack::push(StackData(false));
+		}
+		//Remove from stack:
+		Stack::eraseAt(originB);
+		Stack::eraseAt(originA);
+		Stack::runGC();
+		//Set static pointer:
+		if (xcode.getPointer() > 0) {
+			Stack::setTopPointer(xcode.getPointer());
+		}
+	}
+	return ExecReturn::Ex_OK;
+}
+/** Perform a greater than operation
+*
+*/
+ExecReturn Compute::execute_math_gtre(Instruction &xcode) {
+	StackData* b = Stack::pop(0);
+	StackData* a = Stack::pop(1);
+	if (a == nullptr || b == nullptr) {
+		ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_NULL_STACK_EXTRACTION] + xcode.toString());
+		return ExecReturn::Ex_NULL_STACK_EXTRACTION;
+	}
+	else {
+		int originA = a->getOrigin();
+		int originB = b->getOrigin();
+		if (a->isNumber(true) && b->isNumber(true)) { //a = number AND b = number
+			Stack::push(StackData(a->getNumber(true) >= b->getNumber(true)));
+		}
+		else if (a->isNumber(true) && b->isString()) { //a = number AND b = string
+			Stack::push(StackData(a->getNumber(true) >= b->getString().length()));
+		}
+		else if (a->isString() && b->isNumber(true)) { //a = string AND b = number
+			Stack::push(StackData(a->getString().length() >= b->getNumber(true)));
+		}
+		else if (a->isString() && b->isString()) { //a = string AND b = string
+			Stack::push(StackData(a->getString().length() >= b->getString().length()));
+		}
+		else { //unsopurted
+			ScriptError::warn(execute_warn[21] + ScriptConsole::stackTypeName(a->getType()) + "," + ScriptConsole::stackTypeName(b->getType()));
+			Stack::push(StackData(false));
+		}
+		//Remove from stack:
+		Stack::eraseAt(originB);
+		Stack::eraseAt(originA);
+		Stack::runGC();
+		//Set static pointer:
+		if (xcode.getPointer() > 0) {
+			Stack::setTopPointer(xcode.getPointer());
+		}
+	}
+	return ExecReturn::Ex_OK;
+}
+/** Perform a lesser than operation
+*
+*/
+ExecReturn Compute::execute_math_lsre(Instruction &xcode) {
+	StackData* b = Stack::pop(0);
+	StackData* a = Stack::pop(1);
+	if (a == nullptr || b == nullptr) {
+		ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_NULL_STACK_EXTRACTION] + xcode.toString());
+		return ExecReturn::Ex_NULL_STACK_EXTRACTION;
+	}
+	else {
+		int originA = a->getOrigin();
+		int originB = b->getOrigin();
+		if (a->isNumber(true) && b->isNumber(true)) { //a = number AND b = number
+			Stack::push(StackData(a->getNumber(true) <= b->getNumber(true)));
+		}
+		else if (a->isNumber(true) && b->isString()) { //a = number AND b = string
+			Stack::push(StackData(a->getNumber(true) <= b->getString().length()));
+		}
+		else if (a->isString() && b->isNumber(true)) { //a = string AND b = number
+			Stack::push(StackData(a->getString().length() <= b->getNumber(true)));
+		}
+		else if (a->isString() && b->isString()) { //a = string AND b = string
+			Stack::push(StackData(a->getString().length() <= b->getString().length()));
+		}
+		else { //unsopurted
+			ScriptError::warn(execute_warn[22] + ScriptConsole::stackTypeName(a->getType()) + "," + ScriptConsole::stackTypeName(b->getType()));
 			Stack::push(StackData(false));
 		}
 		//Remove from stack:

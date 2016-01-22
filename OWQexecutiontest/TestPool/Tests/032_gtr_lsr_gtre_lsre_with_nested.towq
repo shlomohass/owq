@@ -13,8 +13,13 @@ if (a < 10) {
 		print("OK4,");
 	}
 }
-if (a < 10 && a == 10 && a >= 10 && a <= 10) {
+if (a < 11 && a > 9 && a == 10 && a >= 10 && a <= 10) {
 	print("OK5");
 } else {
 	print("NO2");
 }
+/*
+@expected-output
+OK1,OK2,OK3,OK4,OK5
+@end-expected-output
+*/

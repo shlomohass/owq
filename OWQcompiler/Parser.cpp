@@ -821,9 +821,13 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
         
         if (operatorToken->token == Lang::dicLang_greater) { // Is greater than
             compile_LR_mathLogigBaseOperations(ByteCode::GTR, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
-        } else { // Is smaller than
+        } else if (operatorToken->token == Lang::dicLang_smaller) { // Is smaller than
             compile_LR_mathLogigBaseOperations(ByteCode::LSR, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
-        }
+        } else if (operatorToken->token == Lang::dicLang_greater_equal) { // Is greater or equal to
+			compile_LR_mathLogigBaseOperations(ByteCode::GTRE, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+		} else if (operatorToken->token == Lang::dicLang_smaller_equal) { // Is smaller or equal to
+			compile_LR_mathLogigBaseOperations(ByteCode::LSRE, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+		}
         
     //c-equals ==
     } else if (priortyCode == 59) {
@@ -832,11 +836,9 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
             compile_LR_mathLogigBaseOperations(ByteCode::CVE, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
         } else if (operatorToken->token == Lang::dicLang_c_nequal){ // Is value not Equal to
 			compile_LR_mathLogigBaseOperations(ByteCode::CVN, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
-        }
-		else if (operatorToken->token == Lang::dicLang_c_tequal) { // Is type Equal to
+        } else if (operatorToken->token == Lang::dicLang_c_tequal) { // Is type Equal to
 			compile_LR_mathLogigBaseOperations(ByteCode::CTE, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
-		}
-		else if (operatorToken->token == Lang::dicLang_c_ntequal) { // Is type not Equal to
+		} else if (operatorToken->token == Lang::dicLang_c_ntequal) { // Is type not Equal to
 			compile_LR_mathLogigBaseOperations(ByteCode::CTN, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
 		}
         
@@ -866,8 +868,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 		script->addInstruction(Instruction(ByteCode::PUSH, tokens.getToken(operatorIndex)));
 		if (operatorIndex == tokens.getSize() - 1) {
 			tokens.extractInclusive(operatorIndex, operatorIndex, eraseCount, script, true);
-		}
-		else {
+		} else {
 			tokens.extractInclusive(operatorIndex, operatorIndex, eraseCount, script);
 		}
 		operatorIndex -= eraseCount;
@@ -1151,7 +1152,12 @@ int Parser::getDelimiterPriorty(std::string toCheckToken, TokenType toCheckType)
 	else if (toCheckToken == Lang::dicLang_plus || toCheckToken == Lang::dicLang_minus) {
 		return 70;
 	}
-	else if (toCheckToken == Lang::dicLang_smaller || toCheckToken == Lang::dicLang_greater) {
+	else if (
+		toCheckToken == Lang::dicLang_smaller || 
+		toCheckToken == Lang::dicLang_greater ||
+		toCheckToken == Lang::dicLang_greater_equal ||
+		toCheckToken == Lang::dicLang_smaller_equal
+	) {
 		return 60;
 	}
 	else if (toCheckToken == Lang::dicLang_c_equal || toCheckToken == Lang::dicLang_c_nequal || toCheckToken == Lang::dicLang_c_tequal || toCheckToken == Lang::dicLang_c_ntequal) {
