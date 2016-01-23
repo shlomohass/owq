@@ -12,30 +12,31 @@
 
 #include <iostream>
 #include <vector>
+namespace Eowq
+{
+	class Stack {
+		static std::vector<StackData> stack;
 
-class Stack {
-    static std::vector<StackData> stack;
-    
-public:
-    Stack();
-    static void push(double data);
-    static void push(std::string& data);
-    static void push(StackData& data);
-    static void push(ScriptVariable& data);
-    static int  size();
-	static StackData* pop();
-    static StackData* pop(int offset);
-    static StackData* extract(int pointer);
-	static void eraseAt(int index);
-	static void runGC();
-    static void setTopPointer(int pointer);
-    static void Swap();
-    static void ShiftTop();
-    static void ShiftTop(int index);
-    static StackData Shift();
-    static void render();
-    virtual ~Stack();
-};
-
+	public:
+		Stack();
+		static void push(double data);
+		static void push(std::string& data);
+		static void push(StackData& data);
+		static void push(ScriptVariable& data);
+		static int  size();
+		static StackData* pop();
+		static StackData* pop(int offset);
+		static StackData* extract(int pointer);
+		static void eraseAt(int index);
+		static void runGC();
+		static void setTopPointer(int pointer);
+		static void Swap();
+		static void ShiftTop();
+		static void ShiftTop(int index);
+		static StackData Shift();
+		static void render();
+		virtual ~Stack();
+	};
+}
 #endif	/* STACK_H */
 

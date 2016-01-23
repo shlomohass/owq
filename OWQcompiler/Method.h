@@ -9,29 +9,31 @@
 
 #include "Loop.h"
 #include "ScriptVariable.h"
+namespace Eowq
+{
 
-class Method : public Loop {
+	class Method : public Loop {
 
-private:
+	private:
 
-	int retAddress;
-    //Cached name just for debugging future!
-	std::string name;
+		int retAddress;
+		//Cached name just for debugging future!
+		std::string name;
 
-public:
-    
-    //Constructors:
-	Method();
-	Method(int address);
-	Method(int address, int xRetAddress, std::string setName);
+	public:
 
-    //Return address:
-	int getReturnAddress();
-        
-    //Return cached name:
-	std::string* getName();
+		//Constructors:
+		Method();
+		Method(int address);
+		Method(int address, int xRetAddress, std::string setName);
 
-};
+		//Return address:
+		int getReturnAddress();
 
+		//Return cached name:
+		std::string* getName();
+
+	};
+}
 #endif	/* METHOD_H */
 

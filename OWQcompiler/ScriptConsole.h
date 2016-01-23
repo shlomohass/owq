@@ -11,27 +11,29 @@
 #include "ScriptVariable.h"
 #include <iostream>
 #include <sstream>
+namespace Eowq
+{
+	class ScriptConsole {
+	public:
 
-class ScriptConsole {
-public:
-    
-    ScriptConsole();
-    
-	//Generic methods:
-    static void print(StackData* sd, bool debug);
-	static StackData length(StackData* sd);
-	static StackData type(StackData* sd);
-	static StackData isNull(StackData* sd);
-	static StackData isPointer(ScriptVariable* sv);
-	static StackData isPointed(ScriptVariable* sv);
-    static std::string toString(double number);
+		ScriptConsole();
+		virtual ~ScriptConsole();
 
-	//Helpers 
-	static std::string stackTypeName(SDtype sdtype);
+		//Generic methods:
+		static void print(StackData* sd, bool debug);
+		static StackData length(StackData* sd);
+		static StackData type(StackData* sd);
+		static StackData isNull(StackData* sd);
+		static StackData isPointer(ScriptVariable* sv);
+		static StackData isPointed(ScriptVariable* sv);
+		static std::string toString(double number);
 
-    virtual ~ScriptConsole();
-    
-};
+		//Helpers 
+		static std::string stackTypeName(SDtype sdtype);
 
+		
+
+	};
+}
 #endif	/* SCRIPTCONSOLE_H */
 

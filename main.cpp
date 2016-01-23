@@ -66,8 +66,8 @@ int main(int argc, char** argv) {
 	}
 	
 	if (execute_is_requested) {
-		Lang* lang = new Lang();
-		Script s;
+		Eowq::Lang* lang = new Eowq::Lang();
+		Eowq::Script s;
 
 		//Register global system variables to Interpreter:
 		//s.registerVariable("Aflag",   RegisteredVariable::REGISTERED_DOUBLE, &Aflag);
@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
 		bool indicator = s.loadFile( settings.inscript, enable_debug);
 		//Loading success so go and do stuff:
 		if (indicator) {
-			s.run( enable_debug );
+			//s.run( enable_debug );
 		}
 
 		delete lang;

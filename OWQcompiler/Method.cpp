@@ -6,22 +6,26 @@
 
 #include "Method.h"
 
-Method::Method() {
-	name = "";
-}
-Method::Method(int address) : Loop(address) {
-    name = "";
-}
+namespace Eowq {
 
-Method::Method(int address, int xRetAddress, std::string setName) : Loop(address) {
-    retAddress = xRetAddress;
-    name = setName;
-}
+	Method::Method() {
+		name = "";
+	}
+	Method::Method(int address) : Loop(address) {
+		name = "";
+	}
 
-int Method::getReturnAddress() {
-    return retAddress;
-}
+	Method::Method(int address, int xRetAddress, std::string setName) : Loop(address) {
+		retAddress = xRetAddress;
+		name = setName;
+	}
 
-std::string* Method::getName() {
-    return &name;
+	int Method::getReturnAddress() {
+		return retAddress;
+	}
+
+	std::string* Method::getName() {
+		return &name;
+	}
+
 }

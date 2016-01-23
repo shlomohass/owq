@@ -10,51 +10,52 @@
 #include "ScriptVariable.h"
 #include <map>
 #include <unordered_map>
+namespace Eowq
+{
+	class Script;
 
-class Script;
+	class Loop {
 
-class Loop {
+	protected:
 
-protected:
+		std::unordered_map<std::string, ScriptVariable> var;
+		int varSize;
+		int personalAddress;
 
-	std::unordered_map<std::string, ScriptVariable> var;
-	int varSize;
-	int personalAddress;
+	public:
 
-public:
-    
-    //Constructors:
-	Loop();
-	Loop(int address);
-        
-    //Push method variables by types:
-	bool addVariable(std::string& name);
-	bool addVariable(std::string& name, StackData& sd);
-	
-    //Get a scoped method variable:
-	std::unordered_map<std::string, ScriptVariable>::iterator getVariableContainerEnd();
-	std::unordered_map<std::string, ScriptVariable>::iterator getVariableIt(std::string& name);
-	ScriptVariable *getVariable(std::string& name);
-	bool hasVariable(std::string& name);
-	
+		//Constructors:
+		Loop();
+		Loop(int address);
 
-	//Setter getter address:
-	void setPersonalAddress(int address);
-	int  getPersonalAddress();
+		//Push method variables by types:
+		bool addVariable(std::string& name);
+		bool addVariable(std::string& name, StackData& sd);
 
-	//Deref variables:
-	void derefInScope(std::string& name);
-	
-	//Delete from scope:
-	void deleteFromScope(std::unordered_map<std::string, ScriptVariable>::iterator& it);
+		//Get a scoped method variable:
+		std::unordered_map<std::string, ScriptVariable>::iterator getVariableContainerEnd();
+		std::unordered_map<std::string, ScriptVariable>::iterator getVariableIt(std::string& name);
+		ScriptVariable *getVariable(std::string& name);
+		bool hasVariable(std::string& name);
 
-	//Reset personal scope:
-	void resetScope(Script* script);
 
-    //Render all registered variables:
-    void renderScopeVars();
+		//Setter getter address:
+		void setPersonalAddress(int address);
+		int  getPersonalAddress();
 
-};
+		//Deref variables:
+		void derefInScope(std::string& name);
 
+		//Delete from scope:
+		void deleteFromScope(std::unordered_map<std::string, ScriptVariable>::iterator& it);
+
+		//Reset personal scope:
+		void resetScope(Script* script);
+
+		//Render all registered variables:
+		void renderScopeVars();
+
+	};
+}
 #endif	/* OWQLOOP_H */
 

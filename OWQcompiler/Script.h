@@ -12,20 +12,22 @@
 //#include <boost\filesystem\fstream.hpp>
 #include <boost\filesystem\operations.hpp>
 #include <boost\filesystem\path.hpp>
+namespace Eowq
+{
+	enum ExecReturn {
+		Ex_OK,
+		Ex_RETURN,
+		Ex_VAR_RESOLVE,
+		Ex_NVAR_ASN,
+		Ex_NULL_STACK_EXTRACTION,
+		Ex_UNSUPPORTED_VAR_TYPE
+	};
 
-enum ExecReturn {
-	Ex_OK,
-	Ex_RETURN,
-	Ex_VAR_RESOLVE,
-	Ex_NVAR_ASN,
-	Ex_NULL_STACK_EXTRACTION,
-	Ex_UNSUPPORTED_VAR_TYPE
-};
-
-enum ScopeType {
-	ST_METHOD,
-	ST_LOOP
-};
+	enum ScopeType {
+		ST_METHOD,
+		ST_LOOP
+	};
+}
 
 #include "Instruction.h"
 #include "Loop.h"
@@ -39,97 +41,99 @@ enum ScopeType {
 #include <vector>
 
 namespace fs = boost::filesystem;
+namespace Eowq
+{
 
-class Parser;
+	class Parser;
 
-struct OWQScope {
-	ScopeType type;
-	Method m;
-	Loop   l;
-	OWQScope() { }
-	OWQScope(Method _m) { m = _m; type = ScopeType::ST_METHOD; }
-	OWQScope(Loop _l) { l = _l; type = ScopeType::ST_LOOP; }
-};
+	struct OWQScope {
+		ScopeType type;
+		Method m;
+		Loop   l;
+		OWQScope() { }
+		OWQScope(Method _m) { m = _m; type = ScopeType::ST_METHOD; }
+		OWQScope(Loop _l) { l = _l; type = ScopeType::ST_LOOP; }
+	};
 
-class Script {
-    
-    friend class Parser;
-	friend class Loop;
-	friend class Method;
-	friend class Compute;
-    friend class Tokens;
+	class Script {
 
-	// Debugger flag:
-	bool script_debug;
-	std::vector<Instruction> code;
-	std::map<std::string, int> functionTable;
-	std::unordered_map<std::string, ScriptVariable> variables;
-    
-	// Scope tracker:
-	std::unordered_map<int, OWQScope> scopeStore;
-	std::vector<OWQScope*> scope;
-    
-	int internalStaticPointer;
-    
-    void popActiveScope();
-    void pushMethodScope(int address, int retAddress, std::string name);
-	void pushLoopScope(int address);
-	
-	OWQScope* scopeStoreHas(int scopeAddress);
+		friend class Parser;
+		friend class Loop;
+		friend class Method;
+		friend class Compute;
+		friend class Tokens;
 
-	int getFunctionAddress(std::string funcName);
-	OWQScope* getActiveScope();
-	OWQScope* getActiveScope(int scopeOffset);
+		// Debugger flag:
+		bool script_debug;
+		std::vector<Instruction> code;
+		std::map<std::string, int> functionTable;
+		std::unordered_map<std::string, ScriptVariable> variables;
 
-    ExecReturn executeInstruction(Instruction &code, int& instructionPointer);
-    ExecReturn executeInstruction(Instruction &code, int& instructionPointer, bool debug);
+		// Scope tracker:
+		std::unordered_map<int, OWQScope> scopeStore;
+		std::vector<OWQScope*> scope;
+
+		int internalStaticPointer;
+
+		void popActiveScope();
+		void pushMethodScope(int address, int retAddress, std::string name);
+		void pushLoopScope(int address);
+
+		OWQScope* scopeStoreHas(int scopeAddress);
+
+		int getFunctionAddress(std::string funcName);
+		OWQScope* getActiveScope();
+		OWQScope* getActiveScope(int scopeOffset);
+
+		ExecReturn executeInstruction(Instruction &code, int& instructionPointer);
+		ExecReturn executeInstruction(Instruction &code, int& instructionPointer, bool debug);
 
 
-    int injectScript(Script* script);
+		int injectScript(Script* script);
 
-    bool isSystemCall(std::string& object, std::string& functionName, Instruction& _xcode);
-    bool validateExtension(std::wstring extension);
-    int  mergeLinesAndCompile(Source* source, Parser* parser, int linenum, bool debug);
+		bool isSystemCall(std::string& object, std::string& functionName, Instruction& _xcode);
+		bool validateExtension(std::wstring extension);
+		int  mergeLinesAndCompile(Source* source, Parser* parser, int linenum, bool debug);
 
-	std::unordered_map<std::string, ScriptVariable>::iterator getVariableIt(std::string& varName);
-	std::unordered_map<std::string, ScriptVariable>::iterator getVariableIt(std::string& varName, int scopeOffset);
-	std::unordered_map<std::string, ScriptVariable>::iterator getVariableIt(std::string& varName, int scopeOffset, bool& flag);
-	std::unordered_map<std::string, ScriptVariable>::iterator getGlobalVariableIt(std::string& varName);
+		std::unordered_map<std::string, ScriptVariable>::iterator getVariableIt(std::string& varName);
+		std::unordered_map<std::string, ScriptVariable>::iterator getVariableIt(std::string& varName, int scopeOffset);
+		std::unordered_map<std::string, ScriptVariable>::iterator getVariableIt(std::string& varName, int scopeOffset, bool& flag);
+		std::unordered_map<std::string, ScriptVariable>::iterator getGlobalVariableIt(std::string& varName);
 
-    ScriptVariable *getVariable(std::string& varName);
-	ScriptVariable *getVariable(std::string& varName, int scopeOffset);
-    ScriptVariable *getGlobalVariable(std::string& varName);
-    
-	void derefBackwordsInScopes(std::string& name);
-	bool deleteInScopes(std::string& name);
+		ScriptVariable *getVariable(std::string& varName);
+		ScriptVariable *getVariable(std::string& varName, int scopeOffset);
+		ScriptVariable *getGlobalVariable(std::string& varName);
 
-    void addInstruction(Instruction I);
-    void addInstruction(Instruction I, bool allowRST);
+		void derefBackwordsInScopes(std::string& name);
+		bool deleteInScopes(std::string& name);
 
-public:
-    Script();
+		void addInstruction(Instruction I);
+		void addInstruction(Instruction I, bool allowRST);
 
-    //Register variable to global scope from Application layer:
-    bool registerVariable(std::string& varName, RegisteredVariable type, void* address);
-    //Register variable to global scope by execution runtime:
-    bool registerVariable(std::string& varName); //intialize variable
-	bool registerVariable(std::string& varName, StackData& sd); // variable
-	int pointerVariable(std::string& varName, std::string& pointTo); // variable pointer
-    bool unregisterVariable(std::string& varName);
-	bool unregisterVariable(std::string& varName, bool notSys);
-    void execute(std::string funcCall);
-    
-	ExecReturn run();
-	ExecReturn run(bool debug);
-    
-    bool loadFile(fs::wpath filename);
-    bool loadFile(fs::wpath filename, bool debug);
+	public:
+		Script();
 
-    int getSize();
-	void render();
+		//Register variable to global scope from Application layer:
+		bool registerVariable(std::string& varName, RegisteredVariable type, void* address);
+		//Register variable to global scope by execution runtime:
+		bool registerVariable(std::string& varName); //intialize variable
+		bool registerVariable(std::string& varName, StackData& sd); // variable
+		int  pointerVariable(std::string& varName, std::string& pointTo); // variable pointer
+		bool unregisterVariable(std::string& varName);
+		bool unregisterVariable(std::string& varName, bool notSys);
+		void execute(std::string funcCall);
 
-    virtual ~Script();
-};
+		ExecReturn run();
+		ExecReturn run(bool debug);
 
+		bool loadFile(fs::wpath filename);
+		bool loadFile(fs::wpath filename, bool debug);
+
+		int getSize();
+		void render();
+
+		virtual ~Script();
+	};
+}
 #endif	/* SCRIPT_H */
 

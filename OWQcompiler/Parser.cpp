@@ -9,6 +9,33 @@
 
 #include "Parser.h"
 
+namespace Eowq {
+std::string Parser::errors[] = {
+	"",
+	"1 script object is null",
+	"2 recursive call max out script contains error",
+	"3 syntax error for function definition",
+	"4 if - statement syntax error",
+	"5 while - statement syntax error",
+	"6 else - statement syntax error",
+	"7 Definition - expected definition of valriable name",
+	"8 Missuse of Braces",
+	"9 Declaration of variables should be followed by an assignment delimiter or by end of statement",
+	"10 Found two commas in variable declaration",
+	"11 Declaraion expression cannot contain keywords",
+	"12 break statement can't use keywords",
+	"13 Function declaration is expecting argument brackets followed by brace open char.",
+	"14 Braces are not allowed in a argument of functions - missing a bracket close?",
+	"15 Keywords are not allowed in as function arguments - missing a bracket close?",
+	"16 Braces should be use after function argument brackets.",
+	"17 Unexpected bracket close - missing a bracket open char?",
+	"18 Function declaratin is missing a function name.",
+	"19 Unset - unset expression is not legal you should unset only variables.",
+	"20 Missuse of Increment / Decrement operator - should be attached to a variable name only.",
+	"21 Keywords are not allowed inside Array square brackets",
+	"22 Assignments operators and block delimiters are not allowedinside Array square brackets"
+};
+
 /** Construct Parser
  * 
  */
@@ -33,10 +60,10 @@ int Parser::compile(Script* script, std::string exp) {
 }
 int Parser::compile(Script* script, std::string exp, bool debug) {
     if (script == NULL) {
-        Tokens::stdError("compile expression, script pointer is null");
+		Tokens::stdError("compile expression, script pointer is null");
         return 1;
     }
-    Tokens tokens;
+	Tokens tokens;
 	int ret = 0;
     //generate our tokens
     tokenize(exp, tokens);
@@ -213,7 +240,7 @@ std::string Parser::getToken() {
                 currentToken.insert(currentToken.end(),1,expression[expressionIndex]);
                 expressionIndex++;
                 if (expressionIndex >= (int)expression.length()) { 
-                    Tokens::stdError("Tokenize expression, string is not encapsulated");
+					Tokens::stdError("Tokenize expression, string is not encapsulated");
                     currentToken = "\0";
                     break; 
                 }
@@ -224,7 +251,7 @@ std::string Parser::getToken() {
                 expressionIndex++;
             }
             if (expressionIndex >= (int)expression.length()) { 
-                Tokens::stdError("Tokenize expression, string is not encapsulated");
+				Tokens::stdError("Tokenize expression, string is not encapsulated");
                 currentToken = "\0";
                 break; 
             }
@@ -268,8 +295,8 @@ void Parser::evaluateGroups(Tokens& tokens, TokenFlag flagToGroup, int startFrom
 	std::string braketClose = Lang::dicLang_braketClose;
 	std::string braketOpen = Lang::dicLang_braketOpen;
     int bracketPriority = getDelimiterPriorty(braketOpen, TokenType::DELIMITER);
-    Token* token;
-    Token* checkToken;
+	Token* token;
+	Token* checkToken;
         
     //Group flags:
     for (i = startFrom; i < setSize; i++) {
@@ -400,9 +427,9 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     int operatorIndex = tokens.getHighestOperatorPriorityIndex(priortyCode);
     
 	std::string operatorTokenStr;
-    Token* operatorToken;
-    Token* leftToken = nullptr;
-    Token* rightToken = nullptr;
+	Token* operatorToken;
+	Token* leftToken = nullptr;
+	Token* rightToken = nullptr;
     
     if ( operatorIndex > 0 ) {
         leftToken = tokens.getTokenObject( operatorIndex - 1 );
@@ -415,7 +442,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     
     //If none:
     if (operatorToken->token == ".none.") {
-        Tokens::stdError("there is no operator found");
+		Tokens::stdError("there is no operator found");
     }
     
     //--------------------------------------------------------------------
@@ -485,7 +512,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
             
             //(expression){
             if(tokens.getToken(tokens.getSize()-1) != Lang::dicLang_bracesOpen) {
-                Tokens::stdError("IF statement syntax error, expected a " + Lang::dicLang_bracesOpen);
+				Tokens::stdError("IF statement syntax error, expected a " + Lang::dicLang_bracesOpen);
                 return 4;
             }
             //Erase block open == brace open:
@@ -506,7 +533,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
             tokens.pop(0);	//erase the else keyword
             //(expression){
             if(tokens.getToken(tokens.getSize()-1) != Lang::dicLang_bracesOpen) {
-                Tokens::stdError("ELSE statement syntax error, expected a " + Lang::dicLang_bracesOpen);
+				Tokens::stdError("ELSE statement syntax error, expected a " + Lang::dicLang_bracesOpen);
                 return 6;
             }
             tokens.pop(tokens.getSize()-1);
@@ -582,7 +609,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 
             //extract the return value and evaluate it recursively
             if (tokens.getSize() > 1) {
-                Tokens sub = tokens.extractInclusive(1, tokens.getSize()-1, eraseCount, script);
+				Tokens sub = tokens.extractInclusive(1, tokens.getSize()-1, eraseCount, script);
                 operatorIndex -= eraseCount;
                 compiler(script, sub, debug, rCount);
             }
@@ -646,7 +673,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 			}
 			//Continue compilation:
 			if (tokens.getSize() > 1) {
-				compiler(script, tokens, debug, rCount);
+				return compiler(script, tokens, debug, rCount);
 			} 
             return 0;
 
@@ -686,7 +713,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     // un-mark the end of a function, if, while loop
     //------------------------------------------------------------
     if (operatorToken->token == Lang::dicLang_bracesClose) {
-        ParseMark ret = unmark(); //un-mark the grouping make earlier
+		ParseMark ret = unmark(); //un-mark the grouping make earlier
         if ( ret == ParseMark::WHILE ) { //loop
             script->addInstruction(Instruction(ByteCode::DONE, Lang::dicLangKey_loop_while));
         } else if ( ret == ParseMark::IF ) {
@@ -705,11 +732,11 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     //----------------------------------------------------------
     //if operator is an open parenthesis then extract the content
     if (operatorToken->token == Lang::dicLang_braketOpen) { //  bracket (
-        //get the close of this parenthesis
 
+        //get the close of this parenthesis
         int closeOfParenthesis = tokens.getMatchingCloseParenthesis(operatorIndex);
         //extract the content and replace with RST
-        Tokens sub = tokens.extractContentOfParenthesis(operatorIndex, closeOfParenthesis, eraseCount, script);
+		Tokens sub = tokens.extractContentOfParenthesis(operatorIndex, closeOfParenthesis, eraseCount, script);
 
         operatorIndex -= 1;	//Just in case its a function call set next block to parse the call name,
         int prevRstPos = script->internalStaticPointer; //just in case the group won't do anything but push
@@ -737,17 +764,18 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
             }
         }
     }
-
+	
     //-----------------------------------------------------------
     // Handle tokens with commas in them
     //			i.e
     //		x , 32 + y , z
-    //
+    // will seperate them into subs and re-compile:
     //-----------------------------------------------------------
-    if (hasCommas(tokens)) {
+    if (hasCommasNotNested(tokens)) {
+		int commaIndex = getCommaIndexNotNested(tokens);
         for (int i = 0; i<tokens.getSize(); i++) {
             if (tokens.getToken(i) == Lang::dicLang_comma) {
-                Tokens sub = tokens.extractInclusive(0, i - 1, eraseCount, script);
+				Tokens sub = tokens.extractInclusive(0, i - 1, eraseCount, script);
                 operatorIndex -= eraseCount;
                 compiler(script, sub, debug, rCount);
                 tokens.pop(0);	//remove RST
@@ -759,6 +787,26 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
         }
         return 0; //return do not do anything else
     }
+
+	//-----------------------------------------------------------
+	// Handle square brackets
+	//-----------------------------------------------------------
+	if (operatorToken->token == Lang::dicLang_sBraketOpen) { //  bracket [
+															 //get the close of this bracket square
+		int closeOfSquareBrackets = tokens.getMatchingCloseSquareBrackets(operatorIndex);
+		//extract the content and replace with RST
+		Tokens sub = tokens.extractContentOfParenthesis(operatorIndex, closeOfSquareBrackets, eraseCount, script);
+
+		//If its the first extract then move on:
+
+		//Evaluate sub tokens of array call:
+		int evSBres = evaluateArraySbrackets(sub);
+		if (evSBres > 0) { return evSBres == 1 ? 22 : 21; }
+		int ret = 0;
+		// compile sub:
+		ret = compiler(script, sub, debug, rCount);
+	}
+
     //---------------------------------------------------------------------------------
     //		Handle math operations in accordance with order of operations
     //---------------------------------------------------------------------------------
@@ -854,7 +902,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     } else if (priortyCode == 40) { //equal sign OR pointer assignment
 
         //extract from 1 past the equal sign to the end of the tokens
-        Tokens sub = tokens.extractInclusive(operatorIndex+1, tokens.getSize()-1, eraseCount, script);
+		Tokens sub = tokens.extractInclusive(operatorIndex+1, tokens.getSize()-1, eraseCount, script);
         compiler(script, sub, debug, rCount);
 		if (operatorToken->token == Lang::dicLang_equal) {
 			script->addInstruction(Instruction(ByteCode::ASN, leftToken->token));
@@ -896,10 +944,10 @@ void Parser::mark(ParseMark markType) {
 }
 ParseMark Parser::unmark() {
     if (marks.size() == 0) {
-        Tokens::stdError("marking stack is zero unable to unmark");
+		Tokens::stdError("marking stack is zero unable to unmark");
         return ParseMark::UNMARK;
     }
-    ParseMark t = marks.back();
+	ParseMark t = marks.back();
     marks.pop_back();
     return t;
 }
@@ -1022,8 +1070,31 @@ bool Parser::evaluateVarNotObjectCall(Token* token) {
 	}
 	return true;
 }
-
-
+/** Evaluates an array square braket to make sure its valid:
+ *  will not allow keywords; braces and not structure commas.
+ *  
+ *  Raw strings are treated as length.
+ *  Doubles are cast to integer.
+ *
+ */
+int Parser::evaluateArraySbrackets(Tokens &sub) {
+	int size = sub.getSize();
+	Token* token = nullptr;
+	for (int i = 0; i < size; i++) {
+		token = sub.getTokenObject(i);
+		if (token->token == Lang::dicLang_equal ||
+			token->token == Lang::dicLang_pointer ||
+			token->token == Lang::dicLang_bracesOpen ||
+			token->token == Lang::dicLang_bracesClose
+		) {
+			return 1;
+		}
+		if (token->type == TokenType::KEYWORD) {
+			return 2;
+		}
+	}
+	return 0;
+}
 /** loop condition to find all until delimiter
  * @param integer currentPos
  * @return boolean
@@ -1131,13 +1202,16 @@ int Parser::getDelimiterPriorty() {
  * @return integer
  */
 int Parser::getDelimiterPriorty(std::string toCheckToken, TokenType toCheckType) {
-	if (toCheckType == KEYWORD) {
+	if (toCheckType == TokenType::KEYWORD) {
 		return 140;
 	}
 	else if (toCheckToken == Lang::dicLang_bracesClose) {
 		return 130;
 	}
 	else if (toCheckToken == Lang::dicLang_braketOpen) {
+		return 120;
+	}
+	else if (toCheckToken == Lang::dicLang_sBraketOpen) {
 		return 110;
 	}
 	else if (toCheckToken == Lang::dicLang_dec || toCheckToken == Lang::dicLang_inc) {
@@ -1153,7 +1227,7 @@ int Parser::getDelimiterPriorty(std::string toCheckToken, TokenType toCheckType)
 		return 70;
 	}
 	else if (
-		toCheckToken == Lang::dicLang_smaller || 
+		toCheckToken == Lang::dicLang_smaller ||
 		toCheckToken == Lang::dicLang_greater ||
 		toCheckToken == Lang::dicLang_greater_equal ||
 		toCheckToken == Lang::dicLang_smaller_equal
@@ -1203,10 +1277,10 @@ bool Parser::hasCommasNotNested(Tokens& tokens) {
 	int nested = 0;
 	for (int i = 0; i < size; i++) {
 		std::string t = tokens.getToken(i);
-		if (t == Lang::dicLang_braketOpen) {
+		if (t == Lang::dicLang_braketOpen || t == Lang::dicLang_sBraketOpen) {
 			nested++;
 		}
-		else if (t == Lang::dicLang_braketClose && nested > 0) {
+		else if ((t == Lang::dicLang_braketClose || t == Lang::dicLang_sBraketClose)&& nested > 0) {
 			nested--;
 		}
 		if (nested < 1 && t == Lang::dicLang_comma) {
@@ -1214,6 +1288,26 @@ bool Parser::hasCommasNotNested(Tokens& tokens) {
 		}
 	}
 	return false;
+}
+/** Get the comma index that is hanging and not nested in a group:
+ *  -1 means no commas.
+ */
+int Parser::getCommaIndexNotNested(Tokens& tokens) {
+	int size = tokens.getSize();
+	int nested = 0;
+	for (int i = 0; i < size; i++) {
+		std::string t = tokens.getToken(i);
+		if (t == Lang::dicLang_braketOpen || t == Lang::dicLang_sBraketOpen) {
+			nested++;
+		}
+		else if ((t == Lang::dicLang_braketClose || t == Lang::dicLang_sBraketClose) && nested > 0) {
+			nested--;
+		}
+		if (nested < 1 && t == Lang::dicLang_comma) {
+			return i;
+		}
+	}
+	return -1;
 }
 /** Parse any string to lower ASCII chars
  * 
@@ -1234,4 +1328,6 @@ std::string Parser::toUpperString(std::string *s) {
 	std::string outBuffer = *s;
     std::transform(s->begin(), s->end(), outBuffer.begin(), ::toupper);
     return outBuffer;
+}
+
 }
