@@ -9,9 +9,19 @@
 
 #include <iostream>
 #include <sstream>
+#include "ScriptVariable.h"
 
 namespace Eowq
 {
+	enum OperandType {
+		OPER_NEW,
+		OPER_SRTING,
+		OPER_NUMBER,
+		OPER_RSTPOINTER,
+		OPER_BOOLEAN,
+		OPER_NULL,
+		OPER_VARIABLE
+	};
 	enum ByteCode {
 		NOP,    //nothing appends
 		RET,    //return from a function, change instruction pointer, pop off method from function stack
@@ -61,9 +71,9 @@ namespace Eowq
 	};
 	extern std::string byteCode[40];
 	class Instruction {
-
 		ByteCode		code;
 		std::string		operand;
+		OperandType		operandType;
 		int				jmpCache;
 		int				staticPointer;
 		bool			isRST;
@@ -81,15 +91,21 @@ namespace Eowq
 		bool isOperandBoolean();
 		bool isOperandNull();
 		bool operandHasQuote();
+
+		OperandType& getOperandType();
+		OperandType& setOperandType();
+		void setOperandType(OperandType type);
+
 		void setPointer(int pointer);
 		int getPointer();
 		void setJmpCache(int i);
 		int getJmpCache();
 		bool isRstPointer();
 		double getNumber();
-		std::string getString();
+		std::string& getString();
 
 		std::string* getOperand();
+		std::string& getOperandRef();
 		ByteCode getCode();
 		std::string toString();
 		std::string byteCodeToShort();

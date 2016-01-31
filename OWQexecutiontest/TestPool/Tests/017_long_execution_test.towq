@@ -14,6 +14,6 @@ print("Iterations: " + i + " - Result: " + lngth);
 
 /*
 @expected-output
-Iterations: 262144 - Result: 4.19429e+06
+Iterations: 262144 - Result: 4194288
 @end-expected-output
 */

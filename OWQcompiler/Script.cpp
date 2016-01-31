@@ -531,8 +531,7 @@ namespace Eowq {
 			if (sv == nullptr) {
 				return getVariable(varName, scopeOffset + 1);
 			}
-		}
-		else {
+		} else {
 			//Not in scope so search in global scope
 			sv = getGlobalVariable(varName);
 		}
@@ -573,8 +572,7 @@ namespace Eowq {
 			StackData* sd = Stack::pop(0);
 			if (sd != nullptr) {
 				ScriptConsole::print(sd, this->script_debug);
-				Stack::eraseAt(sd->getOrigin());
-				Stack::runGC();
+				Stack::eraseAsGC(sd->getOrigin());
 			}
 			if (Compute::flagPush) { Compute::flagPush = false; }
 			return true;
@@ -632,8 +630,8 @@ namespace Eowq {
 					if (!Compute::flagPush) {
 						if (sv->getValuePointer()->isString()) {
 							Stack::render();
-							StackData* sb = Stack::pop();	//second argument first
-							StackData* sa = Stack::pop();	//first argument
+							StackData* sb = Stack::pop(0);	//second argument first
+							StackData* sa = Stack::pop(1);	//first argument
 							if (sb == nullptr || sa == nullptr) {
 								ScriptError::msg("WARNINIG -> substr expects 2 arguments");
 								Stack::push(sv->getValuePointer()->getString());
@@ -644,9 +642,8 @@ namespace Eowq {
 								int originSB = sb->getOrigin();
 								int originSA = sa->getOrigin();
 								Stack::push(sv->getValuePointer()->getString().substr(a, b));
-								Stack::eraseAt(originSB);
-								Stack::eraseAt(originSA);
-								Stack::runGC();
+								Stack::eraseAsGC(originSB);
+								Stack::eraseAsGC(originSA);
 							}
 							if (_xcode.getPointer() > 0) {
 								Stack::setTopPointer(_xcode.getPointer());

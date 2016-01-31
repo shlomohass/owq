@@ -225,6 +225,8 @@ namespace Eowq {
 	}
 	void StackData::setGc() {
 		type = SDtype::SD_GC;
+		rstPos = -1;
+		rst = false;
 	}
 	/** Returns the Stack Data number value
 	 *
@@ -275,9 +277,11 @@ namespace Eowq {
 		return booleanValueToString();
 	}
 	std::string StackData::numberValueToString(double number) {
-		std::stringstream s;
-		s << number;
-		return s.str();
+		//std::stringstream s;
+		//s << number;
+		//return s.str();
+		double intpart;
+		return (std::modf(number, &intpart) == 0.0) ? std::to_string((int)intpart) : std::to_string(number);
 	}
 	/** Converts a boolean to string
 	*

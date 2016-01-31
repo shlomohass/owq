@@ -69,6 +69,7 @@ namespace Eowq
 		bool isKeyword(std::string s);
 		bool hasCommas(Tokens& token);
 		bool hasCommasNotNested(Tokens& token);
+		int  countCommasNotNested(Tokens& sub);
 		int  getCommaIndexNotNested(Tokens& tokens);
 		int  getDelimiterPriorty();
 		int  getDelimiterPriorty(std::string toCheckToken, TokenType toCheckType);

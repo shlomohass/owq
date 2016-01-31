@@ -73,35 +73,31 @@ namespace Eowq {
 	 *getValuePointer
 	 */
 	ExecReturn Compute::execute_push(Instruction& xcode, Script* script) {
-		if (xcode.isOperandString()) { //if operand is string
-			if (xcode.operandHasQuote()) { //if this operand is in the form---> ["what is this a string literal"]
-				Stack::push(*xcode.getOperand()); //save the string literal
-			}
-			else if (xcode.isRstPointer() && xcode.getPointer() > 0) { // We are handling with a static stack pointer
-				Stack::push(StackData(true, xcode.getPointer())); //This will push the special type of RST
-			}
-			else if (xcode.isOperandBoolean()) {
-				Stack::push(StackData(*xcode.getOperand(), true)); //This will push a boolean stack data
-			}
-			else if (xcode.isOperandNull()) {
-				Stack::push(StackData());
-			}
-			else {
-				//the operand is in a form -> someWord <- no quotes around it, meaning it is a name of variable
-				//find that variable from the function, loops scoping
-				ScriptVariable* sv = script->getVariable(*xcode.getOperand());
-				//complain if variable is not found
-				if (sv == nullptr) {
-					ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_VAR_RESOLVE] + *xcode.getOperand());
-					return ExecReturn::Ex_VAR_RESOLVE;
-				}
-				else {
-					//else push the value
-					Stack::push(*sv);
-				}
-			}
+		OperandType cur = xcode.getOperandType();
+		if (cur == OperandType::OPER_NEW) {
+			cur = xcode.setOperandType();
 		}
-		else {
+		if (cur == OperandType::OPER_SRTING) {
+			Stack::push(xcode.getOperandRef());
+		} else if (cur == OperandType::OPER_RSTPOINTER) {
+			Stack::push(StackData(true, xcode.getPointer()));
+		} else if (cur == OperandType::OPER_BOOLEAN) {
+			Stack::push(StackData(xcode.getOperandRef(), true));
+		} else if (cur == OperandType::OPER_NULL) {
+			Stack::push(StackData());
+		} else if (cur == OperandType::OPER_VARIABLE) {
+			//the operand is in a form -> someWord <- no quotes around it, meaning it is a name of variable
+			//find that variable from the function, loops scoping
+			ScriptVariable* sv = script->getVariable(*xcode.getOperand());
+			//complain if variable is not found
+			if (sv == nullptr) {
+				ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_VAR_RESOLVE] + *xcode.getOperand());
+				return ExecReturn::Ex_VAR_RESOLVE;
+			} else {
+				//else push the value
+				Stack::push(*sv);
+			}
+		} else { // its a number:
 			Stack::push(xcode.getNumber());
 		}
 		//if operand is a reference to some variable, push its value onto the stack
@@ -149,8 +145,10 @@ namespace Eowq {
 				return ExecReturn::Ex_NVAR_ASN;
 			}
 			//Remove from stack:
-			Stack::eraseAt(originSD);
-			Stack::runGC();
+			Stack::eraseAsGC(originSD);
+			if (Stack::size() > 100) {
+				Stack::runGC();
+			}
 		}
 		return ExecReturn::Ex_OK;
 	}
@@ -204,20 +202,20 @@ namespace Eowq {
 			int originA = a->getOrigin();
 			int originB = b->getOrigin();
 			if (a->isNumber(true) && b->isNumber(true)) { //a = number AND b = number
-				Stack::push(StackData(a->getNumber(true) > b->getNumber(true)));
+				Stack::push(a->getNumber(true) > b->getNumber(true));
 			}
 			else if (a->isNumber(true) && b->isString()) { //a = number AND b = string
-				Stack::push(StackData(a->getNumber(true) > b->getString().length()));
+				Stack::push(a->getNumber(true) > b->getString().length());
 			}
 			else if (a->isString() && b->isNumber(true)) { //a = string AND b = number
-				Stack::push(StackData(a->getString().length() > b->getNumber(true)));
+				Stack::push(a->getString().length() > b->getNumber(true));
 			}
 			else if (a->isString() && b->isString()) { //a = string AND b = string
-				Stack::push(StackData(a->getString().length() > b->getString().length()));
+				Stack::push(a->getString().length() > b->getString().length());
 			}
 			else { //unsopurted
 				ScriptError::warn(execute_warn[0] + ScriptConsole::stackTypeName(a->getType()) + "," + ScriptConsole::stackTypeName(b->getType()));
-				Stack::push(StackData(false));
+				Stack::push(false);
 			}
 			//Remove from stack:
 			Stack::eraseAt(originB);
@@ -244,25 +242,27 @@ namespace Eowq {
 			int originA = a->getOrigin();
 			int originB = b->getOrigin();
 			if (a->isNumber(true) && b->isNumber(true)) { //a = number AND b = number
-				Stack::push(StackData(a->getNumber(true) < b->getNumber(true)));
+				Stack::push(a->getNumber(true) < b->getNumber(true));
 			}
 			else if (a->isNumber(true) && b->isString()) { //a = number AND b = string
-				Stack::push(StackData(a->getNumber(true) < b->getString().length()));
+				Stack::push(a->getNumber(true) < b->getString().length());
 			}
 			else if (a->isString() && b->isNumber(true)) { //a = string AND b = number
-				Stack::push(StackData(a->getString().length() < b->getNumber(true)));
+				Stack::push(a->getString().length() < b->getNumber(true));
 			}
 			else if (a->isString() && b->isString()) { //a = string AND b = string
-				Stack::push(StackData(a->getString().length() < b->getString().length()));
+				Stack::push(a->getString().length() < b->getString().length());
 			}
 			else { //unsopurted
 				ScriptError::warn(execute_warn[1] + ScriptConsole::stackTypeName(a->getType()) + "," + ScriptConsole::stackTypeName(b->getType()));
-				Stack::push(StackData(false));
+				Stack::push(false);
 			}
 			//Remove from stack:
-			Stack::eraseAt(originB);
-			Stack::eraseAt(originA);
-			Stack::runGC();
+			//Stack::eraseAt(originB);
+			//Stack::eraseAt(originA);
+			//Stack::runGC();
+			Stack::eraseAsGC(originB);
+			Stack::eraseAsGC(originA);
 			//Set static pointer:
 			if (xcode.getPointer() > 0) {
 				Stack::setTopPointer(xcode.getPointer());
@@ -284,20 +284,20 @@ namespace Eowq {
 			int originA = a->getOrigin();
 			int originB = b->getOrigin();
 			if (a->isNumber(true) && b->isNumber(true)) { //a = number AND b = number
-				Stack::push(StackData(a->getNumber(true) >= b->getNumber(true)));
+				Stack::push(a->getNumber(true) >= b->getNumber(true));
 			}
 			else if (a->isNumber(true) && b->isString()) { //a = number AND b = string
-				Stack::push(StackData(a->getNumber(true) >= b->getString().length()));
+				Stack::push(a->getNumber(true) >= b->getString().length());
 			}
 			else if (a->isString() && b->isNumber(true)) { //a = string AND b = number
-				Stack::push(StackData(a->getString().length() >= b->getNumber(true)));
+				Stack::push(a->getString().length() >= b->getNumber(true));
 			}
 			else if (a->isString() && b->isString()) { //a = string AND b = string
-				Stack::push(StackData(a->getString().length() >= b->getString().length()));
+				Stack::push(a->getString().length() >= b->getString().length());
 			}
 			else { //unsopurted
 				ScriptError::warn(execute_warn[21] + ScriptConsole::stackTypeName(a->getType()) + "," + ScriptConsole::stackTypeName(b->getType()));
-				Stack::push(StackData(false));
+				Stack::push(false);
 			}
 			//Remove from stack:
 			Stack::eraseAt(originB);
@@ -324,20 +324,20 @@ namespace Eowq {
 			int originA = a->getOrigin();
 			int originB = b->getOrigin();
 			if (a->isNumber(true) && b->isNumber(true)) { //a = number AND b = number
-				Stack::push(StackData(a->getNumber(true) <= b->getNumber(true)));
+				Stack::push(a->getNumber(true) <= b->getNumber(true));
 			}
 			else if (a->isNumber(true) && b->isString()) { //a = number AND b = string
-				Stack::push(StackData(a->getNumber(true) <= b->getString().length()));
+				Stack::push(a->getNumber(true) <= b->getString().length());
 			}
 			else if (a->isString() && b->isNumber(true)) { //a = string AND b = number
-				Stack::push(StackData(a->getString().length() <= b->getNumber(true)));
+				Stack::push(a->getString().length() <= b->getNumber(true));
 			}
 			else if (a->isString() && b->isString()) { //a = string AND b = string
-				Stack::push(StackData(a->getString().length() <= b->getString().length()));
+				Stack::push(a->getString().length() <= b->getString().length());
 			}
 			else { //unsopurted
 				ScriptError::warn(execute_warn[22] + ScriptConsole::stackTypeName(a->getType()) + "," + ScriptConsole::stackTypeName(b->getType()));
-				Stack::push(StackData(false));
+				Stack::push(false);
 			}
 			//Remove from stack:
 			Stack::eraseAt(originB);
@@ -364,19 +364,19 @@ namespace Eowq {
 			int originA = a->getOrigin();
 			int originB = b->getOrigin();
 			if (a->isNumber(true) && b->isNumber(true)) { //a = number AND b = number
-				Stack::push(StackData(a->getNumber(true) == b->getNumber(true)));
+				Stack::push(a->getNumber(true) == b->getNumber(true));
 			}
 			else if (a->isNumber(true) && b->isString()) { //a = string AND b = string
-				Stack::push(StackData(a->getNumber(true) == b->getString().length()));
+				Stack::push(a->getNumber(true) == b->getString().length());
 			}
 			else if (a->isString() && b->isNumber(true)) { //a = string AND b = number
-				Stack::push(StackData(a->getString().length() == b->getNumber(true)));
+				Stack::push(a->getString().length() == b->getNumber(true));
 			}
 			else if (a->isString() && b->isString()) { //a = string AND b = string
-				Stack::push(StackData(a->getString() == b->getString()));
+				Stack::push(a->getString() == b->getString());
 			}
 			else {
-				Stack::push(StackData(false));
+				Stack::push(false);
 			}
 			//Remove from stack:
 			Stack::eraseAt(originB);
@@ -403,19 +403,19 @@ namespace Eowq {
 			int originA = a->getOrigin();
 			int originB = b->getOrigin();
 			if (a->isNumber(true) && b->isNumber(true)) { //a = number AND b = number
-				Stack::push(StackData(a->getNumber(true) != b->getNumber(true)));
+				Stack::push(a->getNumber(true) != b->getNumber(true));
 			}
 			else if (a->isNumber(true) && b->isString()) { //a = string AND b = string
-				Stack::push(StackData(a->getNumber(true) != b->getString().length()));
+				Stack::push(a->getNumber(true) != b->getString().length());
 			}
 			else if (a->isString() && b->isNumber(true)) { //a = string AND b = number
-				Stack::push(StackData(a->getString().length() != b->getNumber(true)));
+				Stack::push(a->getString().length() != b->getNumber(true));
 			}
 			else if (a->isString() && b->isString()) { //a = string AND b = string
-				Stack::push(StackData(a->getString() != b->getString()));
+				Stack::push(a->getString() != b->getString());
 			}
 			else {
-				Stack::push(StackData(false));
+				Stack::push(false);
 			}
 			//Remove from stack:
 			Stack::eraseAt(originB);
@@ -442,10 +442,10 @@ namespace Eowq {
 			int originA = a->getOrigin();
 			int originB = b->getOrigin();
 			if (a->getType() == b->getType()) {
-				Stack::push(StackData(true));
+				Stack::push(true);
 			}
 			else {
-				Stack::push(StackData(false));
+				Stack::push(false);
 			}
 			//Remove from stack:
 			Stack::eraseAt(originB);
@@ -472,10 +472,10 @@ namespace Eowq {
 			int originA = a->getOrigin();
 			int originB = b->getOrigin();
 			if (a->getType() != b->getType()) {
-				Stack::push(StackData(true));
+				Stack::push(true);
 			}
 			else {
-				Stack::push(StackData(false));
+				Stack::push(false);
 			}
 			//Remove from stack:
 			Stack::eraseAt(originB);
@@ -503,12 +503,13 @@ namespace Eowq {
 			int originB = b->getOrigin();
 			if (!a->isNumber(true) || !b->isNumber(true)) {
 				ScriptError::warn(execute_warn[2]);
+				Stack::push(false);
 			}
 			else if (a->getNumber(true) > 0 && b->getNumber(true) > 0) {
-				Stack::push(StackData(true));
+				Stack::push(true);
 			}
 			else {
-				Stack::push(StackData(false));
+				Stack::push(false);
 			}
 			//Remove from stack:
 			Stack::eraseAt(originB);
@@ -536,12 +537,13 @@ namespace Eowq {
 			int originB = b->getOrigin();
 			if (!a->isNumber(true) || !b->isNumber(true)) {
 				ScriptError::warn(execute_warn[3]);
+				Stack::push(false);
 			}
 			else if (a->getNumber(true) > 0 || b->getNumber(true) > 0) {
-				Stack::push(StackData(true));
+				Stack::push(true);
 			}
 			else {
-				Stack::push(StackData(false));
+				Stack::push(false);
 			}
 			//Remove from stack:
 			Stack::eraseAt(originB);
@@ -584,9 +586,11 @@ namespace Eowq {
 				Stack::push(0);
 			}
 			//Remove from stack:
-			Stack::eraseAt(originB);
-			Stack::eraseAt(originA);
-			Stack::runGC();
+			//Stack::eraseAt(originB);
+			//Stack::eraseAt(originA);
+			//Stack::runGC();
+			Stack::eraseAsGC(originB);
+			Stack::eraseAsGC(originA);
 			//Set static pointer:
 			if (xcode.getPointer() > 0) {
 				Stack::setTopPointer(xcode.getPointer());
@@ -617,7 +621,7 @@ namespace Eowq {
 				Stack::push(a->getString().length() - b->getNumber(true));
 			}
 			else if (a->isString() && b->isString()) {                                                //a = string AND b = string
-				Stack::push(a->getString().length() - b->getString().length());
+				Stack::push((int)a->getString().length() - (int)b->getString().length());
 			}
 			else { //Unsupprted.
 				ScriptError::warn(execute_warn[10] + ScriptConsole::stackTypeName(a->getType()) + "," + ScriptConsole::stackTypeName(b->getType()));
@@ -657,16 +661,18 @@ namespace Eowq {
 				Stack::push(a->getString().length() * b->getNumber(true));
 			}
 			else if (a->isString() && b->isString()) {  //a = string AND b = string
-				Stack::push(a->getString().length() * b->getString().length());
+				Stack::push((int)a->getString().length() * (int)b->getString().length());
 			}
 			else { //Unsupprted.
 				ScriptError::warn(execute_warn[11] + ScriptConsole::stackTypeName(a->getType()) + "," + ScriptConsole::stackTypeName(b->getType()));
 				Stack::push(0);
 			}
 			//Remove from stack:
-			Stack::eraseAt(originB);
-			Stack::eraseAt(originA);
-			Stack::runGC();
+			//Stack::eraseAt(originB);
+			//Stack::eraseAt(originA);
+			//Stack::runGC();
+			Stack::eraseAsGC(originB);
+			Stack::eraseAsGC(originA);
 			//Set static pointer:
 			if (xcode.getPointer() > 0) {
 				Stack::setTopPointer(xcode.getPointer());
@@ -709,7 +715,7 @@ namespace Eowq {
 				Stack::push(a->getString().length() / b->getNumber(true));
 			}
 			else if (a->isString() && b->isString()) { //a = string AND b = string
-				Stack::push(a->getString().length() / b->getString().length());
+				Stack::push((int)a->getString().length() / (int)b->getString().length());
 			}
 			else { //Unsupprted.
 				ScriptError::warn(execute_warn[13] + ScriptConsole::stackTypeName(a->getType()) + "," + ScriptConsole::stackTypeName(b->getType()));
@@ -838,9 +844,12 @@ namespace Eowq {
 						break;
 					}
 				}
-			}
-			else {
+			} else {
 				instructionPointer = xcode.getJmpCache();
+			}
+			//Run stack GC:
+			if (Stack::size() > 100) {
+				Stack::runGC();
 			}
 			//clear the scope:
 			script->getActiveScope()->l.resetScope(script);
@@ -1044,8 +1053,9 @@ namespace Eowq {
 				}
 			}
 			//Remove from stack:
-			Stack::eraseAt(originA);
-			Stack::runGC();
+			//Stack::eraseAt(originA);
+			//Stack::runGC();
+			Stack::eraseAsGC(originA);
 		}
 		return ExecReturn::Ex_OK;
 	}

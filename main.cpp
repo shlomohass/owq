@@ -24,6 +24,7 @@ namespace cm = CommandLineProcessing;
 int main(int argc, char** argv) {
 
 	//Define args and project settings:
+
 	int exitCode = 0;
 	std::string filepath_temp;
 	Argu settings;
@@ -76,7 +77,7 @@ int main(int argc, char** argv) {
 		bool indicator = s.loadFile( settings.inscript, enable_debug);
 		//Loading success so go and do stuff:
 		if (indicator) {
-			//s.run( enable_debug );
+			s.run( enable_debug );
 		}
 
 		delete lang;

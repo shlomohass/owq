@@ -23,21 +23,54 @@ namespace Eowq {
 	 *
 	 * @param double data
 	 */
-	void Stack::push(double data) {
-		push(StackData(data));
+	void Stack::push(double& data) {
+		push_rvalue_obj(StackData(data));
+	}
+	void Stack::push(double&& data) {
+		push_rvalue_obj(StackData(data));
+	}
+	/** Push a number to the stack
+	*
+	* @param double data
+	*/
+	void Stack::push(int& data) {
+		push_rvalue_obj(StackData(data));
+	}
+	void Stack::push(int&& data) {
+		push_rvalue_obj(StackData(data));
+	}
+	/** Push a boolean to the stack
+	*
+	* @param bool data
+	*/
+	void Stack::push(bool& data) {
+		push_rvalue_obj(StackData(data));
+	}
+	void Stack::push(bool&& data) {
+		push_rvalue_obj(StackData(data));
 	}
 	/** Push a string to the stack
 	 *
 	 * @param string data
 	 */
 	void Stack::push(std::string& data) {
-		push(StackData(data));
+		push_rvalue_obj(StackData(data));
+	}
+	void Stack::push(std::string&& data) {
+		push_rvalue_obj(StackData(data));
 	}
 	/** Push a stack data to the stack
 	 *
 	 * @param StackData data
 	 */
 	void Stack::push(StackData& data) {
+		stack.push_back(data);
+	}
+	/** Push a stack data to the stack
+	*
+	* @param StackData data
+	*/
+	void Stack::push_rvalue_obj(StackData&& data) {
 		stack.push_back(data);
 	}
 	/**  Push a variable value to the stack
@@ -72,8 +105,12 @@ namespace Eowq {
 		return &stack[size];
 	}
 	void Stack::setTopPointer(int pointer) {
-		if (stack.size() > 0) {
-			stack.back().setRstPos(pointer);
+		int s = stack.size();
+		if (s > 0) {
+			StackData* sd = &stack[s - 1];
+			if (!sd->isGc()) {
+				stack[s - 1].setRstPos(pointer);
+			}
 			return;
 		}
 		std::cout << std::endl << "Error: tried to set pointer in empty stack" << std::endl;
@@ -114,6 +151,26 @@ namespace Eowq {
 			}
 		}
 		std::cout << std::endl << "Error: stack erase out of bound" << std::endl;
+	}
+	/* Erase as GC for later remove
+	*
+	*/
+	void Stack::eraseAsGC(int index) {
+		//immediate erase
+		if (index == -1) {
+			stack.back().setGc();
+		}
+		if ((int)stack.size() > index && index > -1 && stack[index].getOrigin() == index) {
+			stack.erase(stack.begin() + index);
+			return;
+		}
+		for (int i = (int)stack.size() - 1; i > -1; i--) {
+			if (stack[i].getOrigin() == index) {
+				stack[i].setGc();
+				return;
+			}
+		}
+		std::cout << std::endl << "Error: stack erase As GC out of bound" << std::endl;
 	}
 	/* Erase from stack position
 	*

@@ -48,7 +48,7 @@ namespace Eowq
 
 		//Get methods:
 		std::string& getName(); // Self name even if its a pointer.
-		StackData getValue();
+		StackData& getValue();
 		StackData* getValuePointer();
 		ScriptVariable* getPointer();
 

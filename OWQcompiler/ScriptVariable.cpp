@@ -58,7 +58,7 @@ namespace Eowq {
 		return name;
 	}
 
-	StackData ScriptVariable::getValue() {
+	StackData& ScriptVariable::getValue() {
 		if (type == RegisteredVariable::GLOBAL_POINTER && pointer != nullptr) {
 			return pointer->getValue();
 		}

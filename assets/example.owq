@@ -1,1 +1,26 @@
-let a = [2,4,6];
+//let a = [2,4,6,7,8,10];
+//let b;
+
+/*
+let str = "abcdefgh" + "efghefgh";
+let imax = 1024 / str.length() * 4 * 512 * 2; // 262144
+
+let i = 0;
+let lngth;
+
+// will loop 65536 times:
+while (i < imax) {
+    lngth = str.length() * i;
+	i = i + 1;
+}
+
+print("Iterations: " + i + " - Result: " + lngth);
+*/
+
+let a = 9;
+let b = a;
+
+while (a < 50000) {
+	a++;
+}
+print(a);

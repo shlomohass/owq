@@ -19,15 +19,23 @@ namespace Eowq
 
 	public:
 		Stack();
-		static void push(double data);
+		static void push(double& data);
+		static void push(double&& data);
+		static void push(bool& data);
+		static void push(bool&& data);
+		static void push(int& data);
+		static void push(int&& data);
 		static void push(std::string& data);
+		static void push(std::string&& data);
 		static void push(StackData& data);
+		static void push_rvalue_obj(StackData&& data);
 		static void push(ScriptVariable& data);
 		static int  size();
 		static StackData* pop();
 		static StackData* pop(int offset);
 		static StackData* extract(int pointer);
 		static void eraseAt(int index);
+		static void eraseAsGC(int index);
 		static void runGC();
 		static void setTopPointer(int pointer);
 		static void Swap();

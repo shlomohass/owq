@@ -18,6 +18,8 @@ namespace Eowq {
 		"POI",
 		"GTR",
 		"LSR",
+		"GTRE",
+		"LSRE",
 		"LOOP",
 		"BRE",
 		"BIF",
@@ -55,6 +57,7 @@ namespace Eowq {
 	Instruction::Instruction() {
 		code = ByteCode::NOP;
 		containsQuotes = false;
+		operandType = OperandType::OPER_NEW;
 		jmpCache = -1;
 		staticPointer = 0;
 		isRST = false;
@@ -109,6 +112,7 @@ namespace Eowq {
 		staticPointer = 0;
 		jmpCache = -1;
 		isRST = false;
+		operandType = OperandType::OPER_NEW;
 		if (operand[0] == Lang::LangStringIndicator && operand[operand.size() - 1] == Lang::LangStringIndicator) {
 			containsQuotes = true;
 			//remove the quotes now
@@ -124,6 +128,7 @@ namespace Eowq {
 		operand = xOperand;
 		jmpCache = -1;
 		staticPointer = pointer;
+		operandType = OperandType::OPER_NEW;
 		if (operand[0] == Lang::LangStringIndicator && operand[operand.size() - 1] == Lang::LangStringIndicator) {
 			containsQuotes = true;
 			//remove the quotes now
@@ -144,6 +149,7 @@ namespace Eowq {
 		containsQuotes = false;
 		staticPointer = 0;
 		isRST = true;
+		operandType = OperandType::OPER_NEW;
 	}
 
 	void Instruction::setPointer(int pointer) {
@@ -262,8 +268,41 @@ namespace Eowq {
 	bool Instruction::operandHasQuote() {
 		return containsQuotes;
 	}
+
+	OperandType& Instruction::getOperandType() {
+		return operandType;
+	}
+	OperandType& Instruction::setOperandType() {
+		if (isOperandString()) { //if operand is string
+			if (operandHasQuote()) { //if this operand is in the form---> ["what is this a string literal"]
+				setOperandType(OperandType::OPER_SRTING);
+			}
+			else if (isRstPointer() && getPointer() > 0) { // We are handling with a static stack pointer
+				setOperandType(OperandType::OPER_RSTPOINTER); //This will push the special type of RST
+			}
+			else if (isOperandBoolean()) {
+				setOperandType(OperandType::OPER_BOOLEAN);
+			}
+			else if (isOperandNull()) {
+				setOperandType(OperandType::OPER_NULL);
+			}
+			else {
+				setOperandType(OperandType::OPER_VARIABLE);
+			}
+		} else {
+			setOperandType(OperandType::OPER_NUMBER);
+		}
+		return operandType;
+	}
+	void Instruction::setOperandType(OperandType type) {
+		operandType = type;
+	}
+
 	std::string* Instruction::getOperand() {
 		return &operand;
+	}
+	std::string& Instruction::getOperandRef() {
+		return operand;
 	}
 	ByteCode Instruction::getCode() {
 		return code;
@@ -271,7 +310,7 @@ namespace Eowq {
 	double Instruction::getNumber() {
 		return atof(operand.c_str());
 	}
-	std::string Instruction::getString() {
+	std::string& Instruction::getString() {
 		return operand;
 	}
 }

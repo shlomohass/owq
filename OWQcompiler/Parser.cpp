@@ -773,19 +773,22 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     //-----------------------------------------------------------
     if (hasCommasNotNested(tokens)) {
 		int commaIndex = getCommaIndexNotNested(tokens);
-        for (int i = 0; i<tokens.getSize(); i++) {
-            if (tokens.getToken(i) == Lang::dicLang_comma) {
-				Tokens sub = tokens.extractInclusive(0, i - 1, eraseCount, script);
-                operatorIndex -= eraseCount;
-                compiler(script, sub, debug, rCount);
-                tokens.pop(0);	//remove RST
-                tokens.pop(0);	//remove comma
-                operatorIndex -= 2;
-                compiler(script, tokens, debug, rCount);
-                break;
-            }
-        }
-        return 0; //return do not do anything else
+		Tokens sub = tokens.extractInclusive(0, commaIndex, eraseCount, script);
+		sub.pop(commaIndex);	//remove comma
+		tokens.pop(0);		    //remove rst
+        operatorIndex -= eraseCount;
+		if (sub.getSize() == 1) {
+			Token* examineToken = sub.getTokenObject(0);
+			if (examineToken->type == TokenType::RST || examineToken->type == TokenType::NUMBER || examineToken->type == TokenType::STRING || examineToken->type == TokenType::VAR) {
+				script->addInstruction(Instruction(ByteCode::PUSH, sub.getTokenObject(0)->token, sub.getTokenObject(0)->rstPos), true);
+			} else {
+				//Probably an error...
+			}
+		} else {
+			compiler(script, sub, debug, rCount);
+		}
+
+        return compiler(script, tokens, debug, rCount); //return do not do anything else
     }
 
 	//-----------------------------------------------------------
@@ -797,14 +800,22 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 		//extract the content and replace with RST
 		Tokens sub = tokens.extractContentOfParenthesis(operatorIndex, closeOfSquareBrackets, eraseCount, script);
 
-		//If its the first extract then move on:
+		//If its the first extract then move on (avoids garbage):
 
 		//Evaluate sub tokens of array call:
 		int evSBres = evaluateArraySbrackets(sub);
 		if (evSBres > 0) { return evSBres == 1 ? 22 : 21; }
+		
+		//Count comma cells:
+		int arrayElementsCount = countCommasNotNested(sub);
+
+		//Parse elements:
 		int ret = 0;
-		// compile sub:
-		ret = compiler(script, sub, debug, rCount);
+		if (arrayElementsCount > 0) {
+			// compile sub:
+			ret = compiler(script, sub, debug, rCount);
+		}
+		return ret;
 	}
 
     //---------------------------------------------------------------------------------
@@ -1203,13 +1214,13 @@ int Parser::getDelimiterPriorty() {
  */
 int Parser::getDelimiterPriorty(std::string toCheckToken, TokenType toCheckType) {
 	if (toCheckType == TokenType::KEYWORD) {
-		return 140;
+		return 5000;
 	}
 	else if (toCheckToken == Lang::dicLang_bracesClose) {
-		return 130;
+		return 4999;
 	}
 	else if (toCheckToken == Lang::dicLang_braketOpen) {
-		return 120;
+		return 2000;
 	}
 	else if (toCheckToken == Lang::dicLang_sBraketOpen) {
 		return 110;
@@ -1288,6 +1299,25 @@ bool Parser::hasCommasNotNested(Tokens& tokens) {
 		}
 	}
 	return false;
+}
+/** Get floating commas count:
+ *
+ */
+int Parser::countCommasNotNested(Tokens& sub) {
+	int size = sub.getSize();
+	int count = 0;
+	int nested = 0;
+	for (int i = 0; i < size; i++) {
+		std::string t = sub.getToken(i);
+		if (t == Lang::dicLang_braketOpen || t == Lang::dicLang_sBraketOpen) {
+			nested++;
+		} else if ((t == Lang::dicLang_braketClose || t == Lang::dicLang_sBraketClose) && nested > 0) {
+			nested--;
+		} else if (nested < 1 && t == Lang::dicLang_comma) {
+			count++;
+		}
+	}
+	return count;
 }
 /** Get the comma index that is hanging and not nested in a group:
  *  -1 means no commas.
