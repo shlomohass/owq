@@ -82,6 +82,8 @@ namespace Eowq
 		//Stack pointer Constructor:
 		StackData(bool _rst, int _pos); // Asign a pointer stack value
 
+		//Array constructor:
+		StackData(std::vector<StackData>* arrayPointer); // Asign an array pointer stack value
 
 		void setRstPos(int _rstPos);
 		void setGc();
@@ -94,6 +96,7 @@ namespace Eowq
 		bool isNumber();
 		bool isNumber(bool alsoBools);
 		bool isBoolean();
+		bool isArray();
 		bool isRst();
 		bool isGc();
 		bool isRstPos(int pos);
@@ -111,6 +114,7 @@ namespace Eowq
 		std::string numberValueToString(bool alsoBools);
 		std::string numberValueToString();
 		std::string& booleanValueToString();
+		std::string arrayValueToString();
 		void render();
 
 	};

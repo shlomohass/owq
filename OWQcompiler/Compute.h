@@ -69,6 +69,10 @@ namespace Eowq
 		static ExecReturn execute_variable_declaration(Instruction &xcode, Script *script);
 		static ExecReturn execute_variable_unset(Instruction &xcode, Script *script);
 		static ExecReturn execute_function_call(Instruction &xcode, Script *script, int& instructionPointer);
+
+		//Objects and arrays:
+		static ExecReturn execute_array_definition(Instruction &xcode, Script *script, int& instructionPointer);
+
 	};
 
 }

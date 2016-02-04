@@ -49,6 +49,7 @@ namespace Eowq {
 		"INCR",
 		"DECL",
 		"DECR",
+		"ARD",
 		"DPUSH",
 		"SWA",
 		"SHT"

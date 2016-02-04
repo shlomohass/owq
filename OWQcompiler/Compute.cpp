@@ -1165,4 +1165,33 @@ namespace Eowq {
 		}
 		return ExecReturn::Ex_OK;
 	}
+
+	//Objects and arrays:
+	ExecReturn Compute::execute_array_definition(Instruction &xcode, Script *script, int& instructionPointer) {
+		bool ret;
+		int numberOfargs = (int)xcode.getNumber();
+		int arrayName;
+		
+		//Base array:
+		std::vector<StackData>* Temp = script->pushNewArray(numberOfargs);
+		
+		//Fill array:
+		StackData* a = nullptr;
+		for (int i = numberOfargs - 1; i >= 0; i--) {
+			a = Stack::pop(i);
+			if (a == nullptr) {
+				ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_NULL_STACK_EXTRACTION] + xcode.toString());
+				return ExecReturn::Ex_NULL_STACK_EXTRACTION;
+			}
+			Temp->push_back(*a);
+			Stack::eraseAsGC(a->getOrigin());
+		}
+
+		//Push the array pointer:
+		Stack::push(Temp);
+		if (xcode.getPointer() > 0) {
+			Stack::setTopPointer(xcode.getPointer());
+		}
+		return ExecReturn::Ex_OK;
+	}
 }

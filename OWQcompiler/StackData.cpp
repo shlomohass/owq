@@ -136,6 +136,23 @@ namespace Eowq {
 		MutateToBoolean(value > 0 ? true : false);
 	}
 
+	//Array constructor:
+	StackData::StackData(std::vector<StackData>* arrayPointer) {
+		type = SDtype::SD_ARRAY;
+		dvalue = OWQ_NAN;
+		svalue = Lang::dicLangValue_null_upper;
+		bvalue = -1;
+		isOwqObj = false;
+		isOwqArr = true;
+		owqObj = nullptr;
+		owqArray = arrayPointer;
+		rstPos = -1;
+		rst = false;
+		origin_index = -1;
+	}
+
+
+
 	/** Set the internal static position of the data;
 	 *
 	 * @param integer _rstPos
@@ -197,6 +214,13 @@ namespace Eowq {
 	*/
 	bool StackData::isBoolean() {
 		return type == SDtype::SD_BOOLEAN ? true : false;
+	}
+	/** Check if a Stack Data is of type boolean
+	*
+	* @return boolean
+	*/
+	bool StackData::isArray() {
+		return type == SDtype::SD_ARRAY ? true : false;
 	}
 	/** Checks if this Data has a Rst pointer
 	 *
@@ -293,7 +317,16 @@ namespace Eowq {
 		}
 		return Lang::dicLangValue_false_upper;
 	}
-
+	/** Converts an array to string representation
+	*
+	* @return string
+	*/
+	std::string StackData::arrayValueToString() {
+		if (owqArray == nullptr) {
+			return Lang::dicLangValue_null_upper;
+		}
+		return Lang::dicLang_sBraketOpen + std::to_string((int)owqArray->size()) + Lang::dicLang_sBraketClose;
+	}
 	std::string StackData::getAsString() {
 		if (type == SDtype::SD_NUMBER) {         // Print a number
 			return numberValueToString();
@@ -303,6 +336,9 @@ namespace Eowq {
 		}
 		else if (type == SDtype::SD_BOOLEAN) {
 			return booleanValueToString();
+		}
+		else if (type == SDtype::SD_ARRAY) {
+			return arrayValueToString();
 		}
 		else if (type == SDtype::SD_RST) {     // Print a rst
 			return Lang::dicLangValue_rst_upper;
@@ -327,6 +363,9 @@ namespace Eowq {
 		}
 		else if (isBoolean()) {
 			std::cout << booleanValueToString();
+		}
+		else if (isArray()) {
+			std::cout << getAsString();
 		}
 		else if (isRst()) {     // Print a rst
 			std::cout << Lang::dicLangValue_rst_upper;

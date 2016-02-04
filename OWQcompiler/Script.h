@@ -65,9 +65,15 @@ namespace Eowq
 
 		// Debugger flag:
 		bool script_debug;
+
+		//Containers:
 		std::vector<Instruction> code;
 		std::map<std::string, int> functionTable;
 		std::unordered_map<std::string, ScriptVariable> variables;
+
+		//Arrays space for all scopes:
+		std::unordered_map<double, std::vector<StackData>> arraySpace;
+		double arraySpacePointer;
 
 		// Scope tracker:
 		std::unordered_map<int, OWQScope> scopeStore;
@@ -113,8 +119,12 @@ namespace Eowq
 	public:
 		Script();
 
+		//Array handlers:
+		std::vector<StackData>* pushNewArray(int baseSpace);
+
 		//Register variable to global scope from Application layer:
 		bool registerVariable(std::string& varName, RegisteredVariable type, void* address);
+		
 		//Register variable to global scope by execution runtime:
 		bool registerVariable(std::string& varName); //intialize variable
 		bool registerVariable(std::string& varName, StackData& sd); // variable

@@ -1,0 +1,13 @@
+let b = "shlomi";
+let c = "test";
+let a = 0;
+while (a < 40000) {
+	c = b + a;
+	a++;
+}
+print(c);
+/*
+@expected-output
+shlomi39999
+@end-expected-output
+*/

@@ -815,7 +815,17 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 			// compile sub:
 			ret = compiler(script, sub, debug, rCount);
 		}
-		return ret;
+
+		//If everything is fine add the constructor instructions:
+		if (ret == 0) {
+			std::stringstream strtoa;
+			strtoa << arrayElementsCount;
+			int test = tokens.getTokenObject(operatorIndex)->rstPos;
+			script->addInstruction(Instruction(ByteCode::ARD, strtoa.str(), tokens.getTokenObject(operatorIndex)->rstPos), true);
+		} else {
+			return ret;
+		}
+		return compiler(script, tokens, debug, rCount);
 	}
 
     //---------------------------------------------------------------------------------
@@ -1317,7 +1327,7 @@ int Parser::countCommasNotNested(Tokens& sub) {
 			count++;
 		}
 	}
-	return count;
+	return count > 0 ? count + 1 : count;
 }
 /** Get the comma index that is hanging and not nested in a group:
  *  -1 means no commas.

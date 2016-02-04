@@ -15,9 +15,14 @@ namespace Eowq {
 	namespace fs = boost::filesystem;
 
 	Script::Script() {
+		
+		//Init containers:
 		code.reserve(300);	//pre-allocate 300 instruction space for byte-codes
 		scope.reserve(50);	//pre allocate 50 spaces for scopes
 		scopeStore.reserve(50);
+		arraySpacePointer = 0.0;
+
+		//General flags:
 		internalStaticPointer = 0;
 		script_debug = OWQ_DEBUG;
 	}
@@ -233,6 +238,8 @@ namespace Eowq {
 			return Compute::execute_variable_declaration(xcode, this);
 		case ByteCode::CALL:
 			return Compute::execute_function_call(xcode, this, instructionPointer);
+		case ByteCode::ARD:
+			return Compute::execute_array_definition(xcode, this, instructionPointer);
 		case ByteCode::DPUSH:
 			Compute::flagPush = true;
 		}
@@ -279,6 +286,20 @@ namespace Eowq {
 		}
 		scope.pop_back();
 	}
+
+
+	//Array handlers:
+	std::vector<StackData>* Script::pushNewArray(int baseSpace) {
+		//Temp allocator:
+		std::vector<StackData> Temp;
+		Temp.reserve(baseSpace + 5);
+		//Set address:
+		arraySpacePointer += 0.01;
+		//Assign:
+		arraySpace.insert(std::pair<double, std::vector<StackData>>(arraySpacePointer, Temp));
+		return &arraySpace[arraySpacePointer];
+	}
+
 	/** Assign a global variable scope from Application layer
 	 *  This means that a pointer address will be passed to the global.
 	 *  @param string name

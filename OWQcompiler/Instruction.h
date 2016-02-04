@@ -64,12 +64,14 @@ namespace Eowq
 		DECL,
 		DECR,
 
+		ARD,    //Array definition.
 		DPUSH,  //Prevent next push. -> this is for Garbage preventing on un assigned or chained returns and variable operations.
 		SWA,    //Swap stack
 		SHT     //Shift top on stack.
 
 	};
-	extern std::string byteCode[40];
+
+	extern std::string byteCode[41];
 	class Instruction {
 		ByteCode		code;
 		std::string		operand;
