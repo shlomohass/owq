@@ -9,7 +9,7 @@
 namespace Eowq {
 
 	ScriptConsole::ScriptConsole() {
-		// TODO Auto-generated constructor stub
+
 	}
 
 	/**
@@ -28,11 +28,10 @@ namespace Eowq {
 	* @param StackData* sd
 	*/
 	StackData ScriptConsole::length(StackData* sd) {
-		int l = 0;
-		if (sd->isOftype(SDtype::SD_NUMBER) || sd->isOftype(SDtype::SD_STRING)) {
-			l = (int)sd->getAsString().length();
-			return StackData(l);
-		}
+		if (sd->isOftype(SDtype::SD_STRING) || sd->isOftype(SDtype::SD_NUMBER))
+			return StackData((int)sd->getAsString().length());
+		if (sd->isOftype(SDtype::SD_ARRAY))
+			return StackData((int)sd->getArrayPointer()->size());
 		return StackData(0);
 	}
 	/** Get a variable native type
@@ -40,10 +39,8 @@ namespace Eowq {
 	* @param StackData* sd
 	*/
 	StackData ScriptConsole::type(StackData* sd) {
-		std::string littype = stackTypeName(sd->getType());
-		return StackData(littype);
+		return StackData(stackTypeName(sd->getType()));
 	}
-
 	StackData ScriptConsole::isNull(StackData* sd) {
 		return StackData(sd->getType() == SDtype::SD_NULL);
 	}

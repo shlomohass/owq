@@ -22,6 +22,7 @@ namespace Eowq
 		OPER_NULL,
 		OPER_VARIABLE
 	};
+
 	enum ByteCode {
 		NOP,    //nothing appends
 		RET,    //return from a function, change instruction pointer, pop off method from function stack
@@ -72,9 +73,18 @@ namespace Eowq
 	};
 
 	extern std::string byteCode[41];
+
+	class Token;
+
 	class Instruction {
+
 		ByteCode		code;
 		std::string		operand;
+		
+		bool			arrayPush;
+		int             arrayTraverse;
+		int             arrayPathStaticPointer;
+
 		OperandType		operandType;
 		int				jmpCache;
 		int				staticPointer;
@@ -87,6 +97,13 @@ namespace Eowq
 		Instruction(ByteCode inst);
 		Instruction(ByteCode inst, const std::string& xOperand);
 		Instruction(ByteCode inst, const std::string& xOperand, int pointer);
+		Instruction(ByteCode inst, const Token& imptoken);
+		Instruction(ByteCode inst, const Token& imptoken, int pointer);
+
+		bool isArrayPush();
+		bool isArrayTraverse();
+		int  getArrayTraverse();
+		int  getArrayPathPointer();
 
 		bool isOperandNumber();
 		bool isOperandString();

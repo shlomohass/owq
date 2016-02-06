@@ -20,7 +20,10 @@ namespace Eowq
 		Ex_VAR_RESOLVE,
 		Ex_NVAR_ASN,
 		Ex_NULL_STACK_EXTRACTION,
-		Ex_UNSUPPORTED_VAR_TYPE
+		Ex_UNSUPPORTED_VAR_TYPE, // On inc , dec
+		Ex_UNSUPPORTED_VAR_TYPE_ARRAY,
+		Ex_AVAR_ASN,
+		Ex_ARRAY_PATH_MIS
 	};
 
 	enum ScopeType {

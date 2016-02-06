@@ -17,11 +17,33 @@ namespace Eowq {
 	StackData::StackData() {
 		type = SDtype::SD_NULL;
 	}
+
 	void StackData::MutateToNull() {
 		type = SDtype::SD_NULL;
 		owqval = NULLOWQVALUE;
 	}
 
+	bool StackData::MutateTo(StackData& sd) {
+		switch (sd.getType()) {
+		case SDtype::SD_NULL:
+			MutateToNull();
+			break;
+		case SDtype::SD_BOOLEAN:
+			MutateToBoolean(sd.getRealBoolean());
+			break;
+		case SDtype::SD_NUMBER:
+			MutateToNumber(sd.getNumber());
+			break;
+		case SDtype::SD_STRING:
+			MutateToString(sd.getString());
+			break;
+		case SDtype::SD_ARRAY:
+			MutateToArray(sd.getArrayPointer());
+			break;
+		default:
+			return false;
+		}
+	}
 	/** Construct a Stack Data of some type
 	 *
 	 * @param string|double value
@@ -30,6 +52,7 @@ namespace Eowq {
 	StackData::StackData(const std::string& value) {
 		MutateToString(value);
 	}
+
 	void StackData::MutateToString(const std::string& value) {
 		type = SDtype::SD_STRING;
 		owqval = NULLOWQVALUE;
@@ -99,12 +122,31 @@ namespace Eowq {
 
 	//Array constructor:
 	StackData::StackData(std::vector<StackData>* arrayPointer) {
+		MutateToArray(arrayPointer);
+	}
+	void StackData::MutateToArray(std::vector<StackData>* arrayPointer) {
 		type = SDtype::SD_ARRAY;
 		owqval = NULLOWQVALUE;
 		owqval.isOwqArr = true;
 		owqval.owqArray = arrayPointer;
 	}
-
+	StackData* StackData::traverseInArray(int* path, int index) {
+		if (index > -1) {
+			if (isArray() && (int)owqval.owqArray->size() > path[index]) {
+				return owqval.owqArray->at(path[index]).traverseInArray(path, index - 1);
+			} else {
+				return nullptr;
+			}
+		}
+		return this;
+	}
+	bool StackData::arrayPush(StackData& sd) {
+		if (isArray()) {
+			owqval.owqArray->push_back(sd);
+			return true;
+		}
+		return false;
+	}
 	/** Set the internal static position of the data;
 	 *
 	 * @param integer _rstPos
@@ -241,6 +283,13 @@ namespace Eowq {
 	*/
 	bool StackData::getRealBoolean() {
 		return (owqval.bvalue > 0) ? true : false;
+	}
+	/** Returns the Stack Data boolean value in real form
+	*
+	* @return bool
+	*/
+	std::vector<StackData>* StackData::getArrayPointer() {
+		return owqval.owqArray;
 	}
 	/** Converts a double to string
 	 * @param double number DEFAUT : current dvalue

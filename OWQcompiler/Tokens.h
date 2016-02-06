@@ -50,6 +50,7 @@ namespace Eowq
 		int getMatchingCloseSquareBrackets(int openIndex);
 		std::string getToken(int index);
 		Token* getTokenObject(int index);
+		Token* tokenLeftLookBeforeArrayTraverse(int fromIndex);
 		bool setHasComparison();
 		bool setHasCondition();
 		TokenFlag getTokenFlag(int index);

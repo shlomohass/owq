@@ -813,13 +813,20 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 		int arrayElementsCount = countCommasNotNested(sub);
 
 		//This will indicate an array push flag the left token, remove rst and continue:
-		if (arrayElementsCount == 0 && leftToken != nullptr && leftToken->type == TokenType::VAR) {
-			leftToken->setArrayTreatPush(true);
-			tokens.pop(operatorIndex); //Pop RST || variable
+		Token* leftOverLook = tokens.tokenLeftLookBeforeArrayTraverse(operatorIndex);
+		if (arrayElementsCount == 0 && leftOverLook != nullptr && leftOverLook->type == TokenType::VAR) {
+			leftOverLook->setArrayTreatPush(true);
+			tokens.pop(operatorIndex); //Pop RST 
 		//This will indicate an array traverse callee:
-		} else if (leftToken != nullptr && leftToken->type == TokenType::VAR) {
-
-		
+		} else if (leftOverLook != nullptr && leftOverLook->type == TokenType::VAR) {
+			leftOverLook->setArrayTraverse(arrayElementsCount);
+			int ret = compiler(script, sub, debug, rCount);
+			leftOverLook->setArrayPathStaticPointer(script->code.back().getPointer());
+			tokens.pop(operatorIndex); //Pop RST 
+			if (ret != 0) {
+				//An array error.
+				return ret;
+			}
 		} else {
 			//Probably a definition
 
@@ -840,8 +847,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 				strtoa << arrayElementsCount;
 				int test = tokens.getTokenObject(operatorIndex)->rstPos;
 				script->addInstruction(Instruction(ByteCode::ARD, strtoa.str(), tokens.getTokenObject(operatorIndex)->rstPos), true);
-			}
-			else {
+			} else {
 				return ret;
 			}
 		}
@@ -947,7 +953,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 		Tokens sub = tokens.extractInclusive(operatorIndex+1, tokens.getSize()-1, eraseCount, script);
         compiler(script, sub, debug, rCount);
 		if (operatorToken->token == Lang::dicLang_equal) {
-			script->addInstruction(Instruction(ByteCode::ASN, leftToken->token));
+			script->addInstruction(Instruction(ByteCode::ASN, *leftToken));
 		} else {
 			script->addInstruction(Instruction(ByteCode::POI, leftToken->token));
 		}
@@ -1336,7 +1342,8 @@ bool Parser::hasCommasNotNested(Tokens& tokens) {
  */
 int Parser::countCommasNotNested(Tokens& sub) {
 	int size = sub.getSize();
-	int count = 0;
+	if (size == 0) return 0;
+	int count = 1;
 	int nested = 0;
 	for (int i = 0; i < size; i++) {
 		std::string t = sub.getToken(i);
@@ -1348,7 +1355,7 @@ int Parser::countCommasNotNested(Tokens& sub) {
 			count++;
 		}
 	}
-	return count > 0 ? count + 1 : count;
+	return count;
 }
 /** Get the comma index that is hanging and not nested in a group:
  *  -1 means no commas.

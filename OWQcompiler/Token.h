@@ -21,7 +21,9 @@ namespace Eowq
 		int priority;
 		TokenType type;
 		TokenFlag flag;
-		bool      arrayPush;
+		bool arrayPush;
+		int  arrayTraverse;
+		int  arrayPathStaticPointer;
 		int       rstPos;
 
 		Token(std::string _token, int _priority, TokenType _type, TokenFlag _flag);
@@ -30,6 +32,8 @@ namespace Eowq
 
 		void setFlag(TokenFlag _flag);
 		void setArrayTreatPush(bool toset);
+		void setArrayTraverse(int steps);
+		void setArrayPathStaticPointer(int point);
 		void setPriority(int _priority);
 	};
 }

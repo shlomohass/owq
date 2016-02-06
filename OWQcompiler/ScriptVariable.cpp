@@ -120,6 +120,29 @@ namespace Eowq {
 		return true;
 	}
 
+	// 6-> is not array, 7 general error cant set, 8 path not correct
+	int ScriptVariable::setValueInArray(StackData& sd, int* path, int index, bool push) {
+		if (type == RegisteredVariable::GLOBAL_POINTER && pointer != nullptr)
+			return pointer->setValueInArray(sd, path, index, push);
+		if (type != RegisteredVariable::GLOBAL_FLEX || !value.isArray())
+			return 6; //Not array.
+		//Traverse
+		std::vector<StackData>* baseArr = value.getArrayPointer();
+		StackData* candid = &value;
+		if (index > -1) {
+			if ((int)baseArr->size() <= path[index]) {
+				return 8; //Not array.
+			}
+			candid = baseArr->at(path[index]).traverseInArray(path, index - 1);
+		}
+		//Push to candid:
+		if (push && candid != nullptr)
+			return (candid->arrayPush(sd)) ? 0 : 7;
+		//Set array element:
+		if (!push && candid != nullptr)
+			return (candid->MutateTo(sd)) ? 0 : 7;
+		return 8;
+	}
 	void ScriptVariable::deref() {
 		type = RegisteredVariable::GLOBAL_FLEX;
 		pointer = nullptr;

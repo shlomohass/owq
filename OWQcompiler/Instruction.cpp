@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include "Instruction.h"
 #include "Lang.h"
+#include "Token.h"
 #include <math.h>
 
 namespace Eowq {
@@ -62,54 +63,71 @@ namespace Eowq {
 		jmpCache = -1;
 		staticPointer = 0;
 		isRST = false;
+		arrayPush = false;
+		arrayTraverse = -1;
 	}
 
-	std::string Instruction::toString() {
-		std::string display = byteCodeToShort() + "           ";
-		display = display.substr(0, 5) + " ->  ";
-		//display properly
-		if (operandHasQuote()) {
-			display += "\"";
-		}
-		display += operand;
-		//display properly
-		if (operandHasQuote()) {
-			display += "\"";
-		}
-		display += "                ";
-		display = display.substr(0, 20);
-		//display instruction set static pointer:
-		std::ostringstream convert;   // stream used for the conversion
-		convert << staticPointer;
-		display += "  :  SP[ " + convert.str() + " ]";
-		return display;
-	}
-
-	std::string Instruction::byteCodeToShort() {
-		switch (code) {
-		case ByteCode::GTRE:  return "GTE";
-		case ByteCode::LSRE:  return "LSE";
-		case ByteCode::LOOP:  return "LOO";
-		case ByteCode::DONE:  return "DON";
-		case ByteCode::PUSH:  return "PUS";
-		case ByteCode::MULT:  return "MUL";
-		case ByteCode::EXPON: return "POW";
-		case ByteCode::FUNC:  return "FUN";
-		case ByteCode::ARGC:  return "ARC";
-		case ByteCode::CALL:  return "CAL";
-		case ByteCode::INCL:  return "INL";
-		case ByteCode::INCR:  return "INR";
-		case ByteCode::DECL:  return "DEL";
-		case ByteCode::DECR:  return "DER";
-		case ByteCode::DPUSH: return "DPU";
-		default:
-			return byteCode[code];
-		}
+	Instruction::Instruction(ByteCode inst) {
+		code = inst;
+		jmpCache = -1;
+		containsQuotes = false;
+		staticPointer = 0;
+		isRST = true;
+		operandType = OperandType::OPER_NEW;
+		arrayPush = false;
+		arrayTraverse = -1;
+		arrayPathStaticPointer = 0;
 	}
 
 	Instruction::Instruction(ByteCode inst, const std::string& xOperand) {
 		code = inst;
 		operand = xOperand;
+		staticPointer = 0;
+		jmpCache = -1;
+		isRST = false;
+		operandType = OperandType::OPER_NEW;
+		arrayPush = false;
+		arrayTraverse = -1;
+		arrayPathStaticPointer = 0;
+		if (operand[0] == Lang::LangStringIndicator && operand[operand.size() - 1] == Lang::LangStringIndicator) {
+			containsQuotes = true;
+			//remove the quotes now
+			operand.erase(0, 1);//erase beginning quotation
+			operand.erase(operand.size() - 1, 1);//erase the ending quotation
+		}
+		else {
+			containsQuotes = false;
+		}
+	}
+
+	Instruction::Instruction(ByteCode inst, const std::string& xOperand, int pointer) {
+		code = inst;
+		operand = xOperand;
+		jmpCache = -1;
+		staticPointer = pointer;
+		operandType = OperandType::OPER_NEW;
+		arrayPush = false;
+		arrayTraverse = -1;
+		arrayPathStaticPointer = 0;
+		if (operand[0] == Lang::LangStringIndicator && operand[operand.size() - 1] == Lang::LangStringIndicator) {
+			containsQuotes = true;
+			//remove the quotes now
+			operand.erase(0, 1);//erase beginning quotation
+			operand.erase(operand.size() - 1, 1);//erase the ending quotation
+		} else {
+			containsQuotes = false;
+			if (operand == Lang::dicLangValue_rst_upper) {
+				isRST = true;
+			}
+		}
+	}
+
+	Instruction::Instruction(ByteCode inst, const Token& imptoken) {
+		code = inst;
+		operand = imptoken.token;
+		arrayPush = imptoken.arrayPush;
+		arrayTraverse = imptoken.arrayTraverse;
+		arrayPathStaticPointer = imptoken.arrayPathStaticPointer;
 		staticPointer = 0;
 		jmpCache = -1;
 		isRST = false;
@@ -124,9 +142,13 @@ namespace Eowq {
 			containsQuotes = false;
 		}
 	}
-	Instruction::Instruction(ByteCode inst, const std::string& xOperand, int pointer) {
+
+	Instruction::Instruction(ByteCode inst, const Token& imptoken, int pointer) {
 		code = inst;
-		operand = xOperand;
+		operand = imptoken.token;
+		arrayPush = imptoken.arrayPush;
+		arrayTraverse = imptoken.arrayTraverse;
+		arrayPathStaticPointer = imptoken.arrayPathStaticPointer;
 		jmpCache = -1;
 		staticPointer = pointer;
 		operandType = OperandType::OPER_NEW;
@@ -144,14 +166,6 @@ namespace Eowq {
 		}
 	}
 
-	Instruction::Instruction(ByteCode inst) {
-		code = inst;
-		jmpCache = -1;
-		containsQuotes = false;
-		staticPointer = 0;
-		isRST = true;
-		operandType = OperandType::OPER_NEW;
-	}
 
 	void Instruction::setPointer(int pointer) {
 		staticPointer = pointer;
@@ -165,6 +179,21 @@ namespace Eowq {
 	int Instruction::getJmpCache() {
 		return jmpCache;
 	}
+
+
+	bool Instruction::isArrayPush() {
+		return arrayPush;
+	}
+	bool Instruction::isArrayTraverse() {
+		return arrayTraverse > -1;
+	}
+	int Instruction::getArrayTraverse() {
+		return arrayTraverse;
+	}
+	int Instruction::getArrayPathPointer() {
+		return arrayPathStaticPointer;
+	}
+
 	bool Instruction::isRstPointer() {
 		return isRST;
 	}
@@ -299,19 +328,67 @@ namespace Eowq {
 		operandType = type;
 	}
 
-	std::string* Instruction::getOperand() {
-		return &operand;
-	}
-	std::string& Instruction::getOperandRef() {
-		return operand;
-	}
-	ByteCode Instruction::getCode() {
-		return code;
-	}
-	double Instruction::getNumber() {
-		return atof(operand.c_str());
-	}
 	std::string& Instruction::getString() {
 		return operand;
 	}
+
+	std::string* Instruction::getOperand() {
+		return &operand;
+	}
+
+	std::string& Instruction::getOperandRef() {
+		return operand;
+	}
+	
+	double Instruction::getNumber() {
+		return atof(operand.c_str());
+	}
+
+	ByteCode Instruction::getCode() {
+		return code;
+	}
+
+	std::string Instruction::toString() {
+		std::string display = byteCodeToShort() + "           ";
+		display = display.substr(0, 5) + " ->  ";
+		//display properly
+		if (operandHasQuote()) {
+			display += "\"";
+		}
+		display += operand;
+		//display properly
+		if (operandHasQuote()) {
+			display += "\"";
+		}
+		display += "                ";
+		display = display.substr(0, 20);
+		//display instruction set static pointer:
+		std::ostringstream convert;   // stream used for the conversion
+		convert << staticPointer;
+		display += "  :  SP[ " + convert.str() + " ]";
+		return display;
+	}
+
+	std::string Instruction::byteCodeToShort() {
+		switch (code) {
+		case ByteCode::GTRE:  return "GTE";
+		case ByteCode::LSRE:  return "LSE";
+		case ByteCode::LOOP:  return "LOO";
+		case ByteCode::DONE:  return "DON";
+		case ByteCode::PUSH:  return "PUS";
+		case ByteCode::MULT:  return "MUL";
+		case ByteCode::EXPON: return "POW";
+		case ByteCode::FUNC:  return "FUN";
+		case ByteCode::ARGC:  return "ARC";
+		case ByteCode::CALL:  return "CAL";
+		case ByteCode::INCL:  return "INL";
+		case ByteCode::INCR:  return "INR";
+		case ByteCode::DECL:  return "DEL";
+		case ByteCode::DECR:  return "DER";
+		case ByteCode::DPUSH: return "DPU";
+		default:
+			return byteCode[code];
+		}
+	}
+
 }

@@ -21,7 +21,10 @@ namespace Eowq {
 		"Unable to resolve variable name: ",  // Ex_VAR_RESOLVE
 		"Unable to assign to native variable", // Ex_NVAR_ASN
 		"Null stack extrcation at operation: ", // Ex_NULL_STACK_EXTRACTION
-		"Increment / decrement operation un supported type - expected numeric: " // Ex_UNSUPPORTED_VAR_TYPE
+		"Increment / decrement operation on un supported type - expected numeric: ",
+		"Unable to preform array operation - Not an array.", // Ex_UNSUPPORTED_VAR_TYPE
+		"Unable to assign value to array - unknown reason.",
+		"Array index is not set. path: "
 	};
 
 	const std::string Compute::execute_warn[] = {
@@ -136,14 +139,25 @@ namespace Eowq {
 		if (sv == NULL || sd == nullptr) {
 			ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_VAR_RESOLVE] + *xcode.getOperand());
 			return ExecReturn::Ex_VAR_RESOLVE;
-		}
-		else {
+		} else {
 			int originSD = sd->getOrigin();
 			//assign the value
-			if (!sv->setValue(*sd)) {
-				ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_NVAR_ASN]);
-				return ExecReturn::Ex_NVAR_ASN;
+
+			if (xcode.isArrayPush() || xcode.isArrayTraverse()) {
+				//int ret = sv->setValueInArray(*sd,);
+				ExecReturn ret;
+				ret = execute_array_assignment(xcode, script, sv, sd);
+				if (ret != ExecReturn::Ex_OK) {
+					ScriptError::fatal(execute_errors[(int)ret]);
+					return ExecReturn::Ex_NVAR_ASN;
+				}
+			} else {
+				if (!sv->setValue(*sd)) {
+					ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_NVAR_ASN]);
+					return ExecReturn::Ex_NVAR_ASN;
+				}
 			}
+
 			//Remove from stack:
 			Stack::eraseAsGC(originSD);
 			if (Stack::size() > 100) {
@@ -169,8 +183,7 @@ namespace Eowq {
 			&& !script->code[instructionPointer - 1].isOperandBoolean()
 			) {
 			ret = script->pointerVariable(*xcode.getOperand(), *script->code[instructionPointer - 1].getOperand());
-		}
-		else {
+		} else {
 			ret = 1;
 		}
 		int originSD = sd->getOrigin();
@@ -1191,6 +1204,42 @@ namespace Eowq {
 		Stack::push(Temp);
 		if (xcode.getPointer() > 0) {
 			Stack::setTopPointer(xcode.getPointer());
+		}
+		return ExecReturn::Ex_OK;
+	}
+
+	ExecReturn Compute::execute_array_assignment(Instruction &xcode, Script *script, ScriptVariable* sv, StackData* sd) {
+		const int travNum = xcode.getArrayTraverse();
+		int* path = new int[(travNum > -1 ? travNum : 0)];
+		if (travNum > -1) {
+
+			//The first in stack of path:
+			StackData* a = Stack::extract(xcode.getArrayPathPointer());
+			if (a == nullptr) {
+				ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_NULL_STACK_EXTRACTION] + xcode.toString());
+				return ExecReturn::Ex_NULL_STACK_EXTRACTION;
+			}
+			int originA = a->getOrigin();
+			//Traverse more:
+			path[0] = (int)a->getNumber();
+			Stack::eraseAsGC(a->getOrigin());
+			for (int i = 1; i < travNum; i++) {
+				a = Stack::pop(originA - i);
+				if (a == nullptr) {
+					ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_NULL_STACK_EXTRACTION] + xcode.toString());
+					return ExecReturn::Ex_NULL_STACK_EXTRACTION;
+				}
+				path[i] = (int)a->getNumber();
+				Stack::eraseAsGC(a->getOrigin());
+			}
+
+		}
+		int ret = sv->setValueInArray(*sd, path, travNum -1, xcode.isArrayPush());
+		//Free alocated mem
+		delete[] path;
+		if (ret > 0) {
+			ScriptError::fatal(execute_errors[ret] + xcode.toString());
+			return (ExecReturn)ret;
 		}
 		return ExecReturn::Ex_OK;
 	}

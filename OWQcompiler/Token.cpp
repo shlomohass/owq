@@ -16,6 +16,8 @@ namespace Eowq {
 		flag = _flag;
 		rstPos = 0;
 		arrayPush = false;
+		arrayTraverse = -1;
+		arrayPathStaticPointer = 0;
 	}
 
 	Token::Token(std::string _token, int _priority, TokenType _type, TokenFlag _flag, int _pos) {
@@ -25,6 +27,8 @@ namespace Eowq {
 		flag = _flag;
 		rstPos = _pos;
 		arrayPush = false;
+		arrayTraverse = -1;
+		arrayPathStaticPointer = 0;
 	}
 
 	Token::~Token() {
@@ -38,7 +42,12 @@ namespace Eowq {
 	void Token::setArrayTreatPush(bool toset) {
 		arrayPush = toset;
 	}
-
+	void Token::setArrayTraverse(int steps) {
+		arrayTraverse = steps;
+	}
+	void Token::setArrayPathStaticPointer(int point) {
+		arrayPathStaticPointer = point;
+	}
 	void Token::setPriority(int _priority) {
 		priority = _priority;
 	}

@@ -129,8 +129,7 @@ namespace Eowq {
 					int rstPos = stack[i].getRstPos();
 					stack.at(i).setGc();
 					return extract(rstPos);
-				}
-				else {
+				} else {
 					stack[i].setOrigin(i);
 					return &stack[i];
 				}

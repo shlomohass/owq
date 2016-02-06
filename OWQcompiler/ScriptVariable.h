@@ -59,7 +59,7 @@ namespace Eowq
 
 		//Set value:
 		bool setValue(StackData& sd);
-
+		int setValueInArray(StackData& sd, int* path, int size, bool push);
 		//Deref the pointer:
 		void deref();
 

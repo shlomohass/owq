@@ -365,6 +365,29 @@ namespace Eowq {
 		}
 		return &tokens[index];
 	}
+	/** Get a specific token at left position of index
+	* will skip square brakets -> this is for arrays push delimiter
+	* @param int fromIndex
+	* @return Token*
+	*/
+	Token* Tokens::tokenLeftLookBeforeArrayTraverse(int fromIndex) {
+		if (fromIndex < 1) { return nullptr; }
+		bool inSquare = false;
+		for (int i = fromIndex - 1; i >= 0; i--) {
+			if (tokens[i].type == TokenType::DELIMITER && tokens[i].token == Lang::dicLang_sBraketClose) {
+				inSquare = true;
+				continue;
+			}
+			if (inSquare && tokens[i].type == TokenType::DELIMITER && tokens[i].token == Lang::dicLang_sBraketOpen) {
+				inSquare = false;
+				continue;
+			}
+			if (!inSquare) {
+				return &tokens[i];
+			}
+		}
+		return nullptr;
+	}
 	/** Check if a grouping flag is true or not
 	 *
 	 * @param openIndex
