@@ -20,7 +20,7 @@ namespace Eowq {
 		"Instruction for return without active method", // Ex_RETURN
 		"Unable to resolve variable name: ",  // Ex_VAR_RESOLVE
 		"Unable to assign to native variable", // Ex_NVAR_ASN
-		"Null stack extrcation at operation: " // Ex_NULL_STACK_EXTRACTION
+		"Null stack extrcation at operation: ", // Ex_NULL_STACK_EXTRACTION
 		"Increment / decrement operation un supported type - expected numeric: " // Ex_UNSUPPORTED_VAR_TYPE
 	};
 

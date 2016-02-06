@@ -32,26 +32,36 @@ namespace Eowq
 		SD_GC,
 	};
 
-	class StackData {
+	class StackData;
 
-		//My type:
-		SDtype type;
+	struct OWQvalue {
 
 		//Primitives:
-		std::string svalue;
-		double dvalue;
-		int    bvalue;
+		double dvalue = OWQ_NAN;
+		std::string svalue = "";
+		int bvalue = -1;
+		
+		//Objects:
+		bool isOwqObj = false;
+		bool isOwqArr = false;
+		std::map<std::string, StackData>* owqObj = nullptr;
+		std::vector<StackData>*owqArray = nullptr;
 
-		//Objects childs:
-		bool isOwqObj; //Flag an object;
-		bool isOwqArr; //Flag an array;
-		std::map<std::string, StackData>* owqObj;
-		std::vector<StackData>* owqArray;
+		//Positions and origins:
+		int rstPos = -1;
+		bool rst = false;
+		int origin_index = -1;
 
-		//Static stack pointers:
-		bool   rst;
-		int    rstPos;
-		int    origin_index;
+	};
+
+	static OWQvalue NULLOWQVALUE = OWQvalue();
+	
+
+	class StackData {
+		//My type:
+		SDtype type;
+		//Value container:
+		OWQvalue owqval;
 
 	public:
 

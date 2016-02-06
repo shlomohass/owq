@@ -102,6 +102,7 @@ void Parser::tokenize(std::string& exp, Tokens& tokens) {
     expression = exp;
     expressionIndex = 0;
     int parenthesisScaler = 0;
+	int braketScaler = 0;
     //NOTE: after call to getToken
     //	    the token just created will be stored in 'currentToken'
     getToken();
@@ -111,11 +112,12 @@ void Parser::tokenize(std::string& exp, Tokens& tokens) {
         priortyValue = getDelimiterPriorty(); //get the current tokens priortyValue as a function of its evaluation hierarchy
         //this serves to ensure that multiple parenthetical grouping will be evaluated in a manner such that the deepest
         //grouping is evaluated first
-        if (currentToken == std::string(1, Lang::LangFunctionOpenArguChar)) {
-            priortyValue += parenthesisScaler;
-            parenthesisScaler += 1;
-        }
-        
+        if (currentToken[0] == Lang::LangFunctionOpenArguChar) {
+            priortyValue += parenthesisScaler++;
+        } else if (currentToken[0] == Lang::LangArrayOpenChar) {
+			priortyValue += braketScaler++;
+		}
+
         //clean up the escaped characters of string :
         bool isEscaped = false;
 		std::string buffToken = "";
@@ -200,8 +202,9 @@ std::string Parser::getToken() {
     //Store correct token:
     //First watch for double delimiters:
     if (expressionIndex + 1 < (int)expression.length()) {
-		std::string lookInfront = std::string(1, expression[expressionIndex]);
-        lookInfront += std::string(1, expression[expressionIndex+1]);
+		std::string lookInfront;
+		lookInfront += expression[expressionIndex];
+        lookInfront += expression[expressionIndex+1];
         if (isDelimiter(lookInfront)) {
             currentToken += lookInfront;
             expressionIndex += 2;
@@ -809,22 +812,40 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 		//Count comma cells:
 		int arrayElementsCount = countCommasNotNested(sub);
 
-		//Parse elements:
-		int ret = 0;
-		if (arrayElementsCount > 0) {
-			// compile sub:
-			ret = compiler(script, sub, debug, rCount);
+		//This will indicate an array push flag the left token, remove rst and continue:
+		if (arrayElementsCount == 0 && leftToken != nullptr && leftToken->type == TokenType::VAR) {
+			leftToken->setArrayTreatPush(true);
+			tokens.pop(operatorIndex); //Pop RST || variable
+		//This will indicate an array traverse callee:
+		} else if (leftToken != nullptr && leftToken->type == TokenType::VAR) {
+
+		
+		} else {
+			//Probably a definition
+
+			//Parse elements:
+			int ret = 0;
+			if (arrayElementsCount > 0) {
+				// compile sub:
+				ret = compiler(script, sub, debug, rCount);
+			}
+
+			//Rst pointer sync:
+			if (tokens.getTokenObject(operatorIndex)->rstPos < script->internalStaticPointer) {
+				tokens.getTokenObject(operatorIndex)->rstPos = script->internalStaticPointer++;
+			}
+			//If everything is fine add the constructor instructions:
+			if (ret == 0) {
+				std::stringstream strtoa;
+				strtoa << arrayElementsCount;
+				int test = tokens.getTokenObject(operatorIndex)->rstPos;
+				script->addInstruction(Instruction(ByteCode::ARD, strtoa.str(), tokens.getTokenObject(operatorIndex)->rstPos), true);
+			}
+			else {
+				return ret;
+			}
 		}
 
-		//If everything is fine add the constructor instructions:
-		if (ret == 0) {
-			std::stringstream strtoa;
-			strtoa << arrayElementsCount;
-			int test = tokens.getTokenObject(operatorIndex)->rstPos;
-			script->addInstruction(Instruction(ByteCode::ARD, strtoa.str(), tokens.getTokenObject(operatorIndex)->rstPos), true);
-		} else {
-			return ret;
-		}
 		return compiler(script, tokens, debug, rCount);
 	}
 

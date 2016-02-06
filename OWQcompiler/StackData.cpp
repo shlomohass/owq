@@ -15,20 +15,11 @@ namespace Eowq {
 	 * @param string|double value
 	 */
 	StackData::StackData() {
-		MutateToNull();
+		type = SDtype::SD_NULL;
 	}
 	void StackData::MutateToNull() {
 		type = SDtype::SD_NULL;
-		dvalue = OWQ_NAN;
-		svalue = Lang::dicLangValue_null_upper;
-		bvalue = -1;
-		isOwqObj = false;
-		isOwqArr = false;
-		owqObj = nullptr;
-		owqArray = nullptr;
-		rstPos = -1;
-		rst = false;
-		origin_index = -1;
+		owqval = NULLOWQVALUE;
 	}
 
 	/** Construct a Stack Data of some type
@@ -41,16 +32,8 @@ namespace Eowq {
 	}
 	void StackData::MutateToString(const std::string& value) {
 		type = SDtype::SD_STRING;
-		dvalue = OWQ_NAN;
-		svalue = value;
-		bvalue = -1;
-		isOwqObj = false;
-		isOwqArr = false;
-		owqObj = nullptr;
-		owqArray = nullptr;
-		rstPos = -1;
-		rst = false;
-		origin_index = -1;
+		owqval = NULLOWQVALUE;
+		owqval.svalue = value;
 	}
 
 	//A NUMBER from double:
@@ -66,16 +49,8 @@ namespace Eowq {
 	}
 	void StackData::MutateToNumber(double value) {
 		type = SDtype::SD_NUMBER;
-		dvalue = value;
-		svalue = Lang::dicLangValue_null_upper;
-		bvalue = -1;
-		isOwqObj = false;
-		isOwqArr = false;
-		owqObj = nullptr;
-		owqArray = nullptr;
-		rstPos = -1;
-		rst = false;
-		origin_index = -1;
+		owqval = NULLOWQVALUE;
+		owqval.dvalue = value;
 	}
 
 	/** A special internal type Called RST which indicates a static internal pointer;
@@ -85,16 +60,10 @@ namespace Eowq {
 	 */
 	StackData::StackData(bool _rst, int _rstPos) {
 		type = SDtype::SD_RST;
-		dvalue = OWQ_NAN;
-		svalue = Lang::dicLangValue_null_upper;
-		bvalue = -1;
-		isOwqObj = false;
-		isOwqArr = false;
-		owqObj = nullptr;
-		owqArray = nullptr;
-		rst = _rst;
+		owqval = NULLOWQVALUE;
+		owqval.rst = _rst;
+		owqval.rstPos = _rstPos;
 		setRstPos(_rstPos);
-		origin_index = -1;
 	}
 	/** A boolean value constructor will be an integer but set to a boolean container;
 	*
@@ -115,16 +84,8 @@ namespace Eowq {
 	}
 	void StackData::MutateToBoolean(bool value) {
 		type = SDtype::SD_BOOLEAN;
-		dvalue = OWQ_NAN;
-		svalue = Lang::dicLangValue_null_upper;
-		bvalue = value ? 1 : 0;
-		isOwqObj = false;
-		isOwqArr = false;
-		owqObj = nullptr;
-		owqArray = nullptr;
-		rstPos = -1;
-		rst = false;
-		origin_index = -1;
+		owqval = NULLOWQVALUE;
+		owqval.bvalue = value ? 1 : 0;
 	}
 	void StackData::MutateToBoolean(int value) {
 		MutateToBoolean(value == 0 ? false : true);
@@ -139,44 +100,35 @@ namespace Eowq {
 	//Array constructor:
 	StackData::StackData(std::vector<StackData>* arrayPointer) {
 		type = SDtype::SD_ARRAY;
-		dvalue = OWQ_NAN;
-		svalue = Lang::dicLangValue_null_upper;
-		bvalue = -1;
-		isOwqObj = false;
-		isOwqArr = true;
-		owqObj = nullptr;
-		owqArray = arrayPointer;
-		rstPos = -1;
-		rst = false;
-		origin_index = -1;
+		owqval = NULLOWQVALUE;
+		owqval.isOwqArr = true;
+		owqval.owqArray = arrayPointer;
 	}
-
-
 
 	/** Set the internal static position of the data;
 	 *
 	 * @param integer _rstPos
 	 */
 	void StackData::setRstPos(int _rstPos) {
-		rstPos = _rstPos;
+		owqval.rstPos = _rstPos;
 	}
 	/** The stack position that the stack data is placed in
 	 *
 	 */
 	void StackData::setOrigin(int _origin_index) {
-		origin_index = _origin_index;
+		owqval.origin_index = _origin_index;
 	}
 	int StackData::getOrigin() {
-		return origin_index;
+		return owqval.origin_index;
 	}
 
-	/**
+	/** Get the owq stackdata type
 	*
 	*/
 	SDtype StackData::getType() {
 		return type;
 	}
-	/**
+	/** checks if the stack data is of type
 	 *
 	 */
 	bool StackData::isOftype(SDtype t) {
@@ -235,22 +187,25 @@ namespace Eowq {
 	 * @return boolean
 	 */
 	bool StackData::isRstPos(int pos) {
-		return pos == rstPos ? true : false;
+		return pos == owqval.rstPos ? true : false;
 	}
+	/** get the rst integer value
+	 *
+	 */
 	int StackData::getRstPos() {
-		return rstPos;
+		return owqval.rstPos;
 	}
 
 	/* Gc seter and getter:
-	 *
+	 * Quick GC mutate don't redefine owqval
 	 */
 	bool StackData::isGc() {
 		return type == SDtype::SD_GC ? true : false;
 	}
 	void StackData::setGc() {
 		type = SDtype::SD_GC;
-		rstPos = -1;
-		rst = false;
+		owqval.rstPos = -1;
+		owqval.rst = false;
 	}
 	/** Returns the Stack Data number value
 	 *
@@ -258,41 +213,41 @@ namespace Eowq {
 	 * @return double
 	 */
 	double& StackData::getNumber() {
-		return dvalue;
+		return owqval.dvalue;
 	}
 	double StackData::getNumber(bool alsoBools) {
 		if (isBoolean() && alsoBools) {
-			return bvalue;
+			return owqval.bvalue;
 		}
-		return (double)dvalue;
+		return (double)owqval.dvalue;
 	}
 	/** Returns the Stack Data string value
 	 *
 	 * @return string
 	 */
 	std::string& StackData::getString() {
-		return svalue;
+		return owqval.svalue;
 	}
 	/** Returns the Stack Data boolean value
 	*
 	* @return int -> 1, 0
 	*/
 	int StackData::getBoolean() {
-		return bvalue;
+		return owqval.bvalue;
 	}
 	/** Returns the Stack Data boolean value in real form
 	*
 	* @return bool
 	*/
 	bool StackData::getRealBoolean() {
-		return (bvalue > 0) ? true : false;
+		return (owqval.bvalue > 0) ? true : false;
 	}
 	/** Converts a double to string
 	 * @param double number DEFAUT : current dvalue
 	 * @return string
 	 */
 	std::string StackData::numberValueToString() {
-		return numberValueToString(dvalue);
+		return numberValueToString(owqval.dvalue);
 	}
 	std::string StackData::numberValueToString(bool alsoBools) {
 		if (isNumber()) {
@@ -312,9 +267,8 @@ namespace Eowq {
 	* @return string
 	*/
 	std::string& StackData::booleanValueToString() {
-		if (bvalue > 0) {
+		if (owqval.bvalue > 0)
 			return Lang::dicLangValue_true_upper;
-		}
 		return Lang::dicLangValue_false_upper;
 	}
 	/** Converts an array to string representation
@@ -322,10 +276,9 @@ namespace Eowq {
 	* @return string
 	*/
 	std::string StackData::arrayValueToString() {
-		if (owqArray == nullptr) {
+		if (owqval.owqArray == nullptr)
 			return Lang::dicLangValue_null_upper;
-		}
-		return Lang::dicLang_sBraketOpen + std::to_string((int)owqArray->size()) + Lang::dicLang_sBraketClose;
+		return "Array" + Lang::dicLang_sBraketOpen + std::to_string((int)owqval.owqArray->size()) + Lang::dicLang_sBraketClose;
 	}
 	std::string StackData::getAsString() {
 		if (type == SDtype::SD_NUMBER) {         // Print a number
@@ -350,36 +303,29 @@ namespace Eowq {
 	}
 
 	/** Render the Stack Data to the terminal
-	 *
+	 *  For debugger usage.
 	 */
-
 	void StackData::render() {
 		bool printRst = true;
 		if (isNumber()) {         // Print a number
 			std::cout << getNumber();
-		}
-		else if (isString()) {  // Print a string
+		} else if (isString()) {  // Print a string
 			std::cout << getString();
-		}
-		else if (isBoolean()) {
+		} else if (isBoolean()) { // Print a boolean
 			std::cout << booleanValueToString();
-		}
-		else if (isArray()) {
+		} else if (isArray()) {   // Print an owq array
 			std::cout << getAsString();
-		}
-		else if (isRst()) {     // Print a rst
+		} else if (isRst()) {     // Print a rst
 			std::cout << Lang::dicLangValue_rst_upper;
-		}
-		else if (isGc()) {
+		} else if (isGc()) {      // Print a GC
 			std::cout << Lang::dicLangValue_garbage_upper;
-		}
-		else {                  // Print NULL
+		} else { // Print NULL
 			std::cout << Lang::dicLangValue_null_upper;
 			printRst = false;
 		}
 		//Handle output of rst positions:
-		if (printRst && rstPos > -1) {
-			std::cout << " :: P{ " << rstPos << " }";
+		if (printRst && owqval.rstPos > -1) {
+			std::cout << " :: P{ " << owqval.rstPos << " }";
 		}
 	}
 }

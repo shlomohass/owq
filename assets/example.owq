@@ -1,6 +1,11 @@
+
 //let a = [2,(4),(6 + 2*(1+3)),7];
-let era = "shlomi";
+//let era = "shlomi";
 let b = [1,2,3,4];
 //let c = [];
-let d = 3;
-print(era);
+//let e = [1,[2,3],4];
+
+b[] = 5;
+
+
+print(3);

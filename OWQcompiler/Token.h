@@ -21,6 +21,7 @@ namespace Eowq
 		int priority;
 		TokenType type;
 		TokenFlag flag;
+		bool      arrayPush;
 		int       rstPos;
 
 		Token(std::string _token, int _priority, TokenType _type, TokenFlag _flag);
@@ -28,6 +29,7 @@ namespace Eowq
 		virtual ~Token();
 
 		void setFlag(TokenFlag _flag);
+		void setArrayTreatPush(bool toset);
 		void setPriority(int _priority);
 	};
 }
