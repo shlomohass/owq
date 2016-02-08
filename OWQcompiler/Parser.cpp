@@ -639,10 +639,10 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 					if (t1 > 0) { return t1; } //Invalid return error code!
 											   //Compile sub expression:
 					compiler(script, sub, debug, rCount);
-					tokens.pop(operatorIndex + 1); //Pop RST of variable expression
-					tokens.pop(operatorIndex + 1); //Pop comma
-					avoidEvaluation = true;
 				}
+				tokens.pop(operatorIndex + 1); //Pop RST of variable expression
+				tokens.pop(operatorIndex + 1); //Pop comma
+				avoidEvaluation = true;
 			} else {
 				//This removes the define key word
 				tokens.pop(operatorIndex);
