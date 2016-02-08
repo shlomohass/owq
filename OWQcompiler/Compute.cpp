@@ -51,6 +51,7 @@ namespace Eowq {
 		/* 20 */ "Pointer self reference is not alowed (infinite reference): ",
 		/* 21  */ "Tried to GTR or EQUAL with unsupported types: ",
 		/* 22  */ "Tried to LSR or EQUAL with unsupported types: ",
+		/* 23  */ "Array element is not defined or variable is not an array: "
 	};
 	Compute::Compute() {
 
@@ -77,31 +78,41 @@ namespace Eowq {
 	 */
 	ExecReturn Compute::execute_push(Instruction& xcode, Script* script) {
 		OperandType cur = xcode.getOperandType();
-		if (cur == OperandType::OPER_NEW) {
-			cur = xcode.setOperandType();
-		}
-		if (cur == OperandType::OPER_SRTING) {
-			Stack::push(xcode.getOperandRef());
-		} else if (cur == OperandType::OPER_RSTPOINTER) {
-			Stack::push(StackData(true, xcode.getPointer()));
-		} else if (cur == OperandType::OPER_BOOLEAN) {
-			Stack::push(StackData(xcode.getOperandRef(), true));
-		} else if (cur == OperandType::OPER_NULL) {
-			Stack::push(StackData());
-		} else if (cur == OperandType::OPER_VARIABLE) {
-			//the operand is in a form -> someWord <- no quotes around it, meaning it is a name of variable
-			//find that variable from the function, loops scoping
-			ScriptVariable* sv = script->getVariable(*xcode.getOperand());
-			//complain if variable is not found
-			if (sv == nullptr) {
-				ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_VAR_RESOLVE] + *xcode.getOperand());
-				return ExecReturn::Ex_VAR_RESOLVE;
-			} else {
-				//else push the value
-				Stack::push(*sv);
-			}
-		} else { // its a number:
-			Stack::push(xcode.getNumber());
+		if (cur == OperandType::OPER_NEW) cur = xcode.setOperandType();
+		switch (cur) {
+			case OperandType::OPER_NUMBER:
+				Stack::push_rvalue_obj(xcode.getNumber());
+				break;
+			case OperandType::OPER_SRTING:
+				Stack::push(xcode.getOperandRef());
+				break;
+			case OperandType::OPER_RSTPOINTER:
+				Stack::push_rvalue_obj(StackData(true, xcode.getPointer()));
+				break;
+			case OperandType::OPER_VARIABLE: {
+					ScriptVariable* sv = script->getVariable(*xcode.getOperand());
+					//complain if variable is not found
+					if (sv == nullptr) {
+						ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_VAR_RESOLVE] + *xcode.getOperand());
+						return ExecReturn::Ex_VAR_RESOLVE;
+					}
+					else { //else push the value
+						//if we need array traversal:
+						if (xcode.isArrayTraverse()) {
+							if (execute_array_extract_value(xcode, script, sv) != ExecReturn::Ex_OK)
+								return ExecReturn::Ex_AVAR_RESOLVE;
+						}
+						else { //Normal Push:
+							Stack::push(*sv);
+						}
+					}
+				} break;
+			case OperandType::OPER_BOOLEAN:
+				Stack::push_rvalue_obj(StackData(xcode.getOperandRef(), true));
+				break;
+			case OperandType::OPER_NULL:
+				Stack::push_rvalue_obj(StackData());
+				break;
 		}
 		//if operand is a reference to some variable, push its value onto the stack
 		if (xcode.getPointer() > 0) {
@@ -144,13 +155,8 @@ namespace Eowq {
 			//assign the value
 
 			if (xcode.isArrayPush() || xcode.isArrayTraverse()) {
-				//int ret = sv->setValueInArray(*sd,);
-				ExecReturn ret;
-				ret = execute_array_assignment(xcode, script, sv, sd);
-				if (ret != ExecReturn::Ex_OK) {
-					ScriptError::fatal(execute_errors[(int)ret]);
+				if (execute_array_assignment(xcode, script, sv, sd) != ExecReturn::Ex_OK)
 					return ExecReturn::Ex_NVAR_ASN;
-				}
 			} else {
 				if (!sv->setValue(*sd)) {
 					ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_NVAR_ASN]);
@@ -1214,17 +1220,35 @@ namespace Eowq {
 		if (travNum > -1) {
 
 			//The first in stack of path:
-			StackData* a = Stack::extract(xcode.getArrayPathPointer());
-			if (a == nullptr) {
-				ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_NULL_STACK_EXTRACTION] + xcode.toString());
-				return ExecReturn::Ex_NULL_STACK_EXTRACTION;
+			StackData* a;
+			for (int i = 0; i < travNum; i++) { 
+				a = Stack::pop(i + 1); //We start creating the path one after the assignment value.
+				if (a == nullptr) {
+					ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_NULL_STACK_EXTRACTION] + xcode.toString());
+					return ExecReturn::Ex_NULL_STACK_EXTRACTION;
+				}
+				path[i] = (int)a->getNumber();
+				Stack::eraseAsGC(a->getOrigin());
 			}
-			int originA = a->getOrigin();
-			//Traverse more:
-			path[0] = (int)a->getNumber();
-			Stack::eraseAsGC(a->getOrigin());
-			for (int i = 1; i < travNum; i++) {
-				a = Stack::pop(originA - i);
+		}
+		int ret = sv->setValueInArray(*sd, path, travNum -1, xcode.isArrayPush());
+		//Free alocated mem
+		delete[] path;
+		if (ret > 0) {
+			ScriptError::fatal(execute_errors[ret] + xcode.toString());
+			return (ExecReturn)ret;
+		}
+		return ExecReturn::Ex_OK;
+	}
+
+	ExecReturn Compute::execute_array_extract_value(Instruction &xcode, Script *script, ScriptVariable* sv) {
+		const int travNum = xcode.getArrayTraverse();
+		int* path = new int[(travNum > -1 ? travNum : 0)];
+		if (travNum > -1) {
+			//The first in stack of path:
+			StackData* a;
+			for (int i = 0; i < travNum; i++) {
+				a = Stack::pop(0);
 				if (a == nullptr) {
 					ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_NULL_STACK_EXTRACTION] + xcode.toString());
 					return ExecReturn::Ex_NULL_STACK_EXTRACTION;
@@ -1234,13 +1258,16 @@ namespace Eowq {
 			}
 
 		}
-		int ret = sv->setValueInArray(*sd, path, travNum -1, xcode.isArrayPush());
+		StackData* toPush = sv->getValueInArray(path, travNum - 1);
 		//Free alocated mem
 		delete[] path;
-		if (ret > 0) {
-			ScriptError::fatal(execute_errors[ret] + xcode.toString());
-			return (ExecReturn)ret;
+		//Push the value:
+		if (toPush == nullptr) {
+			//Warning
+			ScriptError::warn(execute_errors[23] + xcode.toString());
+			Stack::push_rvalue_obj(StackData());
 		}
+		Stack::push(*toPush);
 		return ExecReturn::Ex_OK;
 	}
 }

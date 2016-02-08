@@ -83,7 +83,6 @@ namespace Eowq
 		
 		bool			arrayPush;
 		int             arrayTraverse;
-		int             arrayPathStaticPointer;
 
 		OperandType		operandType;
 		int				jmpCache;
@@ -103,8 +102,7 @@ namespace Eowq
 		bool isArrayPush();
 		bool isArrayTraverse();
 		int  getArrayTraverse();
-		int  getArrayPathPointer();
-
+		
 		bool isOperandNumber();
 		bool isOperandString();
 		bool isOperandBoolean();

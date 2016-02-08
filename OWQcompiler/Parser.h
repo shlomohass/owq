@@ -10,9 +10,10 @@
 #include "Setowq.h"
 #include <iomanip>
 
-#include "Tokens.h"
+
 #include "Lang.h"
 #include "Script.h"
+#include "Tokens.h"
 
 namespace Eowq
 {
@@ -31,6 +32,7 @@ namespace Eowq
 		std::string currentToken;	//the currentToken as a function of expression
 		std::vector<ParseMark> marks;		//helps to group related code branches: functions, if, while
 		TokenType currentTokenType;	//describes the current token type
+		std::vector<Tokens> cachedSubsPool;
 
 		//---------------------------------------------------------
 		// vital workers

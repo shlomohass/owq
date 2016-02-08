@@ -23,7 +23,8 @@ namespace Eowq
 		Ex_UNSUPPORTED_VAR_TYPE, // On inc , dec
 		Ex_UNSUPPORTED_VAR_TYPE_ARRAY,
 		Ex_AVAR_ASN,
-		Ex_ARRAY_PATH_MIS
+		Ex_ARRAY_PATH_MIS,
+		Ex_AVAR_RESOLVE,
 	};
 
 	enum ScopeType {

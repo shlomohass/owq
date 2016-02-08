@@ -143,16 +143,37 @@ namespace Eowq {
 			return (candid->MutateTo(sd)) ? 0 : 7;
 		return 8;
 	}
+	
+	StackData* ScriptVariable::getValueInArray(int* path, int index) {
+		if (type == RegisteredVariable::GLOBAL_POINTER && pointer != nullptr)
+			return pointer->getValueInArray(path, index);
+		if (type != RegisteredVariable::GLOBAL_FLEX || !value.isArray())
+			return nullptr; //Not array.
+		//Traverse
+		std::vector<StackData>* baseArr = value.getArrayPointer();
+		StackData* candid = &value;
+		if (index > -1) {
+			if ((int)baseArr->size() <= path[index]) {
+				return nullptr; //Not array.
+			}
+			candid = baseArr->at(path[index]).traverseInArray(path, index - 1);
+		}
+		return candid;
+	}
+
 	void ScriptVariable::deref() {
 		type = RegisteredVariable::GLOBAL_FLEX;
 		pointer = nullptr;
 	}
+	
 	int ScriptVariable::getPointedCounter() {
 		return hasPointers;
 	}
+	
 	void ScriptVariable::setPointedCounter(int num) {
 		hasPointers = num;
 	}
+	
 	void ScriptVariable::setHasPointers() {
 		hasPointers++;
 	}
@@ -178,6 +199,7 @@ namespace Eowq {
 	bool ScriptVariable::isPointed() {
 		return hasPointers > 0;
 	}
+	
 	std::string ScriptVariable::renderVariable() {
 		if (type == RegisteredVariable::GLOBAL_POINTER && pointer != nullptr) {
 			return pointer->renderVariable();

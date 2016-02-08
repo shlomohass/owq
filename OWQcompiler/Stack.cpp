@@ -166,13 +166,17 @@ namespace Eowq {
 		if (index == -1) {
 			stack.back().setGc();
 		}
+		/*
 		if ((int)stack.size() > index && index > -1 && stack[index].getOrigin() == index) {
 			stack.erase(stack.begin() + index);
 			return;
 		}
-		for (int i = (int)stack.size() - 1; i > -1; i--) {
+		*/
+		int size = (int)stack.size() - 1;
+		for (int i = size; i > -1; i--) {
 			if (stack[i].getOrigin() == index) {
-				stack[i].setGc();
+				if (size == i) stack.erase(stack.begin() + index);
+				else  stack[i].setGc();
 				return;
 			}
 		}

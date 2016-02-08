@@ -800,6 +800,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 	if (operatorToken->token == Lang::dicLang_sBraketOpen) { //  bracket [
 															 //get the close of this bracket square
 		int closeOfSquareBrackets = tokens.getMatchingCloseSquareBrackets(operatorIndex);
+
 		//extract the content and replace with RST
 		Tokens sub = tokens.extractContentOfParenthesis(operatorIndex, closeOfSquareBrackets, eraseCount, script);
 
@@ -815,18 +816,19 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 		//This will indicate an array push flag the left token, remove rst and continue:
 		Token* leftOverLook = tokens.tokenLeftLookBeforeArrayTraverse(operatorIndex);
 		if (arrayElementsCount == 0 && leftOverLook != nullptr && leftOverLook->type == TokenType::VAR) {
+			
 			leftOverLook->setArrayTreatPush(true);
 			tokens.pop(operatorIndex); //Pop RST 
+
 		//This will indicate an array traverse callee:
 		} else if (leftOverLook != nullptr && leftOverLook->type == TokenType::VAR) {
+
+			//Remove Rst and cache the tokens for later use when variable is called
 			leftOverLook->setArrayTraverse(arrayElementsCount);
-			int ret = compiler(script, sub, debug, rCount);
-			leftOverLook->setArrayPathStaticPointer(script->code.back().getPointer());
 			tokens.pop(operatorIndex); //Pop RST 
-			if (ret != 0) {
-				//An array error.
-				return ret;
-			}
+			cachedSubsPool.push_back(sub); // This will save the path tokens for later
+			leftOverLook->setTokenSubCache(cachedSubsPool.size() - 1); //Save the cache index.
+
 		} else {
 			//Probably a definition
 
@@ -949,9 +951,17 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
         
     } else if (priortyCode == 40) { //equal sign OR pointer assignment
 
-        //extract from 1 past the equal sign to the end of the tokens
+		//Compile cached left before:
+		if (leftToken->arrayTraverse != -1) {
+			int ret = compiler(script, cachedSubsPool.at(leftToken->subTokenCache), debug, rCount);
+			if (ret != 0) return ret;
+		}
+
+        //extract from 1 past the equal sign to the end of the tokens 
+		//This will push the needed assign:
 		Tokens sub = tokens.extractInclusive(operatorIndex+1, tokens.getSize()-1, eraseCount, script);
         compiler(script, sub, debug, rCount);
+		
 		if (operatorToken->token == Lang::dicLang_equal) {
 			script->addInstruction(Instruction(ByteCode::ASN, *leftToken));
 		} else {
@@ -961,7 +971,13 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
         operatorIndex -= eraseCount;
             
     } else if (priortyCode == 0 || priortyCode == 1) {
-		script->addInstruction(Instruction(ByteCode::PUSH, tokens.getToken(operatorIndex)));
+
+		//Compile cached before:
+		if (operatorToken->arrayTraverse != -1) {
+			int ret = compiler(script, cachedSubsPool.at(operatorToken->subTokenCache), debug, rCount);
+			if (ret != 0) return ret;
+		}
+		script->addInstruction(Instruction(ByteCode::PUSH, *operatorToken));
 		if (operatorIndex == tokens.getSize() - 1) {
 			tokens.extractInclusive(operatorIndex, operatorIndex, eraseCount, script, true);
 		} else {
@@ -1267,28 +1283,22 @@ int Parser::getDelimiterPriorty(std::string toCheckToken, TokenType toCheckType)
 	}
 	else if (toCheckToken == Lang::dicLang_power) {
 		return 90;
-	}
-	else if (toCheckToken == Lang::dicLang_multi || toCheckToken == Lang::dicLang_divide) {
+	}else if (toCheckToken == Lang::dicLang_multi || toCheckToken == Lang::dicLang_divide) {
 		return 80;
-	}
-	else if (toCheckToken == Lang::dicLang_plus || toCheckToken == Lang::dicLang_minus) {
+	} else if (toCheckToken == Lang::dicLang_plus || toCheckToken == Lang::dicLang_minus) {
 		return 70;
-	}
-	else if (
+	} else if (
 		toCheckToken == Lang::dicLang_smaller ||
 		toCheckToken == Lang::dicLang_greater ||
 		toCheckToken == Lang::dicLang_greater_equal ||
 		toCheckToken == Lang::dicLang_smaller_equal
-	) {
+		) {
 		return 60;
-	}
-	else if (toCheckToken == Lang::dicLang_c_equal || toCheckToken == Lang::dicLang_c_nequal || toCheckToken == Lang::dicLang_c_tequal || toCheckToken == Lang::dicLang_c_ntequal) {
+	} else if (toCheckToken == Lang::dicLang_c_equal || toCheckToken == Lang::dicLang_c_nequal || toCheckToken == Lang::dicLang_c_tequal || toCheckToken == Lang::dicLang_c_ntequal) {
 		return 59;
-	}
-	else if (toCheckToken == Lang::dicLang_and) {
+	} else if (toCheckToken == Lang::dicLang_and) {
 		return 50;
-	}
-	else if (toCheckToken == Lang::dicLang_or) {
+	} else if (toCheckToken == Lang::dicLang_or) {
 		return 49;
 	}
 	else if (toCheckToken == Lang::dicLang_equal || toCheckToken == Lang::dicLang_pointer) {

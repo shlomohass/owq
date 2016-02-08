@@ -76,7 +76,6 @@ namespace Eowq {
 		operandType = OperandType::OPER_NEW;
 		arrayPush = false;
 		arrayTraverse = -1;
-		arrayPathStaticPointer = 0;
 	}
 
 	Instruction::Instruction(ByteCode inst, const std::string& xOperand) {
@@ -88,7 +87,6 @@ namespace Eowq {
 		operandType = OperandType::OPER_NEW;
 		arrayPush = false;
 		arrayTraverse = -1;
-		arrayPathStaticPointer = 0;
 		if (operand[0] == Lang::LangStringIndicator && operand[operand.size() - 1] == Lang::LangStringIndicator) {
 			containsQuotes = true;
 			//remove the quotes now
@@ -108,7 +106,6 @@ namespace Eowq {
 		operandType = OperandType::OPER_NEW;
 		arrayPush = false;
 		arrayTraverse = -1;
-		arrayPathStaticPointer = 0;
 		if (operand[0] == Lang::LangStringIndicator && operand[operand.size() - 1] == Lang::LangStringIndicator) {
 			containsQuotes = true;
 			//remove the quotes now
@@ -127,7 +124,6 @@ namespace Eowq {
 		operand = imptoken.token;
 		arrayPush = imptoken.arrayPush;
 		arrayTraverse = imptoken.arrayTraverse;
-		arrayPathStaticPointer = imptoken.arrayPathStaticPointer;
 		staticPointer = 0;
 		jmpCache = -1;
 		isRST = false;
@@ -148,7 +144,6 @@ namespace Eowq {
 		operand = imptoken.token;
 		arrayPush = imptoken.arrayPush;
 		arrayTraverse = imptoken.arrayTraverse;
-		arrayPathStaticPointer = imptoken.arrayPathStaticPointer;
 		jmpCache = -1;
 		staticPointer = pointer;
 		operandType = OperandType::OPER_NEW;
@@ -189,9 +184,6 @@ namespace Eowq {
 	}
 	int Instruction::getArrayTraverse() {
 		return arrayTraverse;
-	}
-	int Instruction::getArrayPathPointer() {
-		return arrayPathStaticPointer;
 	}
 
 	bool Instruction::isRstPointer() {

@@ -4,8 +4,9 @@
  * 
  * Created on 30 דצמבר 2015, 04:59
  */
-
+#include "Tokens.h"
 #include "Token.h"
+
 
 namespace Eowq {
 
@@ -17,7 +18,6 @@ namespace Eowq {
 		rstPos = 0;
 		arrayPush = false;
 		arrayTraverse = -1;
-		arrayPathStaticPointer = 0;
 	}
 
 	Token::Token(std::string _token, int _priority, TokenType _type, TokenFlag _flag, int _pos) {
@@ -28,7 +28,6 @@ namespace Eowq {
 		rstPos = _pos;
 		arrayPush = false;
 		arrayTraverse = -1;
-		arrayPathStaticPointer = 0;
 	}
 
 	Token::~Token() {
@@ -45,8 +44,8 @@ namespace Eowq {
 	void Token::setArrayTraverse(int steps) {
 		arrayTraverse = steps;
 	}
-	void Token::setArrayPathStaticPointer(int point) {
-		arrayPathStaticPointer = point;
+	void Token::setTokenSubCache(int placed) {
+		subTokenCache = placed;
 	}
 	void Token::setPriority(int _priority) {
 		priority = _priority;

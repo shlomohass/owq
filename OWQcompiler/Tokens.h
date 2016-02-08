@@ -10,8 +10,10 @@
 #include <iostream>
 #include <vector>
 #include "Token.h"
+
 namespace Eowq
 {
+
 	/**
 	 * Functions to hold script terms that characterize a line
 	 */
@@ -50,6 +52,7 @@ namespace Eowq
 		int getMatchingCloseSquareBrackets(int openIndex);
 		std::string getToken(int index);
 		Token* getTokenObject(int index);
+		void replaceTokenAt(int index, Token& token);
 		Token* tokenLeftLookBeforeArrayTraverse(int fromIndex);
 		bool setHasComparison();
 		bool setHasCondition();

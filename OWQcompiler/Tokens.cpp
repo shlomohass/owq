@@ -4,9 +4,12 @@
  * 
  */
 
+
+
 #include "Tokens.h"
 #include "Lang.h"
 #include "Script.h"
+
 #include <sstream> 
 
 namespace Eowq {
@@ -364,6 +367,16 @@ namespace Eowq {
 			return nullptr;
 		}
 		return &tokens[index];
+	}
+	/** Replace a specific token in set:
+	*
+	* @param int index
+	* @param Token&
+	*/
+	void Tokens::replaceTokenAt(int index, Token& token) {
+		Token* target = getTokenObject(index);
+		if (target != nullptr)
+			*target = token;
 	}
 	/** Get a specific token at left position of index
 	* will skip square brakets -> this is for arrays push delimiter

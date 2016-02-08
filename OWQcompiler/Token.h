@@ -9,12 +9,17 @@
 #define	TOKEN_H
 
 #include <iostream>
+
 namespace Eowq
 {
+
 	enum TokenType { NONE, NUMBER, STRING, DELIMITER, VAR, KEYWORD, RST };
 	enum TokenFlag { UNFLAG, NORMAL, COMPARISON, CONDITION };
 
+	class Tokens;
+
 	class Token {
+
 	public:
 
 		std::string token;
@@ -23,7 +28,7 @@ namespace Eowq
 		TokenFlag flag;
 		bool arrayPush;
 		int  arrayTraverse;
-		int  arrayPathStaticPointer;
+		int  subTokenCache;
 		int       rstPos;
 
 		Token(std::string _token, int _priority, TokenType _type, TokenFlag _flag);
@@ -33,7 +38,7 @@ namespace Eowq
 		void setFlag(TokenFlag _flag);
 		void setArrayTreatPush(bool toset);
 		void setArrayTraverse(int steps);
-		void setArrayPathStaticPointer(int point);
+		void setTokenSubCache(int placed);
 		void setPriority(int _priority);
 	};
 }
