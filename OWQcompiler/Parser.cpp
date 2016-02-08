@@ -875,61 +875,66 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 	//exponent ^
 	} else if (priortyCode == 90) { 
 
-        compile_LR_mathLogigBaseOperations(ByteCode::EXPON, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+        compile_LR_mathLogigBaseOperations(ByteCode::EXPON, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken, debug, rCount);
     
     //multi and division 
     } else if (priortyCode == 80) {	
     
         if (operatorToken->token == Lang::dicLang_multi) { //Multiple
-            compile_LR_mathLogigBaseOperations(ByteCode::MULT, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::MULT, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken, debug, rCount);
         } else { //Divide
-            compile_LR_mathLogigBaseOperations(ByteCode::DIV, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::DIV, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken, debug, rCount);
         }
         
     //add and subtract
     } else if (priortyCode == 70) { 
     
         if (operatorToken->token == Lang::dicLang_plus) { // ADD values 
-            compile_LR_mathLogigBaseOperations(ByteCode::ADD, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::ADD, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken, debug, rCount);
         } else { // Subtract values
-            compile_LR_mathLogigBaseOperations(ByteCode::SUB, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::SUB, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken, debug, rCount);
         }
     //greater lesser
     } else if (priortyCode == 60) { 
         
         if (operatorToken->token == Lang::dicLang_greater) { // Is greater than
-            compile_LR_mathLogigBaseOperations(ByteCode::GTR, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::GTR, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken, debug, rCount);
         } else if (operatorToken->token == Lang::dicLang_smaller) { // Is smaller than
-            compile_LR_mathLogigBaseOperations(ByteCode::LSR, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::LSR, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken, debug, rCount);
         } else if (operatorToken->token == Lang::dicLang_greater_equal) { // Is greater or equal to
-			compile_LR_mathLogigBaseOperations(ByteCode::GTRE, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+			compile_LR_mathLogigBaseOperations(ByteCode::GTRE, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken, debug, rCount);
 		} else if (operatorToken->token == Lang::dicLang_smaller_equal) { // Is smaller or equal to
-			compile_LR_mathLogigBaseOperations(ByteCode::LSRE, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+			compile_LR_mathLogigBaseOperations(ByteCode::LSRE, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken, debug, rCount);
 		}
         
     //c-equals ==
     } else if (priortyCode == 59) {
         
         if (operatorToken->token == Lang::dicLang_c_equal) { // Is value Equal to
-            compile_LR_mathLogigBaseOperations(ByteCode::CVE, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::CVE, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken, debug, rCount);
         } else if (operatorToken->token == Lang::dicLang_c_nequal){ // Is value not Equal to
-			compile_LR_mathLogigBaseOperations(ByteCode::CVN, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+			compile_LR_mathLogigBaseOperations(ByteCode::CVN, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken, debug, rCount);
         } else if (operatorToken->token == Lang::dicLang_c_tequal) { // Is type Equal to
-			compile_LR_mathLogigBaseOperations(ByteCode::CTE, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+			compile_LR_mathLogigBaseOperations(ByteCode::CTE, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken, debug, rCount);
 		} else if (operatorToken->token == Lang::dicLang_c_ntequal) { // Is type not Equal to
-			compile_LR_mathLogigBaseOperations(ByteCode::CTN, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+			compile_LR_mathLogigBaseOperations(ByteCode::CTN, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken, debug, rCount);
 		}
         
     // matching signs logics
     } else if (priortyCode == 50 || priortyCode == 49) {
         
         if (operatorToken->token == Lang::dicLang_and) { // Is LOGIC AND
-            compile_LR_mathLogigBaseOperations(ByteCode::AND, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::AND, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken, debug, rCount);
         } else { // Is LOGIC OR
-            compile_LR_mathLogigBaseOperations(ByteCode::POR, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken);
+            compile_LR_mathLogigBaseOperations(ByteCode::POR, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken, debug, rCount);
         }
         
     } else if (priortyCode == 40) { //equal sign OR pointer assignment
+
+        //extract from 1 past the equal sign to the end of the tokens 
+		//This will push the needed assign:
+		Tokens sub = tokens.extractInclusive(operatorIndex+1, tokens.getSize()-1, eraseCount, script);
+        compiler(script, sub, debug, rCount);
 
 		//Compile cached left before:
 		if (leftToken->arrayTraverse != -1) {
@@ -937,11 +942,6 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 			if (ret != 0) return ret;
 		}
 
-        //extract from 1 past the equal sign to the end of the tokens 
-		//This will push the needed assign:
-		Tokens sub = tokens.extractInclusive(operatorIndex+1, tokens.getSize()-1, eraseCount, script);
-        compiler(script, sub, debug, rCount);
-		
 		if (operatorToken->token == Lang::dicLang_equal) {
 			script->addInstruction(Instruction(ByteCode::ASN, *leftToken));
 		} else {
@@ -1012,10 +1012,20 @@ ParseMark Parser::getMark() {
  * @param string rightToken
  * @return boolean
  */
-bool Parser::compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, Tokens* tokens, int &operatorIndex, int &priority, int &eraseCount, Token* leftToken, Token* rightToken) {
+bool Parser::compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, Tokens* tokens, int &operatorIndex, int &priority, int &eraseCount, Token* leftToken, Token* rightToken, bool debug, int rCount) {
 
-    script->addInstruction(Instruction(ByteCode::PUSH, leftToken->token, leftToken->rstPos), true);
-    script->addInstruction(Instruction(ByteCode::PUSH, rightToken->token, rightToken->rstPos), true);
+	//Compile cached before of left:
+	if (leftToken->arrayTraverse != -1) {
+		int ret = compiler(script, cachedSubsPool.at(leftToken->subTokenCache), debug, rCount);
+		if (ret != 0) return ret;
+	}
+    script->addInstruction(Instruction(ByteCode::PUSH, *leftToken, leftToken->rstPos), true);
+	//Compile cached before of right:
+	if (rightToken->arrayTraverse != -1) {
+		int ret = compiler(script, cachedSubsPool.at(rightToken->subTokenCache), debug, rCount);
+		if (ret != 0) return ret;
+	}
+	script->addInstruction(Instruction(ByteCode::PUSH, *rightToken, rightToken->rstPos), true);
     script->addInstruction(Instruction(bc));
     tokens->extractInclusive(operatorIndex - 1, operatorIndex + 1, eraseCount, script, true);
     operatorIndex -= eraseCount;

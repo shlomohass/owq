@@ -81,7 +81,7 @@ namespace Eowq {
 		if (cur == OperandType::OPER_NEW) cur = xcode.setOperandType();
 		switch (cur) {
 			case OperandType::OPER_NUMBER:
-				Stack::push_rvalue_obj(xcode.getNumber());
+				Stack::push(xcode.getNumber());
 				break;
 			case OperandType::OPER_SRTING:
 				Stack::push(xcode.getOperandRef());
@@ -145,27 +145,29 @@ namespace Eowq {
 	 *
 	 */
 	ExecReturn Compute::execute_variable_assignment(Instruction &xcode, Script *script) {
-		StackData* sd = Stack::pop(0); //pop and get the value to assign
 		ScriptVariable* sv = script->getVariable(*xcode.getOperand()); //get the variable we wish to sign to
-		if (sv == NULL || sd == nullptr) {
+		if (sv == NULL) {
 			ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_VAR_RESOLVE] + *xcode.getOperand());
 			return ExecReturn::Ex_VAR_RESOLVE;
 		} else {
-			int originSD = sd->getOrigin();
 			//assign the value
-
 			if (xcode.isArrayPush() || xcode.isArrayTraverse()) {
-				if (execute_array_assignment(xcode, script, sv, sd) != ExecReturn::Ex_OK)
+				if (execute_array_assignment(xcode, script, sv) != ExecReturn::Ex_OK)
 					return ExecReturn::Ex_NVAR_ASN;
 			} else {
+				StackData* sd = Stack::pop(0); //pop and get the value to assign
+				if (sv == nullptr) {
+					ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_NULL_STACK_EXTRACTION] + *xcode.getOperand());
+					return ExecReturn::Ex_NULL_STACK_EXTRACTION;
+				}
+				int originSD = sd->getOrigin();
 				if (!sv->setValue(*sd)) {
 					ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_NVAR_ASN]);
 					return ExecReturn::Ex_NVAR_ASN;
 				}
+				Stack::eraseAsGC(originSD);
 			}
-
 			//Remove from stack:
-			Stack::eraseAsGC(originSD);
 			if (Stack::size() > 100) {
 				Stack::runGC();
 			}
@@ -237,9 +239,8 @@ namespace Eowq {
 				Stack::push(false);
 			}
 			//Remove from stack:
-			Stack::eraseAt(originB);
-			Stack::eraseAt(originA);
-			Stack::runGC();
+			Stack::eraseAsGC(originB);
+			Stack::eraseAsGC(originA);
 			//Set static pointer:
 			if (xcode.getPointer() > 0) {
 				Stack::setTopPointer(xcode.getPointer());
@@ -319,9 +320,8 @@ namespace Eowq {
 				Stack::push(false);
 			}
 			//Remove from stack:
-			Stack::eraseAt(originB);
-			Stack::eraseAt(originA);
-			Stack::runGC();
+			Stack::eraseAsGC(originB);
+			Stack::eraseAsGC(originA);
 			//Set static pointer:
 			if (xcode.getPointer() > 0) {
 				Stack::setTopPointer(xcode.getPointer());
@@ -359,9 +359,8 @@ namespace Eowq {
 				Stack::push(false);
 			}
 			//Remove from stack:
-			Stack::eraseAt(originB);
-			Stack::eraseAt(originA);
-			Stack::runGC();
+			Stack::eraseAsGC(originB);
+			Stack::eraseAsGC(originA);
 			//Set static pointer:
 			if (xcode.getPointer() > 0) {
 				Stack::setTopPointer(xcode.getPointer());
@@ -398,9 +397,8 @@ namespace Eowq {
 				Stack::push(false);
 			}
 			//Remove from stack:
-			Stack::eraseAt(originB);
-			Stack::eraseAt(originA);
-			Stack::runGC();
+			Stack::eraseAsGC(originB);
+			Stack::eraseAsGC(originA);
 			//Set static pointer:
 			if (xcode.getPointer() > 0) {
 				Stack::setTopPointer(xcode.getPointer());
@@ -437,9 +435,8 @@ namespace Eowq {
 				Stack::push(false);
 			}
 			//Remove from stack:
-			Stack::eraseAt(originB);
-			Stack::eraseAt(originA);
-			Stack::runGC();
+			Stack::eraseAsGC(originB);
+			Stack::eraseAsGC(originA);
 			//Set static pointer:
 			if (xcode.getPointer() > 0) {
 				Stack::setTopPointer(xcode.getPointer());
@@ -647,9 +644,8 @@ namespace Eowq {
 				Stack::push(0);
 			}
 			//Remove from stack:
-			Stack::eraseAt(originB);
-			Stack::eraseAt(originA);
-			Stack::runGC();
+			Stack::eraseAsGC(originB);
+			Stack::eraseAsGC(originA);
 			//Set static pointer:
 			if (xcode.getPointer() > 0) {
 				Stack::setTopPointer(xcode.getPointer());
@@ -741,9 +737,8 @@ namespace Eowq {
 				Stack::push(0);
 			}
 			//Remove from stack:
-			Stack::eraseAt(originB);
-			Stack::eraseAt(originA);
-			Stack::runGC();
+			Stack::eraseAsGC(originB);
+			Stack::eraseAsGC(originA);
 			//Set static pointer:
 			if (xcode.getPointer() > 0) {
 				Stack::setTopPointer(xcode.getPointer());
@@ -781,9 +776,8 @@ namespace Eowq {
 				Stack::push(0);
 			}
 			//Remove from stack:
-			Stack::eraseAt(originB);
-			Stack::eraseAt(originA);
-			Stack::runGC();
+			Stack::eraseAsGC(originB);
+			Stack::eraseAsGC(originA);
 			//Set static pointer:
 			if (xcode.getPointer() > 0) {
 				Stack::setTopPointer(xcode.getPointer());
@@ -949,8 +943,7 @@ namespace Eowq {
 				}
 			}
 			//Remove from stack:
-			Stack::eraseAt(originA);
-			Stack::runGC();
+			Stack::eraseAsGC(originA);
 		}
 		return ExecReturn::Ex_OK;
 	}
@@ -1000,8 +993,7 @@ namespace Eowq {
 				}
 			}
 			//Remove from stack:
-			Stack::eraseAt(originA);
-			Stack::runGC();
+			Stack::eraseAsGC(originA);
 		}
 		return ExecReturn::Ex_OK;
 	}
@@ -1214,15 +1206,14 @@ namespace Eowq {
 		return ExecReturn::Ex_OK;
 	}
 
-	ExecReturn Compute::execute_array_assignment(Instruction &xcode, Script *script, ScriptVariable* sv, StackData* sd) {
+	ExecReturn Compute::execute_array_assignment(Instruction &xcode, Script *script, ScriptVariable* sv) {
 		const int travNum = xcode.getArrayTraverse();
 		int* path = new int[(travNum > -1 ? travNum : 0)];
 		if (travNum > -1) {
-
 			//The first in stack of path:
 			StackData* a;
 			for (int i = 0; i < travNum; i++) { 
-				a = Stack::pop(i + 1); //We start creating the path one after the assignment value.
+				a = Stack::pop(0);
 				if (a == nullptr) {
 					ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_NULL_STACK_EXTRACTION] + xcode.toString());
 					return ExecReturn::Ex_NULL_STACK_EXTRACTION;
@@ -1231,7 +1222,10 @@ namespace Eowq {
 				Stack::eraseAsGC(a->getOrigin());
 			}
 		}
+		StackData* sd = Stack::pop(0);
 		int ret = sv->setValueInArray(*sd, path, travNum -1, xcode.isArrayPush());
+		Stack::eraseAsGC(sd->getOrigin());
+
 		//Free alocated mem
 		delete[] path;
 		if (ret > 0) {
@@ -1264,10 +1258,11 @@ namespace Eowq {
 		//Push the value:
 		if (toPush == nullptr) {
 			//Warning
-			ScriptError::warn(execute_errors[23] + xcode.toString());
+			ScriptError::warn(execute_warn[23] + xcode.toString());
 			Stack::push_rvalue_obj(StackData());
+		} else {
+			Stack::push(*toPush);
 		}
-		Stack::push(*toPush);
 		return ExecReturn::Ex_OK;
 	}
 }

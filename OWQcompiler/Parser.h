@@ -79,7 +79,7 @@ namespace Eowq
 		//----------------------------------------------------------
 		// Compiler - Methods
 		//----------------------------------------------------------
-		bool compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, Tokens* token, int &operatorIndex, int &priority, int &eraseCount, Token* leftToken, Token* rightToken);
+		bool compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, Tokens* token, int &operatorIndex, int &priority, int &eraseCount, Token* leftToken, Token* rightToken, bool debug, int rCount);
 
 	public:
 

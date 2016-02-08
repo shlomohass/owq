@@ -72,7 +72,7 @@ namespace Eowq
 
 		//Objects and arrays:
 		static ExecReturn execute_array_definition(Instruction &xcode, Script *script, int& instructionPointer);
-		static ExecReturn execute_array_assignment(Instruction &xcode, Script *script, ScriptVariable* sv, StackData* sd);
+		static ExecReturn execute_array_assignment(Instruction &xcode, Script *script, ScriptVariable* sv);
 		static ExecReturn execute_array_extract_value(Instruction &xcode, Script *script, ScriptVariable* sv);
 	};
 

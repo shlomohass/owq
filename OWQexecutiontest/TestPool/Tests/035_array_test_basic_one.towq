@@ -1,0 +1,23 @@
+let a, b, c, d;
+
+a = [1,2,3];
+
+b = a[0] + a[1] + a[2]; // 6
+c = a[0] * a[1] * a[2]; // 6
+d = a[0] - a[1] - a[2]; // -4
+
+a[] = ["owq ","vectors ","amazing"];
+a[] = [];
+a[4][] = "test";
+a[4,0] = a[4,0] + " work";
+
+print( b + c + d + ","); // 8
+print(a[3,0] + a[3,1] + a[3,2] + ","); // owq vectors amazing
+print(a[4,0]); // test work
+
+/*
+@expected-output
+8,owq vectors amazing,test work
+@end-expected-output
+*/
+

@@ -1,3 +1,12 @@
 
-let a,b,c,d;
+let a, b, c, d;
+
+a = [1,2,3];
+
+if (a.length() == 3 && a[1] == 2) {
+	print("OK");
+} else {
+	print("BAD!");
+}
+
 

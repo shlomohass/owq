@@ -248,7 +248,16 @@ namespace Eowq {
 	 */
 	void Stack::render() {
 		std::cout << "     Stack(" << stack.size() << "):\n";
+		bool gcBlock = false;
 		for (int i = (int)stack.size() - 1; i > -1; i--) {
+			if (stack[i].isGc()) {
+				if (!gcBlock) {
+					std::cout << "           [.] = GC's" << std::endl;
+					gcBlock = true;
+				}
+				continue;
+			}
+			gcBlock = false;
 			std::cout << "           [" << i << "] = ";
 			stack[i].render();
 			std::cout << std::endl;
