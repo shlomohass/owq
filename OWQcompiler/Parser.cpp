@@ -18,7 +18,7 @@ std::string Parser::errors[] = {
 	"4 if - statement syntax error",
 	"5 while - statement syntax error",
 	"6 else - statement syntax error",
-	"7 Definition - expected definition of valriable name",
+	"7 Definition - expected definition of variable name",
 	"8 Missuse of Braces",
 	"9 Declaration of variables should be followed by an assignment delimiter or by end of statement",
 	"10 Found two commas in variable declaration",
@@ -630,38 +630,18 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 			//Check for several defines: note that define key word is still in the token set.
 			bool avoidEvaluation = false;
 			if (hasCommasNotNested(tokens)) {
-				//TODO avoid BRACKETS!
 				//Scan to Define all recursivly:
-				std::string t;
-				std::string langCommas = Lang::dicLang_comma;
-				std::string langOpenBracket = Lang::dicLang_braketOpen;
-				std::string langCloseBracket = Lang::dicLang_braketClose;
-				int tokenSetSize = (int)tokens.getSize();
-				int nestedBrackets = 0;
-				for (int i = operatorIndex + 1; i < tokenSetSize - 1; i++) {
-					t = tokens.getToken(i);
-					if (t == langOpenBracket) {
-						nestedBrackets++;
-					} else if (t == langCloseBracket) {
-						nestedBrackets--;
-					} else if (t == langCommas && nestedBrackets == 0) {
-						Tokens sub = tokens.extractInclusive(operatorIndex + 1, i - 1, eraseCount, script);
-						i -= eraseCount;
-						tokenSetSize -= eraseCount;
-						//If the sub is just one token avoid anything elese and continue:
-						if (sub.getSize() > 1) {
-							//Evaluate:
-							int t1 = evaluateDeclarationSub(sub, true);
-							if (t1 > 0) { return t1; } //Invalid return error code!
-							//Compile sub expression:
-							compiler(script, sub, debug, rCount);
-						}
-						tokens.pop(i); //Pop RST || variable
-						tokens.pop(i); //Pop comma
-						avoidEvaluation = true;
-						break;
-					}
-
+				int commaIndex = getCommaIndexNotNested(tokens);
+				Tokens sub = tokens.extractInclusive(operatorIndex + 1, commaIndex - 1, eraseCount, script);
+				if (sub.getSize() > 1) {
+					//Evaluate:
+					int t1 = evaluateDeclarationSub(sub, true);
+					if (t1 > 0) { return t1; } //Invalid return error code!
+											   //Compile sub expression:
+					compiler(script, sub, debug, rCount);
+					tokens.pop(operatorIndex + 1); //Pop RST of variable expression
+					tokens.pop(operatorIndex + 1); //Pop comma
+					avoidEvaluation = true;
 				}
 			} else {
 				//This removes the define key word
