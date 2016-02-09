@@ -1,0 +1,16 @@
+let a, b, c, d;
+
+a = [ 1,2,3,4,5 ];
+b = [];
+c = [ 2 ];
+d = true;
+
+print(a["owq"]); // 4
+print(a[b]);	 // 1
+print(a[c]);	 // 2
+print(a[d]);	 // 2
+/*
+@expected-output
+4122
+@end-expected-output
+*/

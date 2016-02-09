@@ -132,8 +132,10 @@ namespace Eowq {
 	}
 	StackData* StackData::traverseInArray(int* path, int index) {
 		if (index > -1) {
-			if (isArray() && (int)owqval.owqArray->size() > path[index]) {
-				return owqval.owqArray->at(path[index]).traverseInArray(path, index - 1);
+			//Invert ele index if negative:
+			int ele = path[index] >= 0 ? path[index] : (int)owqval.owqArray->size() + path[index];
+			if (isArray() && ele >= 0 && (int)owqval.owqArray->size() > ele) {
+				return owqval.owqArray->at(ele).traverseInArray(path, index - 1);
 			} else {
 				return nullptr;
 			}
@@ -263,6 +265,29 @@ namespace Eowq {
 		}
 		return (double)owqval.dvalue;
 	}
+	/* Will return any value as its number value 
+	 * 
+	 * Number -> Number
+	 * String -> string length
+	 * Boolean -> 1 | 0
+	 * Array   -> Element count.
+	 * Null,GC,RST    -> 0
+	 * 
+	 */
+	double StackData::getAsNumber() {
+		switch (type) {
+			case SDtype::SD_NUMBER:
+				return owqval.dvalue;
+			case SDtype::SD_BOOLEAN:
+				return (double)owqval.bvalue;
+			case SDtype::SD_STRING:
+				return (double)owqval.svalue.length();
+			case SDtype::SD_ARRAY:
+				return (double)owqval.owqArray->size();
+		}
+		return 0.0;
+	};
+
 	/** Returns the Stack Data string value
 	 *
 	 * @return string

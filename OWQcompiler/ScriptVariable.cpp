@@ -130,10 +130,13 @@ namespace Eowq {
 		std::vector<StackData>* baseArr = value.getArrayPointer();
 		StackData* candid = &value;
 		if (index > -1) {
-			if ((int)baseArr->size() <= path[index]) {
-				return 8; //Not array.
+			//Invert ele:
+			int ele = path[index] >= 0 ? path[index] : (int)baseArr->size() + path[index];
+			if (ele >= 0 && (int)baseArr->size() > ele) {
+				candid = baseArr->at(ele).traverseInArray(path, index - 1);
+			} else {
+				return 8; //Not in array.
 			}
-			candid = baseArr->at(path[index]).traverseInArray(path, index - 1);
 		}
 		//Push to candid:
 		if (push && candid != nullptr)
@@ -153,10 +156,12 @@ namespace Eowq {
 		std::vector<StackData>* baseArr = value.getArrayPointer();
 		StackData* candid = &value;
 		if (index > -1) {
-			if ((int)baseArr->size() <= path[index]) {
-				return nullptr; //Not array.
+			int ele = path[index] >= 0 ? path[index] : (int)baseArr->size() + path[index];
+			if (ele >= 0 && (int)baseArr->size() > ele) {
+				candid = baseArr->at(ele).traverseInArray(path, index - 1);
+			} else {
+				return nullptr; //Not in array.
 			}
-			candid = baseArr->at(path[index]).traverseInArray(path, index - 1);
 		}
 		return candid;
 	}

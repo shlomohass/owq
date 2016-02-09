@@ -1,12 +1,22 @@
 
+// a[-1]
+// Treat any value as numeric in array path.
+// a += 4
+// a -= 5
+// print 5,6,7;
+// isset a[1]; <- isset value check if its defined
+// continue
+// unset a[3]
+// a.sort();
+
 let a, b, c, d;
 
-a = [1,2,3];
+a = [1,2,3,4,5];
+b = [];
+c = [2];
+d = true;
 
-if (a.length() == 3 && a[1] == 2) {
-	print("OK");
-} else {
-	print("BAD!");
-}
-
-
+print(a["owq"]); // 4
+print(a[b]);	 // 1
+print(a[c]);	 // 2
+print(a[d]);	 // 2

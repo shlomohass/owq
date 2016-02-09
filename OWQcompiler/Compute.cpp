@@ -1217,8 +1217,9 @@ namespace Eowq {
 				if (a == nullptr) {
 					ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_NULL_STACK_EXTRACTION] + xcode.toString());
 					return ExecReturn::Ex_NULL_STACK_EXTRACTION;
+				} else {
+					path[i] = (int)a->getAsNumber();
 				}
-				path[i] = (int)a->getNumber();
 				Stack::eraseAsGC(a->getOrigin());
 			}
 		}
@@ -1246,11 +1247,11 @@ namespace Eowq {
 				if (a == nullptr) {
 					ScriptError::fatal(execute_errors[(int)ExecReturn::Ex_NULL_STACK_EXTRACTION] + xcode.toString());
 					return ExecReturn::Ex_NULL_STACK_EXTRACTION;
+				} else {
+					path[i] = (int)a->getAsNumber();
 				}
-				path[i] = (int)a->getNumber();
 				Stack::eraseAsGC(a->getOrigin());
 			}
-
 		}
 		StackData* toPush = sv->getValueInArray(path, travNum - 1);
 		//Free alocated mem

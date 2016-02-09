@@ -117,8 +117,9 @@ namespace Eowq
 
 		int         getOrigin();
 		int         getRstPos();
-		double&      getNumber();
+		double&     getNumber();
 		double      getNumber(bool alsoBools);
+		double      getAsNumber();
 		int         getBoolean();
 		bool        getRealBoolean();
 		std::vector<StackData>* getArrayPointer();
