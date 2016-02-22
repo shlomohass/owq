@@ -35,6 +35,7 @@ namespace Eowq
 		static ExecReturn execute_push(Instruction &xcode, Script *script);
 		static ExecReturn execute_function_return(Instruction &xcode, Script *script, int& instructionPointer);
 		static ExecReturn execute_variable_assignment(Instruction &xcode, Script *script);
+		static ExecReturn execute_variable_assignment_add_sub(Instruction &xcode, Script *script);
 		static ExecReturn execute_pointer_assignment(Instruction &xcode, Script *script, int& instructionPointer);
 
 		//Compute methods - Math and comparison:
@@ -71,8 +72,10 @@ namespace Eowq
 		static ExecReturn execute_function_call(Instruction &xcode, Script *script, int& instructionPointer);
 
 		//Objects and arrays:
+		static int* get_array_path_heap_path(const int& travCount);
 		static ExecReturn execute_array_definition(Instruction &xcode, Script *script, int& instructionPointer);
 		static ExecReturn execute_array_assignment(Instruction &xcode, Script *script, ScriptVariable* sv);
+		static ExecReturn execute_array_assignment_add_sub(Instruction &xcode, Script *script, ScriptVariable* sv);
 		static ExecReturn execute_array_extract_value(Instruction &xcode, Script *script, ScriptVariable* sv);
 	};
 

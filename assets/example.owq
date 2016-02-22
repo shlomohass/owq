@@ -1,22 +1,27 @@
 
-// a[-1]
-// Treat any value as numeric in array path.
-// a += 4
-// a -= 5
-// print 5,6,7;
-// isset a[1]; <- isset value check if its defined
-// continue
-// unset a[3]
-// a.sort();
+// [x] a[-1]
+// [x] Treat any value as numeric in array path.
+// [x] a += 4
+// [x] a -= 5
+// [x] rearange compiler lib
+// [x] Pointer can't point to array ele and array ele can't hold pointer.
+// [ ] unset arrays handlers.
+// [ ] array scoping 
+// [ ] print 5,6,7;
+// [ ] isset a[1]; <- isset value check if its defined
+// [ ] continue
+// [ ] unset a[3]
+// [ ] a.sort();
+// [ ] a.fill(); // String or Array filled with a value -> for String any Data will be represented as char.
+// [ ] String.split(","); <- by char, all chars, number means slice
+// [ ] Array.join("-");      <- Merge array to string with spacer.
 
-let a, b, c, d;
+// let a = [1,2,[4,6]];
 
-a = [1,2,3,4,5];
-b = [];
-c = [2];
-d = true;
 
-print(a["owq"]); // 4
-print(a[b]);	 // 1
-print(a[c]);	 // 2
-print(a[d]);	 // 2
+let a = [1];
+let b;
+a[0] -> b;
+
+print(a.sum());
+

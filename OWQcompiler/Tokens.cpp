@@ -14,11 +14,13 @@
 
 namespace Eowq {
 
+
 	Tokens::Tokens() {
 		tokens.reserve(30);
 		comparisonFlag = false;
 		conditionFlag = false;
 	}
+
 
 	/**
 	 * Principle agent
@@ -55,77 +57,6 @@ namespace Eowq {
 		}
 	}
 
-	/**
-	 * Returns true or false indicating if the index is a number
-	 * @param index of token, bound checking is implemented
-	 * @return true or false
-	 */
-	bool Tokens::isNumber(int index) {
-		if (index < 0 || index > getSize() - 1) {
-			return false;
-		}
-		if (tokens[index].type == TokenType::NUMBER) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Returns true or false indicating if the index is a delimiter
-	 * @param index of token, bound checking is implemented
-	 * @return true or false
-	 */
-	bool Tokens::isDelimiter(int index) {
-		if (index < 0 || index > getSize() - 1) {
-			return false;
-		}
-		if (tokens[index].type == TokenType::DELIMITER) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Returns true or false indicating if the index is a number
-	 * @param index of token, bound checking is implemented
-	 * @return true or false
-	 */
-	bool Tokens::isVar(int index) {
-		if (index < 0 || index > getSize() - 1) {
-			return false;
-		}
-		if (tokens[index].type == TokenType::VAR) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Indicate whether or not the index supplied is that of a closed parenthesis
-	 * @param index
-	 * @return
-	 */
-	bool Tokens::isCloseParenthesis(int index) {
-		bool isDelim = isDelimiter(index);
-		if (!isDelim) return false;
-		if (tokens[index].token == Lang::dicLang_braketClose) {
-			return true;
-		}
-		return false;
-	}
-	/**
-	 * Indicate whether or not the index supplied is that of an open parenthesis
-	 * @param index
-	 * @return
-	 */
-	bool Tokens::isOpenParenthesis(int index) {
-		bool isDelim = isDelimiter(index);
-		if (!isDelim) return false;
-		if (tokens[index].token == Lang::dicLang_braketOpen) {
-			return true;
-		}
-		return false;
-	}
 
 	/**
 	 *
@@ -176,14 +107,12 @@ namespace Eowq {
 			//Mark the last operation to set result with pointer:
 			script->code.back().setPointer(script->internalStaticPointer);
 
-		}
-		else {
+		} else {
 			Token rstToken(Lang::dicLangValue_rst_upper, 0, TokenType::RST, TokenFlag::NORMAL, 0);
 			tokens.insert(tokens.begin() + startParenthesisIndex, rstToken);
 		}
 		return newTokenSet;
 	}
-
 	/**
 	 * Extract , inclusively, everything between startIndex and endIndex
 	 *
@@ -227,12 +156,35 @@ namespace Eowq {
 			tokens.insert(tokens.begin() + startIndex, rstToken);
 			//Mark the last operation to set result with pointer:
 			script->code.back().setPointer(script->internalStaticPointer);
-		}
-		else {
+		} else {
 			Token rstToken(Lang::dicLangValue_rst_upper, 0, TokenType::RST, TokenFlag::NORMAL, 0);
 			tokens.insert(tokens.begin() + startIndex, rstToken);
 		}
 
+		return newTokenSet;
+	}
+	Tokens Tokens::extractInclusiveWithoutRst(int startIndex, int endIndex, int& extractionCount) {
+		Tokens newTokenSet;
+		if (startIndex < 0 || startIndex > getSize() - 1) {
+			stdError("token extraction, startIndex out of bounds");
+			return newTokenSet;
+		}
+		if (endIndex < startIndex || endIndex > getSize() - 1) {
+			stdError("token extraction, endIndex out of bounds");
+			return newTokenSet;
+		}
+		//copy from current token-set to new token-set
+		int i;
+		int count = 0; //the total count of values to extract
+		for (i = startIndex; i < endIndex + 1; i++) {
+			newTokenSet.addToken(tokens[i]);
+			count++;
+		}
+		//erase
+		for (i = 0; i < count; i++) { //erase the total number of tokens extracted
+			tokens.erase(tokens.begin() + startIndex);
+		}
+		extractionCount = count;
 		return newTokenSet;
 	}
 	/** Extrack token set that are bound by a end of expression:
@@ -256,117 +208,55 @@ namespace Eowq {
 		}
 		return newTokenSet;
 	}
-	/** Report error to user
-	 *
-	 * @param msg
-	 */
-	void Tokens::stdError(std::string msg) {
-		std::cout << "error: " << msg << std::endl;
-	}
-
-	/** Expose token:
-	 *
-	 */
-	void Tokens::renderTokens() {
-		std::cout << "   TOKENS        --> { ";
-		for (int i = 0; i < getSize(); i++) {
-			std::cout << "'" << tokens[i].token << "' ";
-		}
-		std::cout << "}" << std::endl;
-	}
-
-	void Tokens::renderTokensJoined() {
-		std::cout << "   TOKENS-JOINED   --> ";
-		for (int i = 0; i < getSize(); i++) {
-			std::cout << tokens[i].token << " ";
-		}
-		std::cout << std::endl << std::endl;
-	}
-	void Tokens::renderTokenType() {
-		std::string str;
-		std::cout << "   TOKENS-TYPE   --> { ";
-		for (int i = 0; i < getSize(); i++) {
-			switch (tokens[i].type) {
-			case TokenType::DELIMITER:str = "DLM"; break;
-			case TokenType::NUMBER:	str = "NUM"; break;
-			case TokenType::STRING:	str = "STR"; break;
-			case TokenType::VAR:		str = "VAR"; break;
-			case TokenType::KEYWORD:	str = "KEY"; break;
-			case TokenType::NONE:		str = "NON"; break;
-			case TokenType::RST:		str = "RST"; break;
-			default:
-				str = "UNKNOWN";
-			}
-			if (str == Lang::dicLangValue_rst_upper) {
-				std::cout << "'" << str << ":" << tokens[i].rstPos << "' ";
-			}
-			else {
-				std::cout << "'" << str << "' ";
-			}
-		}
-		std::cout << "}" << std::endl;
-	}
-
-	void Tokens::renderTokenPriorty() {
-		std::cout << "   TOKENS-PRIORITY --> ";
-		for (int i = 0; i < getSize(); i++) {
-			std::cout << "[" << tokens[i].priority << "] ";
-		}
-		std::cout << "}" << std::endl;
-	}
-
-	/**
-	 * Return the priority / weight associated with token at an index
-	 * @param integer index
-	 * @return integer
-	 */
-	int Tokens::getTokenPriorty(int index) {
+	
+	
+	/** Remove token at index
+	*
+	* @param integer index
+	*/
+	void Tokens::pop(int index) {
 		if (index < 0 || index > getSize() - 1) {
-			stdError("getToken priority out of bounds");
-			return 0;
+			stdError("pop token index out of range");
+			return;
 		}
-		return tokens[index].priority;
+		tokens.erase(tokens.begin() + index);
 	}
-
-	/**
-	 * Search for the highest priority value and return its index
-	 * @param priortyCode
-	 * @return
-	 */
-	int Tokens::getHighestOperatorPriorityIndex(int& priortyCode) {
-		int index = 0;
-		int highest = -10;
-		int size = getSize();
-		for (int i = 0; i < size; i++) {
-			if (tokens[i].priority > highest) {
-				highest = tokens[i].priority;
-				priortyCode = highest;
-				index = i;
-			}
-		}
-		return index;
+	/** Push a token before a index:
+	*
+	* @param string token
+	* @param int pri
+	* @param TokenType type
+	* @param int index
+	* @return boolean
+	*
+	*/
+	bool Tokens::pushBefore(int index, std::string _token, int pri, TokenType type) {
+		auto pos_tokens = tokens.begin();
+		if (index >= (int)tokens.size() || index < 0) { return false; }
+		Token token(_token, pri, type, TokenFlag::NORMAL);
+		tokens.insert(pos_tokens + index, token);
+		return true;
 	}
-	/** Get a specific token at index
-	 *
-	 * @param int index
-	 * @return string
-	 */
-	std::string Tokens::getToken(int index) {
-		if (index < 0 || index >= getSize()) {
-			return ".none.";
+	/** Push a token after a index:
+	*
+	* @param int index
+	* @param string token
+	* @param int pri
+	* @param TokenType type
+	* @return boolean
+	*
+	*/
+	bool Tokens::pushAfter(int index, std::string _token, int pri, TokenType type) {
+		Token token(_token, pri, type, TokenFlag::NORMAL);
+		if (index + 1 >= (int)this->tokens.size()) {
+			this->tokens.push_back(token);
 		}
-		return tokens[index].token;
-	}
-	/** Get a specific token object at index
-	 *
-	 * @param int index
-	 * @return Token
-	 */
-	Token* Tokens::getTokenObject(int index) {
-		if (index < 0 || index >= getSize()) {
-			return nullptr;
+		else {
+			auto pos_tokens = this->tokens.begin();
+			advance(pos_tokens, index + 1);
+			this->tokens.insert(pos_tokens, token);
 		}
-		return &tokens[index];
+		return true;
 	}
 	/** Replace a specific token in set:
 	*
@@ -377,6 +267,93 @@ namespace Eowq {
 		Token* target = getTokenObject(index);
 		if (target != nullptr)
 			*target = token;
+	}
+
+
+	/* Check for not nested commas in token group:
+	*
+	*/
+	bool Tokens::hasCommasNotNested() {
+		int size = getSize();
+		int nested = 0;
+		for (int i = 0; i < size; i++) {
+			Token* t = getTokenObject(i);
+			if (t->token == Lang::dicLang_braketOpen || t->token == Lang::dicLang_sBraketOpen)
+				nested++;
+			else if ((t->token == Lang::dicLang_braketClose || t->token == Lang::dicLang_sBraketClose) && nested > 0)
+				nested--;
+			if (nested < 1 && t->token == Lang::dicLang_comma)
+				return true;
+		}
+		return false;
+	}
+	/** Get first level commas (not nested) count:
+	*
+	*/
+	int Tokens::countCommasNotNested() {
+		int size = getSize();
+		if (size == 0) return 0;
+		int count = 1;
+		int nested = 0;
+		for (int i = 0; i < size; i++) {
+			Token* t = getTokenObject(i);
+			if (t->token == Lang::dicLang_braketOpen || t->token == Lang::dicLang_sBraketOpen)
+				nested++;
+			else if ((t->token == Lang::dicLang_braketClose || t->token == Lang::dicLang_sBraketClose) && nested > 0)
+				nested--;
+			else if (nested < 1 && t->token == Lang::dicLang_comma)
+				count++;
+		}
+		return count;
+	}
+	/** Get the comma index that is hanging and not nested in a group:
+	*  -1 means no commas.
+	*/
+	int Tokens::getCommaIndexNotNested() {
+		int size = getSize();
+		int nested = 0;
+		for (int i = 0; i < size; i++) {
+			Token* t = getTokenObject(i);
+			if (t->token == Lang::dicLang_braketOpen || t->token == Lang::dicLang_sBraketOpen)
+				nested++;
+			else if ((t->token == Lang::dicLang_braketClose || t->token == Lang::dicLang_sBraketClose) && nested > 0)
+				nested--;
+			if (nested < 1 && t->token == Lang::dicLang_comma)
+				return i;
+		}
+		return -1;
+	}
+
+
+	/** get tokens count
+	*
+	* @return int
+	*
+	*/
+	int Tokens::getSize() {
+		return (int)tokens.size();
+	}
+	/** Get a specific token at index
+	*
+	* @param int index
+	* @return string
+	*/
+	std::string Tokens::getToken(int index) {
+		if (index < 0 || index >= getSize()) {
+			return ".none.";
+		}
+		return tokens[index].token;
+	}
+	/** Get a specific token object at index
+	*
+	* @param int index
+	* @return Token
+	*/
+	Token* Tokens::getTokenObject(int index) {
+		if (index < 0 || index >= getSize()) {
+			return nullptr;
+		}
+		return &tokens[index];
 	}
 	/** Get a specific token at left position of index
 	* will skip square brakets -> this is for arrays push delimiter
@@ -401,22 +378,41 @@ namespace Eowq {
 		}
 		return nullptr;
 	}
-	/** Check if a grouping flag is true or not
-	 *
-	 * @param openIndex
-	 * @return
-	 */
-	bool Tokens::setHasComparison() {
-		return comparisonFlag;
-	}
-	bool Tokens::setHasCondition() {
-		return conditionFlag;
-	}
 	TokenFlag Tokens::getTokenFlag(int index) {
 		if (index < 0 || index >= getSize()) {
 			return TokenFlag::UNFLAG;
 		}
 		return tokens[index].flag;
+	}
+	/**
+	 * Return the priority / weight associated with token at an index
+	 * @param integer index
+	 * @return integer
+	 */
+	int Tokens::getTokenPriorty(int index) {
+		if (index < 0 || index > getSize() - 1) {
+			stdError("getToken priority out of bounds");
+			return 0;
+		}
+		return tokens[index].priority;
+	}
+	/**
+	 * Search for the highest priority value and return its index
+	 * @param priortyCode
+	 * @return
+	 */
+	int Tokens::getHighestOperatorPriorityIndex(int& priortyCode) {
+		int index = 0;
+		int highest = -10;
+		int size = getSize();
+		for (int i = 0; i < size; i++) {
+			if (tokens[i].priority > highest) {
+				highest = tokens[i].priority;
+				priortyCode = highest;
+				index = i;
+			}
+		}
+		return index;
 	}
 	/** Find closing Parenthesis token of open index
 	 *
@@ -464,76 +460,40 @@ namespace Eowq {
 		}
 		return openIndex;
 	}
-	/** Remove token at index
-	 *
-	 * @param integer index
-	 */
-	void Tokens::pop(int index) {
+	
+
+	/** Check if a grouping flag is true or not
+	*
+	* @param openIndex
+	* @return
+	*/
+	bool Tokens::setHasComparison() {
+		return comparisonFlag;
+	}
+	bool Tokens::setHasCondition() {
+		return conditionFlag;
+	}
+
+
+	/**
+	* Returns true or false indicating if the index is a number
+	* @param index of token, bound checking is implemented
+	* @return true or false
+	*/
+	bool Tokens::isNumber(int index) {
 		if (index < 0 || index > getSize() - 1) {
-			stdError("pop token index out of range");
-			return;
-		}
-		tokens.erase(tokens.begin() + index);
-	}
-
-	/** Push a token before a index:
-	 *
-	 * @param string token
-	 * @param int pri
-	 * @param TokenType type
-	 * @param int index
-	 * @return boolean
-	 *
-	 */
-	bool Tokens::pushBefore(int index, std::string _token, int pri, TokenType type) {
-		auto pos_tokens = tokens.begin();
-		if (index >= (int)tokens.size() || index < 0) { return false; }
-		Token token(_token, pri, type, TokenFlag::NORMAL);
-		tokens.insert(pos_tokens + index, token);
-		return true;
-	}
-	/** Push a token after a index:
-	 *
-	 * @param int index
-	 * @param string token
-	 * @param int pri
-	 * @param TokenType type
-	 * @return boolean
-	 *
-	 */
-	bool Tokens::pushAfter(int index, std::string _token, int pri, TokenType type) {
-		Token token(_token, pri, type, TokenFlag::NORMAL);
-		if (index + 1 >= (int)this->tokens.size()) {
-			this->tokens.push_back(token);
-		}
-		else {
-			auto pos_tokens = this->tokens.begin();
-			advance(pos_tokens, index + 1);
-			this->tokens.insert(pos_tokens, token);
-		}
-		return true;
-	}
-
-	/** Evaluate a token and check if its a keyword
-	 *
-	 * @param index
-	 * @return boolean
-	 */
-	bool Tokens::isKeyWord(int index) {
-		if (index < 0 || index >= getSize()) {
-			stdError("index for keyword check is out of bounds");
 			return false;
 		}
-		if (tokens[index].type == TokenType::KEYWORD) {
+		if (tokens[index].type == TokenType::NUMBER) {
 			return true;
 		}
 		return false;
 	}
 	/** Evaluate a token and check if its a string
-	 *
-	 * @param index
-	 * @return boolean
-	 */
+	*
+	* @param index
+	* @return boolean
+	*/
 	bool Tokens::isString(int index) {
 		if (index < 0 || index >= getSize()) {
 			stdError("index for keyword check is out of bounds");
@@ -544,23 +504,142 @@ namespace Eowq {
 		}
 		return false;
 	}
+	/**
+	* Returns true or false indicating if the index is a delimiter
+	* @param index of token, bound checking is implemented
+	* @return true or false
+	*/
+	bool Tokens::isDelimiter(int index) {
+		if (index < 0 || index > getSize() - 1) {
+			return false;
+		}
+		if (tokens[index].type == TokenType::DELIMITER) {
+			return true;
+		}
+		return false;
+	}
+	/**
+	* Returns true or false indicating if the index is a number
+	* @param index of token, bound checking is implemented
+	* @return true or false
+	*/
+	bool Tokens::isVar(int index) {
+		if (index < 0 || index > getSize() - 1) {
+			return false;
+		}
+		if (tokens[index].type == TokenType::VAR) {
+			return true;
+		}
+		return false;
+	}
+	/**
+	* Indicate whether or not the index supplied is that of a closed parenthesis
+	* @param index
+	* @return
+	*/
+	bool Tokens::isCloseParenthesis(int index) {
+		bool isDelim = isDelimiter(index);
+		if (!isDelim) return false;
+		if (tokens[index].token == Lang::dicLang_braketClose) {
+			return true;
+		}
+		return false;
+	}
+	/**
+	* Indicate whether or not the index supplied is that of an open parenthesis
+	* @param index
+	* @return
+	*/
+	bool Tokens::isOpenParenthesis(int index) {
+		bool isDelim = isDelimiter(index);
+		if (!isDelim) return false;
+		if (tokens[index].token == Lang::dicLang_braketOpen) {
+			return true;
+		}
+		return false;
+	}
+	/** Evaluate a token and check if its a keyword
+	*
+	* @param index
+	* @return boolean
+	*/
+	bool Tokens::isKeyWord(int index) {
+		if (index < 0 || index >= getSize()) {
+			stdError("index for keyword check is out of bounds");
+			return false;
+		}
+		if (tokens[index].type == TokenType::KEYWORD) {
+			return true;
+		}
+		return false;
+	}
+
+
+	/** Expose token:
+	*
+	*/
+	void Tokens::renderTokens() {
+		std::cout << "   TOKENS        --> { ";
+		for (int i = 0; i < getSize(); i++) {
+			std::cout << "'" << tokens[i].token << "' ";
+		}
+		std::cout << "}" << std::endl;
+	}
+	void Tokens::renderTokensJoined() {
+		std::cout << "   TOKENS-JOINED   --> ";
+		for (int i = 0; i < getSize(); i++) {
+			std::cout << tokens[i].token << " ";
+		}
+		std::cout << std::endl << std::endl;
+	}
+	void Tokens::renderTokenType() {
+		std::string str;
+		std::cout << "   TOKENS-TYPE   --> { ";
+		for (int i = 0; i < getSize(); i++) {
+			switch (tokens[i].type) {
+			case TokenType::DELIMITER:str = "DLM"; break;
+			case TokenType::NUMBER:	str = "NUM"; break;
+			case TokenType::STRING:	str = "STR"; break;
+			case TokenType::VAR:		str = "VAR"; break;
+			case TokenType::KEYWORD:	str = "KEY"; break;
+			case TokenType::NONE:		str = "NON"; break;
+			case TokenType::RST:		str = "RST"; break;
+			default:
+				str = "UNKNOWN";
+			}
+			if (str == Lang::dicLangValue_rst_upper) {
+				std::cout << "'" << str << ":" << tokens[i].rstPos << "' ";
+			}
+			else {
+				std::cout << "'" << str << "' ";
+			}
+		}
+		std::cout << "}" << std::endl;
+	}
+	void Tokens::renderTokenPriorty() {
+		std::cout << "   TOKENS-PRIORITY --> ";
+		for (int i = 0; i < getSize(); i++) {
+			std::cout << "[" << tokens[i].priority << "] ";
+		}
+		std::cout << "}" << std::endl;
+	}
+
+
 	/** clear tokens
-	 *
-	 */
+	*
+	*/
 	void Tokens::clear() {
 		tokens.clear();
 		comparisonFlag = false;
 		conditionFlag = false;
 	}
-	/** get tokens count
-	 *
-	 * @return int
-	 *
-	 */
-	int Tokens::getSize() {
-		return (int)tokens.size();
+	/** Report error to user
+	*
+	* @param msg
+	*/
+	void Tokens::stdError(std::string msg) {
+		std::cout << "error: " << msg << std::endl;
 	}
-
 	Tokens::~Tokens() {
 		clear();
 	}

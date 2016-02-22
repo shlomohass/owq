@@ -43,6 +43,7 @@ namespace Eowq {
 		default:
 			return false;
 		}
+		return true;
 	}
 	/** Construct a Stack Data of some type
 	 *

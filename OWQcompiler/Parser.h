@@ -23,7 +23,26 @@ namespace Eowq
 	 *
 	 * It takes an expression and determines meaning
 	 */
-	enum ParseMark { UNMARK, FUNCTION, IF, WHILE, ELSE, GROUPDEFINE, BREAKEXP };
+	enum ParseMark { 
+		UNMARK, 
+		FUNCTION, 
+		IF, 
+		WHILE, 
+		ELSE, 
+		GROUPDEFINE,
+		BREAKEXP,
+		ARRAYDEF
+	};
+
+	struct Compileobj {
+		int eraseCount;
+		int priortyCode;
+		std::string operatorTokenStr;
+		Token* operatorToken;
+		Token* leftToken;
+		Token* rightToken;
+		Compileobj();
+	};
 
 	class Parser {
 
@@ -41,7 +60,8 @@ namespace Eowq
 		void 	    evaluateGroups(Tokens& token, TokenFlag flagToGroup);
 		void 	    evaluateGroups(Tokens& token, TokenFlag flagToGroup, int startFrom);
 		int   	    compiler(Script* script, Tokens& token, bool debug, int rCount);
-		std::string getToken();
+		int   	    compilerNew(Script* script, Tokens& token, bool debug, int rCount);
+		std::string getToken(bool& trimmedSpace);
 		void 	    mark(ParseMark markType);
 		ParseMark   unmark();
 		ParseMark   getMark();
@@ -54,6 +74,7 @@ namespace Eowq
 		int    evaluateFunctionDeclaration(Tokens &sub);
 		bool   evaluateVarNotObjectCall(Token* token);
 		int    evaluateArraySbrackets(Tokens &sub);
+		
 		//----------------------------------------------------------
 		// Aux- helper functions
 		//----------------------------------------------------------
@@ -69,21 +90,39 @@ namespace Eowq
 		bool isDigit(const char& c);
 		bool isDigit(const std::string& c);
 		bool isKeyword(std::string s);
-		bool hasCommas(Tokens& token);
-		bool hasCommasNotNested(Tokens& token);
-		int  countCommasNotNested(Tokens& sub);
-		int  getCommaIndexNotNested(Tokens& tokens);
+
 		int  getDelimiterPriorty();
 		int  getDelimiterPriorty(std::string toCheckToken, TokenType toCheckType);
 
 		//----------------------------------------------------------
 		// Compiler - Methods
 		//----------------------------------------------------------
-		bool compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, Tokens* token, int &operatorIndex, int &priority, int &eraseCount, Token* leftToken, Token* rightToken, bool debug, int rCount);
+		int compile_comma_set(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_end_block(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, Tokens* token, int &operatorIndex, int &priority, int &eraseCount, Token* leftToken, Token* rightToken, bool debug, int rCount);
+		int compile_LR_math(ByteCode bc, Compileobj& comobj, int &operatorIndex, Script*& script, Tokens& tokens, bool debug, int rCount);
+		int compile_parenthetical_gouping(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_squareb_grouping(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_variable_definition(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_variable_destructor(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_condition_if(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_condition_else(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_loop_while(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_loop_break(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_condition_break(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
 
+		int compile_push(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_inc_dec_op(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_expon(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_add_sub(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_mul_div(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_grt_lsr(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_equality_op(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_logic_gates(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		int compile_equal(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount);
+		
+	
 	public:
-
-
 		//Compilation errors messages:
 		static std::string errors[];
 

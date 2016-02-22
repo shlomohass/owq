@@ -16,6 +16,8 @@ namespace Eowq {
 		"NOP",
 		"RET",
 		"ASN",
+		"ASNA",
+		"ASNS",
 		"POI",
 		"GTR",
 		"LSR",
@@ -72,7 +74,7 @@ namespace Eowq {
 		jmpCache = -1;
 		containsQuotes = false;
 		staticPointer = 0;
-		isRST = true;
+		isRST = false;
 		operandType = OperandType::OPER_NEW;
 		arrayPush = false;
 		arrayTraverse = -1;
@@ -147,13 +149,13 @@ namespace Eowq {
 		jmpCache = -1;
 		staticPointer = pointer;
 		operandType = OperandType::OPER_NEW;
+		isRST = false;
 		if (operand[0] == Lang::LangStringIndicator && operand[operand.size() - 1] == Lang::LangStringIndicator) {
 			containsQuotes = true;
 			//remove the quotes now
 			operand.erase(0, 1);//erase beginning quotation
 			operand.erase(operand.size() - 1, 1);//erase the ending quotation
-		}
-		else {
+		} else {
 			containsQuotes = false;
 			if (operand == Lang::dicLangValue_rst_upper) {
 				isRST = true;
@@ -363,23 +365,25 @@ namespace Eowq {
 
 	std::string Instruction::byteCodeToShort() {
 		switch (code) {
-		case ByteCode::GTRE:  return "GTE";
-		case ByteCode::LSRE:  return "LSE";
-		case ByteCode::LOOP:  return "LOO";
-		case ByteCode::DONE:  return "DON";
-		case ByteCode::PUSH:  return "PUS";
-		case ByteCode::MULT:  return "MUL";
-		case ByteCode::EXPON: return "POW";
-		case ByteCode::FUNC:  return "FUN";
-		case ByteCode::ARGC:  return "ARC";
-		case ByteCode::CALL:  return "CAL";
-		case ByteCode::INCL:  return "INL";
-		case ByteCode::INCR:  return "INR";
-		case ByteCode::DECL:  return "DEL";
-		case ByteCode::DECR:  return "DER";
-		case ByteCode::DPUSH: return "DPU";
-		default:
-			return byteCode[code];
+			case ByteCode::ASNA:  return "ASA";
+			case ByteCode::ASNS:  return "ASS";
+			case ByteCode::GTRE:  return "GTE";
+			case ByteCode::LSRE:  return "LSE";
+			case ByteCode::LOOP:  return "LOO";
+			case ByteCode::DONE:  return "DON";
+			case ByteCode::PUSH:  return "PUS";
+			case ByteCode::MULT:  return "MUL";
+			case ByteCode::EXPON: return "POW";
+			case ByteCode::FUNC:  return "FUN";
+			case ByteCode::ARGC:  return "ARC";
+			case ByteCode::CALL:  return "CAL";
+			case ByteCode::INCL:  return "INL";
+			case ByteCode::INCR:  return "INR";
+			case ByteCode::DECL:  return "DEL";
+			case ByteCode::DECR:  return "DER";
+			case ByteCode::DPUSH: return "DPU";
+			default:
+				return byteCode[code];
 		}
 	}
 

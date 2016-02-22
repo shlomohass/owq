@@ -175,6 +175,9 @@ namespace Eowq {
 			return Compute::execute_function_return(xcode, this, instructionPointer);
 		case ByteCode::ASN:
 			return Compute::execute_variable_assignment(xcode, this);
+		case ByteCode::ASNA:
+		case ByteCode::ASNS:
+			return Compute::execute_variable_assignment_add_sub(xcode, this);
 		case ByteCode::POI:
 			return Compute::execute_pointer_assignment(xcode, this, instructionPointer);
 		case ByteCode::UNS:
@@ -355,7 +358,7 @@ namespace Eowq {
 		if (isFound) {
 			//Check for infinite reference:
 			if (pointTo == name || itT->second.inPointerPath(name)) {
-				return 2;
+				return 20;
 			}
 			std::unordered_map<std::string, ScriptVariable>::iterator itS = getVariableIt(name);
 			//if its a pointer remove ispointed by -1;
@@ -368,7 +371,7 @@ namespace Eowq {
 			itT->second.setHasPointers();
 			return 0;
 		}
-		return 1;
+		return 19;
 	}
 	/** Unregister a variable only if it exists:
 	 * @param string name
@@ -586,7 +589,7 @@ namespace Eowq {
 	}
 
 	bool Script::isSystemCall(std::string& object, std::string& functionName, Instruction& _xcode) {
-
+		/* CACHE THE SYS */
 		//Console print:
 		int sysCall = Lang::LangFindSystemLib(functionName);
 		if (sysCall == 1 || sysCall == 2) { // Print
@@ -669,6 +672,24 @@ namespace Eowq {
 							if (_xcode.getPointer() > 0) {
 								Stack::setTopPointer(_xcode.getPointer());
 							}
+						}
+					}
+				}
+				else if (sysCall == 9) { //join
+					if (!Compute::flagPush) {
+						// Add error when not array
+						Stack::push(ScriptConsole::join(sv->getValuePointer()));
+						if (_xcode.getPointer() > 0) {
+							Stack::setTopPointer(_xcode.getPointer());
+						}
+					}
+				}
+				else if (sysCall == 10) { //sum
+					if (!Compute::flagPush) {
+						// Add error when not array
+						Stack::push(ScriptConsole::sum(sv->getValuePointer()));
+						if (_xcode.getPointer() > 0) {
+							Stack::setTopPointer(_xcode.getPointer());
 						}
 					}
 				}

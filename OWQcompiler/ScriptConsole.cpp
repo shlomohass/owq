@@ -56,6 +56,43 @@ namespace Eowq {
 		return ss.str();
 	}
 
+
+	StackData ScriptConsole::join(StackData* sd) {
+		if (sd->getType() != SDtype::SD_ARRAY)
+			return StackData();
+		std::vector<StackData>* arrayTarget = sd->getArrayPointer();
+		int size = (int)arrayTarget->size();
+		std::stringstream ss;
+		ss << "";
+		for (int i = 0; i < size; i++) {
+			StackData* sdChild = &arrayTarget->at(i);
+			if (sdChild->isArray()) {
+				ss << join(sdChild).getAsString();
+			} else {
+				ss << sdChild->getAsString();
+			}
+		}
+		return StackData(ss.str());
+	}
+
+	StackData ScriptConsole::sum(StackData* sd) {
+		if (sd->getType() != SDtype::SD_ARRAY)
+			return StackData();
+
+		std::vector<StackData>* arrayTarget = sd->getArrayPointer();
+		int size = (int)arrayTarget->size();
+		double result = 0;
+		for (int i = 0; i < size; i++) {
+			StackData* sdChild = &arrayTarget->at(i);
+			if (sdChild->isArray()) {
+				result += sum(sdChild).getAsNumber();
+			}
+			else {
+				result += sdChild->getAsNumber();
+			}
+		}
+		return StackData(result);
+	}
 	std::string ScriptConsole::stackTypeName(SDtype sdtype) {
 		switch (sdtype) {
 		case SDtype::SD_ARRAY:	return "ARRAY";			break;

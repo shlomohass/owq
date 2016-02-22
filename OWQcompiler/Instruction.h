@@ -27,6 +27,8 @@ namespace Eowq
 		NOP,    //nothing appends
 		RET,    //return from a function, change instruction pointer, pop off method from function stack
 		ASN,    //assign value to variable
+		ASNA,	//assign value to variable and add
+		ASNS,   //assign value to variable and sub
 		POI,    //assign pointer to variable
 
 		GTR,    //greater
@@ -72,7 +74,7 @@ namespace Eowq
 
 	};
 
-	extern std::string byteCode[41];
+	extern std::string byteCode[43];
 
 	class Token;
 

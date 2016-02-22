@@ -26,6 +26,8 @@ namespace Eowq {
 		{ "multi"             , "*"		},
 		{ "divide"            , "/"		},
 		{ "equal"             , "="		},
+		{ "equal-add"         , "+="	},
+		{ "equal-sub"         , "-="	},
 		{ "pointer"           , "->"	},
 		{ "braketOpen"        , "("		},
 		{ "braketClose"       , ")"		},
@@ -99,14 +101,16 @@ namespace Eowq {
 
 	//Set systemCalls extensions:
 	std::map<int, std::string> Lang::LangSystemLib = {
-		{ 1, "print"	},
-		{ 2, "rep"		},
-		{ 3, "length"	},
-		{ 4, "type"		},
-		{ 5, "isNull"	},
-		{ 6, "isPointer"},
-		{ 7, "isPointed"},
-		{ 8, "substr"	}
+		{ 1,  "print"	  },
+		{ 2,  "rep"		  },
+		{ 3,  "length"	  },
+		{ 4,  "type"	  },
+		{ 5,  "isNull"	  },
+		{ 6,  "isPointer" },
+		{ 7,  "isPointed" },
+		{ 8,  "substr"	  },
+		{ 9,  "join"	  },
+		{ 10, "sum"		  }
 	};
 
 	Lang::Lang() {
@@ -161,6 +165,8 @@ namespace Eowq {
 	std::string Lang::dicLang_multi = "";
 	std::string Lang::dicLang_divide = "";
 	std::string Lang::dicLang_equal = "";
+	std::string Lang::dicLang_equalAdd = "";
+	std::string Lang::dicLang_equalSub = "";
 	std::string Lang::dicLang_pointer = "";
 	std::string Lang::dicLang_braketOpen = "";
 	std::string Lang::dicLang_braketClose = "";
@@ -240,6 +246,8 @@ namespace Eowq {
 		dicLang_multi = LangFindDelimiter("multi");
 		dicLang_divide = LangFindDelimiter("divide");
 		dicLang_equal = LangFindDelimiter("equal");
+		dicLang_equalAdd = LangFindDelimiter("equal-add");
+		dicLang_equalSub = LangFindDelimiter("equal-sub");
 		dicLang_pointer = LangFindDelimiter("pointer");
 		dicLang_braketOpen = LangFindDelimiter("braketOpen");
 		dicLang_braketClose = LangFindDelimiter("braketClose");
@@ -365,6 +373,8 @@ namespace Eowq {
 		if (value[0] == dicLang_multi[0] && value == dicLang_multi) return true;
 		if (value[0] == dicLang_divide[0] && value == dicLang_divide) return true;
 		if (value[0] == dicLang_equal[0] && value == dicLang_equal) return true;
+		if (value[0] == dicLang_equalAdd[0] && value == dicLang_equalAdd) return true;
+		if (value[0] == dicLang_equalSub[0] && value == dicLang_equalSub) return true;
 		if (value[0] == dicLang_pointer[0] && value == dicLang_pointer) return true;
 		if (value[0] == dicLang_braketOpen[0] && value == dicLang_braketOpen) return true;
 		if (value[0] == dicLang_braketClose[0] && value == dicLang_braketClose) return true;

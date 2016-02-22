@@ -15,9 +15,9 @@ std::string Parser::errors[] = {
 	"1 script object is null",
 	"2 recursive call max out script contains error",
 	"3 syntax error for function definition",
-	"4 if - statement syntax error",
-	"5 while - statement syntax error",
-	"6 else - statement syntax error",
+	"4 if - statement syntax error expected brace after expression.",
+	"5 while - statement syntax error expected brace after expression.",
+	"6 else - statement syntax error expected brace after expression.",
 	"7 Definition - expected definition of variable name",
 	"8 Missuse of Braces",
 	"9 Declaration of variables should be followed by an assignment delimiter or by end of statement",
@@ -33,8 +33,21 @@ std::string Parser::errors[] = {
 	"19 Unset - unset expression is not legal you should unset only variables.",
 	"20 Missuse of Increment / Decrement operator - should be attached to a variable name only.",
 	"21 Keywords are not allowed inside Array square brackets",
-	"22 Assignments operators and block delimiters are not allowedinside Array square brackets"
+	"22 Assignments operators and block delimiters are not allowedinside Array square brackets",
+	"23 Pointer to array element is not allowed.",
+	"24 Array element of type pointer is not allowed."
 };
+
+/** Construct compileobj
+*
+*/
+Compileobj::Compileobj() {
+	eraseCount    = 0;
+	priortyCode   = 0;
+	operatorToken = nullptr;
+	leftToken     = nullptr;
+	rightToken    = nullptr;
+}
 
 /** Construct Parser
  * 
@@ -87,7 +100,8 @@ int Parser::compile(Script* script, std::string exp, bool debug) {
 		//Reset internalStaticPointer used for RST stack calls:
 		script->internalStaticPointer = 0;
 
-		ret = compiler(script, subexp, debug, 0);
+		ret = compilerNew(script, subexp, debug, 0);
+
 		if (ret > 0) { break; }
 	}
     //compile our tokens
@@ -103,9 +117,10 @@ void Parser::tokenize(std::string& exp, Tokens& tokens) {
     expressionIndex = 0;
     int parenthesisScaler = 0;
 	int braketScaler = 0;
+	bool trimmedSpace = false;
     //NOTE: after call to getToken
     //	    the token just created will be stored in 'currentToken'
-    getToken();
+    getToken(trimmedSpace);
 
     int priortyValue = 0;
     while (currentToken != "") {
@@ -157,7 +172,7 @@ void Parser::tokenize(std::string& exp, Tokens& tokens) {
         }
         
         //Handle negative number grouping:
-        if (currentTokenType == TokenType::NUMBER && tokens.getSize() > 0) {
+        if (currentTokenType == TokenType::NUMBER && tokens.getSize() > 0 && !trimmedSpace) {
             //Look behind for -
             int stackTempSize = tokens.getSize();
 			std::string behindCheck1 = tokens.getToken(stackTempSize - 1);
@@ -172,14 +187,15 @@ void Parser::tokenize(std::string& exp, Tokens& tokens) {
             }            
         }
         tokens.addToken(currentToken, priortyValue, currentTokenType, true);
-        getToken();	
+        getToken(trimmedSpace);
     }
 }
 /** Return the next token contain in the expression passed to function <b>compile(Script, string</b>
  * 
  * @return
  */
-std::string Parser::getToken() {
+std::string Parser::getToken(bool& trimmedSpace) {
+	trimmedSpace = false;
     currentToken = "";
     //check for endl of expression
     if (expressionIndex == (int)expression.length()){
@@ -192,6 +208,7 @@ std::string Parser::getToken() {
     }
     //skip over white spaces and ;
     while (expressionIndex < (int)expression.length() && isSpace(expression[expressionIndex])) {
+		trimmedSpace = true;
         ++expressionIndex;
     }
     //check for endl of expression
@@ -405,7 +422,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     
     if(!script) return 1;
     
-    if(tokens.getSize() == 0) return 0;
+    if (tokens.getSize() == 0) return 0;
 
     //assumptions:
     // parenthetically matching through out
@@ -629,9 +646,9 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 			}
 			//Check for several defines: note that define key word is still in the token set.
 			bool avoidEvaluation = false;
-			if (hasCommasNotNested(tokens)) {
+			if (tokens.hasCommasNotNested()) {
 				//Scan to Define all recursivly:
-				int commaIndex = getCommaIndexNotNested(tokens);
+				int commaIndex = tokens.getCommaIndexNotNested();
 				Tokens sub = tokens.extractInclusive(operatorIndex + 1, commaIndex - 1, eraseCount, script);
 				if (sub.getSize() > 1) {
 					//Evaluate:
@@ -676,7 +693,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 			tokens.pop(operatorIndex);
 			tokens.pop(operatorIndex);
 			//Scan to allow bulk unset:
-			if (hasCommasNotNested(tokens)) {
+			if (tokens.hasCommasNotNested()) {
 				//Scan to Unset all:
 				Token* t;
 				int tokenSetSize = (int)tokens.getSize();
@@ -710,43 +727,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
         return 0;
     } //end of un-mark
 
-    //------------------------------------------------------
-    // Handle parenthetical groupings
-    //----------------------------------------------------------
-    //if operator is an open parenthesis then extract the content
-    if (operatorToken->token == Lang::dicLang_braketOpen) { //  bracket (
-
-        //get the close of this parenthesis
-        int closeOfParenthesis = tokens.getMatchingCloseParenthesis(operatorIndex);
-        //extract the content and replace with RST
-		Tokens sub = tokens.extractContentOfParenthesis(operatorIndex, closeOfParenthesis, eraseCount, script);
-
-        operatorIndex -= 1;	//Just in case its a function call set next block to parse the call name,
-        int prevRstPos = script->internalStaticPointer; //just in case the group won't do anything but push
-        compiler(script, sub, debug, rCount);
-        
-        //Set the correct Static Pointer of the brackets group since we set it to zero by default:
-        if (tokens.getSize() > operatorIndex + 1) {
-			if (prevRstPos == script->internalStaticPointer) {
-				script->internalStaticPointer++;
-			}
-            tokens.tokens[operatorIndex + 1].rstPos = script->internalStaticPointer;
-        }
-        
-        //Make appropriate function Call
-        if (tokens.getSize() > 1 && operatorIndex >= 0 && leftToken != nullptr) { //two or more
-            //if previous token before the parenthesis has a non zero priority of 2 then make function call
-            if (tokens.getTokenPriorty(operatorIndex) && leftToken->type != TokenType::KEYWORD && leftToken->type != TokenType::DELIMITER) {
-				if (operatorIndex == 0 && rCount == 1) { // A garbage preventor:
-					script->addInstruction(Instruction(ByteCode::DPUSH, "CALL"));
-				}
-				std::string funcName = leftToken->token;
-				script->addInstruction(Instruction(ByteCode::CALL, funcName, tokens.tokens[operatorIndex + 1].rstPos));
-                tokens.pop(operatorIndex); //removes function name, operatorIndex points to function name
-                
-            }
-        }
-    }
+    
 	
     //-----------------------------------------------------------
     // Handle tokens with commas in them
@@ -754,8 +735,8 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     //		x , 32 + y , z
     // will seperate them into subs and re-compile:
     //-----------------------------------------------------------
-    if (hasCommasNotNested(tokens)) {
-		int commaIndex = getCommaIndexNotNested(tokens);
+    if (tokens.hasCommasNotNested()) {
+		int commaIndex = tokens.getCommaIndexNotNested();
 		Tokens sub = tokens.extractInclusive(0, commaIndex, eraseCount, script);
 		sub.pop(commaIndex);	//remove comma
 		tokens.pop(0);		    //remove rst
@@ -775,10 +756,13 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     }
 
 	//-----------------------------------------------------------
-	// Handle square brackets
+	// Handle square brackets [
 	//-----------------------------------------------------------
-	if (operatorToken->token == Lang::dicLang_sBraketOpen) { //  bracket [
-															 //get the close of this bracket square
+	
+	if (operatorToken->token == Lang::dicLang_sBraketOpen) { 
+		
+		//  bracket [
+		//  get the close of this bracket square
 		int closeOfSquareBrackets = tokens.getMatchingCloseSquareBrackets(operatorIndex);
 
 		//extract the content and replace with RST
@@ -791,7 +775,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 		if (evSBres > 0) { return evSBres == 1 ? 22 : 21; }
 		
 		//Count comma cells:
-		int arrayElementsCount = countCommasNotNested(sub);
+		int arrayElementsCount = sub.countCommasNotNested();
 
 		//This will indicate an array push flag the left token, remove rst and continue:
 		Token* leftOverLook = tokens.tokenLeftLookBeforeArrayTraverse(operatorIndex);
@@ -800,7 +784,8 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 			leftOverLook->setArrayTreatPush(true);
 			tokens.pop(operatorIndex); //Pop RST 
 
-		//This will indicate an array traverse callee:
+		// This will indicate an array traverse callee:
+
 		} else if (leftOverLook != nullptr && leftOverLook->type == TokenType::VAR) {
 
 			//Remove Rst and cache the tokens for later use when variable is called
@@ -810,18 +795,23 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 			leftOverLook->setTokenSubCache(cachedSubsPool.size() - 1); //Save the cache index.
 
 		} else {
-			//Probably a definition
 
+			//Probably a definition
 			//Parse elements:
+
 			int ret = 0;
 			if (arrayElementsCount > 0) {
 				// compile sub:
+				mark(ParseMark::ARRAYDEF);
 				ret = compiler(script, sub, debug, rCount);
+				unmark();
 			}
 
 			//Rst pointer sync:
 			if (tokens.getTokenObject(operatorIndex)->rstPos < script->internalStaticPointer) {
 				tokens.getTokenObject(operatorIndex)->rstPos = script->internalStaticPointer++;
+			} else if (script->internalStaticPointer == 0) {
+				tokens.getTokenObject(operatorIndex)->rstPos = ++script->internalStaticPointer;
 			}
 			//If everything is fine add the constructor instructions:
 			if (ret == 0) {
@@ -889,11 +879,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     //add and subtract
     } else if (priortyCode == 70) { 
     
-        if (operatorToken->token == Lang::dicLang_plus) { // ADD values 
-            compile_LR_mathLogigBaseOperations(ByteCode::ADD, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken, debug, rCount);
-        } else { // Subtract values
-            compile_LR_mathLogigBaseOperations(ByteCode::SUB, script, &tokens, operatorIndex, priortyCode, eraseCount, leftToken, rightToken, debug, rCount);
-        }
+        
     //greater lesser
     } else if (priortyCode == 60) { 
         
@@ -944,6 +930,10 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 
 		if (operatorToken->token == Lang::dicLang_equal) {
 			script->addInstruction(Instruction(ByteCode::ASN, *leftToken));
+		} else if (operatorToken->token == Lang::dicLang_equalAdd) {
+			script->addInstruction(Instruction(ByteCode::ASNA, *leftToken));
+		} else if (operatorToken->token == Lang::dicLang_equalSub) {
+			script->addInstruction(Instruction(ByteCode::ASNS, *leftToken));
 		} else {
 			script->addInstruction(Instruction(ByteCode::POI, leftToken->token));
 		}
@@ -957,12 +947,19 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 			int ret = compiler(script, cachedSubsPool.at(operatorToken->subTokenCache), debug, rCount);
 			if (ret != 0) return ret;
 		}
-		script->addInstruction(Instruction(ByteCode::PUSH, *operatorToken));
-		if (operatorIndex == tokens.getSize() - 1) {
+		if (getMark() == ParseMark::ARRAYDEF) {
+			script->addInstruction(Instruction(ByteCode::PUSH, *operatorToken, operatorToken->rstPos), true);
+		} else {
+			script->addInstruction(Instruction(ByteCode::PUSH, *operatorToken, operatorToken->rstPos));
+		}
+
+		//This will force a RST pointer especially for stuff like (a) or (4):
+		if (operatorIndex == tokens.getSize() - 1 && getMark() != ParseMark::ARRAYDEF) {
 			tokens.extractInclusive(operatorIndex, operatorIndex, eraseCount, script, true);
 		} else {
 			tokens.extractInclusive(operatorIndex, operatorIndex, eraseCount, script);
 		}
+
 		operatorIndex -= eraseCount;
     }
     //--------------------------------------------------------
@@ -974,6 +971,158 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
     
     return 0;
 }
+
+int Parser::compilerNew(Script* script, Tokens& tokens, bool debug, int rCount) {\
+	
+	//Early exits:
+	if (!script || script == nullptr) return 1;
+	if (tokens.getSize() == 0) return 0;
+	//Debuging:
+	if (debug && OWQ_DEBUG_EXPOSE_COMPILER_PARSE && OWQ_DEBUG_LEVEL > 1) {
+		tokens.renderTokens();
+		if (OWQ_DEBUG_LEVEL > 2) { tokens.renderTokenType(); }
+		if (OWQ_DEBUG_LEVEL > 3) { tokens.renderTokenPriorty(); }
+		if (OWQ_DEBUG_LEVEL > 2) { Lang::printEmpLine(1); }
+	}
+	//rCount is the nesting recursive calls limit:
+	rCount++;
+	if (rCount > 50) return 2;
+	
+
+	//set compile object:
+	Compileobj comobj;
+	int operatorIndex = tokens.getHighestOperatorPriorityIndex(comobj.priortyCode);
+	if (operatorIndex > 0)
+		comobj.leftToken = tokens.getTokenObject(operatorIndex - 1);
+	if (operatorIndex < tokens.getSize() && tokens.getSize() > 1)
+		comobj.rightToken = tokens.getTokenObject(operatorIndex + 1);
+	comobj.operatorToken = tokens.getTokenObject(operatorIndex);
+	comobj.operatorTokenStr = comobj.operatorToken->token;
+
+	//If none:
+	if (comobj.operatorToken->token == ".none.")
+		Tokens::stdError("there is no operator found");
+
+	//--------------------------------------------------------------------
+	// Keyword has the highest priority so execute immediately
+	// Key word statements should rerun compilation ret is not valid here.
+	//--------------------------------------------------------------------
+	if (comobj.operatorToken->type == TokenType::KEYWORD) {
+
+		//Validate good marks -> those marks are not allowed:
+		if (getMark() == ParseMark::BREAKEXP) {
+			return 12;
+		}
+
+		// Variable Definition:
+		if (comobj.operatorToken->token == Lang::dicLangKey_variable) {
+			return compile_variable_definition(comobj, operatorIndex, script, tokens, debug, rCount);
+
+		// Variable Destruction: -> only naming and objectes & arrays element allowed.
+		} else if (comobj.operatorToken->token == Lang::dicLangKey_unset) {
+			return compile_variable_destructor(comobj, operatorIndex, script, tokens, debug, rCount);
+		
+		// Condition Expression:
+		} else if (comobj.operatorToken->token == Lang::dicLangKey_cond_if) {
+			return compile_condition_if(comobj, operatorIndex, script, tokens, debug, rCount);
+
+		// Conditions Else block:
+		} else if (comobj.operatorToken->token == Lang::dicLangKey_cond_else) {
+			return compile_condition_else(comobj, operatorIndex, script, tokens, debug, rCount);
+
+		// While Loop:
+		} else if (comobj.operatorToken->token == Lang::dicLangKey_loop_while) {
+			return compile_loop_while(comobj, operatorIndex, script, tokens, debug, rCount);
+		
+		// Loop break:
+		} else if (comobj.operatorToken->token == Lang::dicLangKey_loop_break) {
+			return compile_loop_break(comobj, operatorIndex, script, tokens, debug, rCount);
+
+		// Condition break:
+		} else if (comobj.operatorToken->token == Lang::dicLangKey_cond_break) {
+			return compile_condition_break(comobj, operatorIndex, script, tokens, debug, rCount);
+		}
+	}
+
+	//-----------------------------------------------------------
+	// Handle token set with commas in them in the first layer
+	//-----------------------------------------------------------
+	if (tokens.hasCommasNotNested()) {
+		return compile_comma_set(comobj, operatorIndex, script, tokens, debug, rCount);
+	}
+
+	int ret = 0;
+
+	//------------------------------------------------------------
+	// un-mark the end of a function, if, while loop
+	//------------------------------------------------------------
+	if (comobj.operatorToken->token == Lang::dicLang_bracesClose) {
+		ret = compile_end_block(comobj, operatorIndex, script, tokens, debug, rCount);
+	}
+
+	//-----------------------------------------------------------
+	// Handle parenthetical groupings ( )
+	//-----------------------------------------------------------
+	if (comobj.operatorToken->token == Lang::dicLang_braketOpen) {
+		ret = compile_parenthetical_gouping(comobj, operatorIndex, script, tokens, debug, rCount);
+	}
+
+	//-----------------------------------------------------------
+	// Handle square brackets [ ]
+	//-----------------------------------------------------------
+
+	if (comobj.operatorToken->token == Lang::dicLang_sBraketOpen) {
+		ret = compile_squareb_grouping(comobj, operatorIndex, script, tokens, debug, rCount);
+	}
+
+	//-----------------------------------------------------------
+	// Handle Math and Push
+	//-----------------------------------------------------------
+	switch (comobj.priortyCode) {
+		//PUSH
+		case 0: case 1:
+			ret = compile_push(comobj, operatorIndex, script, tokens, debug, rCount);
+			break;
+		// INC, DEC
+		case 91:
+			ret = compile_inc_dec_op(comobj, operatorIndex, script, tokens, debug, rCount);
+			break;
+		// EXPONENT:
+		case 90:
+			ret = compile_expon(comobj, operatorIndex, script, tokens, debug, rCount);
+			break;
+		// MULT and DIV
+		case 80:
+			ret = compile_mul_div(comobj, operatorIndex, script, tokens, debug, rCount);
+			break;
+		// ADD and SUBTRACT
+		case 70:
+			ret = compile_add_sub(comobj, operatorIndex, script, tokens, debug, rCount);
+			break;
+		// GTR LSR operations:
+		case 60:
+			ret = compile_grt_lsr(comobj, operatorIndex, script, tokens, debug, rCount);
+			break;
+		// EQUALITY operations
+		case 59:
+			ret = compile_equality_op(comobj, operatorIndex, script, tokens, debug, rCount);
+			break;
+		// LOGIC GATES:
+		case 50: case 49:
+			ret = compile_logic_gates(comobj, operatorIndex, script, tokens, debug, rCount);
+			break;
+		case 40:
+			ret = compile_equal(comobj, operatorIndex, script, tokens, debug, rCount);
+			break;
+	}
+
+	//-----------------------------------------------------------
+	// Validate return message and continue compilation
+	//-----------------------------------------------------------
+	if (ret != 0) return ret;
+	return compilerNew(script, tokens, debug, rCount);
+}
+
 /** Used to describes the body of a function, conditional branches, or looping
  *
  * markType is used to delineate between the different types of markings
@@ -1001,6 +1150,8 @@ ParseMark Parser::getMark() {
 	}
 	return marks.back();
 }
+
+
 /** Generate byte-code for Math and logic based operations
  * 
  * @param ByteCode bc
@@ -1012,7 +1163,33 @@ ParseMark Parser::getMark() {
  * @param string rightToken
  * @return boolean
  */
-bool Parser::compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, Tokens* tokens, int &operatorIndex, int &priority, int &eraseCount, Token* leftToken, Token* rightToken, bool debug, int rCount) {
+int Parser::compile_comma_set(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	int commaIndex = tokens.getCommaIndexNotNested();
+	Tokens sub = tokens.extractInclusive(0, commaIndex, comobj.eraseCount, script);
+	sub.pop(commaIndex);	//remove comma
+	tokens.pop(0);		    //remove rst
+	operatorIndex -= comobj.eraseCount;
+	int ret = compilerNew(script, sub, debug, rCount);
+	if (ret > 0) return ret;
+	return compilerNew(script, tokens, debug, rCount);
+}
+int Parser::compile_end_block(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	ParseMark ret = unmark(); //un-mark the grouping maked earlier
+	if (ret == ParseMark::WHILE) { //loop
+		script->addInstruction(Instruction(ByteCode::DONE, Lang::dicLangKey_loop_while));
+	} else if (ret == ParseMark::IF) {
+		script->addInstruction(Instruction(ByteCode::DONE, Lang::dicLangKey_cond_if));
+	} else if (ret == ParseMark::ELSE) {
+		script->addInstruction(Instruction(ByteCode::DONE, Lang::dicLangKey_cond_else));
+	} else {
+		//Bad palcement of the barces
+		return 8;
+	}
+	//Remove the brace:
+	tokens.pop(operatorIndex);
+	return 0;
+}
+int Parser::compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, Tokens* tokens, int &operatorIndex, int &priority, int &eraseCount, Token* leftToken, Token* rightToken, bool debug, int rCount) {
 
 	//Compile cached before of left:
 	if (leftToken->arrayTraverse != -1) {
@@ -1029,8 +1206,403 @@ bool Parser::compile_LR_mathLogigBaseOperations(ByteCode bc, Script*& script, To
     script->addInstruction(Instruction(bc));
     tokens->extractInclusive(operatorIndex - 1, operatorIndex + 1, eraseCount, script, true);
     operatorIndex -= eraseCount;
-    return true;
+    return 0;
 }
+int Parser::compile_LR_math(ByteCode bc, Compileobj& comobj, int &operatorIndex, Script*& script, Tokens& tokens, bool debug, int rCount) {
+
+	//Compile cached before of left:
+	if (comobj.leftToken->arrayTraverse != -1) {
+		int ret = compilerNew(script, cachedSubsPool.at(comobj.leftToken->subTokenCache), debug, rCount);
+		if (ret != 0) return ret;
+	}
+	script->addInstruction(Instruction(ByteCode::PUSH, *comobj.leftToken, comobj.leftToken->rstPos), true);
+	//Compile cached before of right:
+	if (comobj.rightToken->arrayTraverse != -1) {
+		int ret = compilerNew(script, cachedSubsPool.at(comobj.rightToken->subTokenCache), debug, rCount);
+		if (ret != 0) return ret;
+	}
+	script->addInstruction(Instruction(ByteCode::PUSH, *comobj.rightToken, comobj.rightToken->rstPos), true);
+	script->addInstruction(Instruction(bc));
+	tokens.extractInclusive(operatorIndex - 1, operatorIndex + 1, comobj.eraseCount, script, true);
+	operatorIndex -= comobj.eraseCount;
+	return 0;
+}
+int Parser::compile_parenthetical_gouping(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	
+	//get the close of this parenthesis
+	int closeOfParenthesis = tokens.getMatchingCloseParenthesis(operatorIndex);
+	
+	//Validate close par:
+
+	//extract the content and replace with RST later depending if its a group or a function
+	Tokens sub = tokens.extractContentOfParenthesis(operatorIndex, closeOfParenthesis, comobj.eraseCount, script);
+	operatorIndex -= 1;	//Just in case its a function call set next block to parse the call name,
+	
+						//Make appropriate function Call check:
+	bool funcCall = false;
+	if (tokens.getSize() > 1 && operatorIndex >= 0 && comobj.leftToken != nullptr) { //two or more																		 //if previous token before the parenthesis has a non zero priority of 2 then make function call
+		if (tokens.getTokenPriorty(operatorIndex) && comobj.leftToken->type != TokenType::KEYWORD && comobj.leftToken->type != TokenType::DELIMITER) {
+			funcCall = true;
+			//Mark
+			mark(ParseMark::GROUPDEFINE);
+		}
+	}
+
+	int ret = compilerNew(script, sub, debug, rCount);
+
+	//Make appropriate function Call
+	if (funcCall) { //two or more
+		if (operatorIndex == 0 && rCount == 1) { 
+			// A garbage preventor: for no assignment functions:
+			script->addInstruction(Instruction(ByteCode::DPUSH, "CALL"));
+		}
+		script->addInstruction(Instruction(ByteCode::CALL, comobj.leftToken->token, tokens.tokens[operatorIndex + 1].rstPos));
+		tokens.pop(operatorIndex); //removes function name, operatorIndex points to function name
+		unmark();
+	}
+
+	//Sync RST -> will pop RST and replace it with newest RST and sync latest Operation wil the same RST pos:
+	tokens.extractInclusive(
+		funcCall ? operatorIndex : operatorIndex + 1, 
+		funcCall ? operatorIndex : operatorIndex + 1, 
+		comobj.eraseCount, 
+		script, 
+		true
+	);
+	return ret;
+}
+int Parser::compile_squareb_grouping(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	//  get the close of this bracket square
+	int closeOfSquareBrackets = tokens.getMatchingCloseSquareBrackets(operatorIndex);
+
+	//extract the content and replace with RST
+	Tokens sub = tokens.extractContentOfParenthesis(operatorIndex, closeOfSquareBrackets, comobj.eraseCount, script);
+
+	//If its the first extract then move on (avoids garbage):
+
+	//Evaluate sub tokens of array call:
+	int evSBres = evaluateArraySbrackets(sub);
+	if (evSBres > 0) { return evSBres == 1 ? 22 : 21; }
+	//Count comma cells:
+	int arrayElementsCount = sub.countCommasNotNested();
+	//This will indicate an array push flag the left token, remove rst and continue:
+	Token* leftOverLook = tokens.tokenLeftLookBeforeArrayTraverse(operatorIndex);
+	if (arrayElementsCount == 0 && leftOverLook != nullptr && leftOverLook->type == TokenType::VAR) {
+		leftOverLook->setArrayTreatPush(true);
+		tokens.pop(operatorIndex); //Pop RST 
+	}
+	// This will indicate an array traverse callee:
+	else if (leftOverLook != nullptr && leftOverLook->type == TokenType::VAR) {
+		//Remove Rst and cache the tokens for later use when variable is called
+		leftOverLook->setArrayTraverse(arrayElementsCount);
+		tokens.pop(operatorIndex); //Pop RST 
+		cachedSubsPool.push_back(sub); // This will save the path tokens for later
+		leftOverLook->setTokenSubCache(cachedSubsPool.size() - 1); //Save the cache index.
+	} else {
+		//Probably a definition
+		//Parse elements:
+		int ret = 0;
+		if (arrayElementsCount > 0) {
+			// compile sub:
+			mark(ParseMark::ARRAYDEF);
+			ret = compilerNew(script, sub, debug, rCount);
+			unmark();
+		}
+		//Rst pointer sync:
+		// tokens.extractInclusive(operatorIndex, operatorIndex, comobj.eraseCount, script, true);
+		//If everything is fine add the constructor instructions:
+		if (ret == 0) {
+			std::stringstream strtoa;
+			strtoa << arrayElementsCount;
+			int test = tokens.getTokenObject(operatorIndex)->rstPos;
+			script->addInstruction(Instruction(ByteCode::ARD, strtoa.str(), tokens.getTokenObject(operatorIndex)->rstPos), true);
+		} else return ret;
+	}
+	// return compilerNew(script, tokens, debug, rCount);
+	return 0;
+}
+int Parser::compile_variable_definition(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+
+	//Set first variable on the right:
+	if (comobj.rightToken != nullptr && comobj.rightToken->type == TokenType::VAR) {
+		script->addInstruction(Instruction(ByteCode::DEF, *comobj.rightToken));
+	} else return 7;
+
+	//Check for several defines: note that define key word is still in the token set.
+	bool avoidEvaluation = false;
+	if (tokens.hasCommasNotNested()) {
+		//Scan to Define all recursivly:
+		int commaIndex = tokens.getCommaIndexNotNested();
+		Tokens sub = tokens.extractInclusive(operatorIndex + 1, commaIndex - 1, comobj.eraseCount, script);
+		if (sub.getSize() > 1) {
+			//Evaluate:
+			int t1 = evaluateDeclarationSub(sub, true);
+			if (t1 > 0) return t1; //Invalid return error code!
+			//Compile sub expression:
+			compilerNew(script, sub, debug, rCount);
+		}
+		tokens.pop(operatorIndex + 1); //Pop RST of variable expression
+		tokens.pop(operatorIndex + 1); //Pop comma
+		avoidEvaluation = true;
+	} else {
+		//This removes the define key word
+		tokens.pop(operatorIndex);
+	}
+	//Evaluate and check if there is equal sign:
+	if (!avoidEvaluation) {
+		if (evaluateDeclarationSub(tokens, false) > 0) {
+			tokens.renderTokens();
+			return 9;
+		}
+	}
+	//Continue compilation:
+	if (tokens.getSize() > 1) {
+		return compilerNew(script, tokens, debug, rCount);
+	}
+	//Finished:
+	return 0;
+}
+int Parser::compile_variable_destructor(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	
+	//Unset first variable on the right:
+	if (comobj.rightToken != nullptr && comobj.rightToken->type == TokenType::VAR) {
+		if (evaluateVarNotObjectCall(comobj.rightToken))
+			script->addInstruction(Instruction(ByteCode::UNS, comobj.rightToken->token));
+		else return 19;
+	} else return 7;
+
+	//This removes the define key word and the unset variable:
+	tokens.pop(operatorIndex);
+	tokens.pop(operatorIndex);
+	//Scan to allow bulk unset:
+	if (tokens.hasCommasNotNested()) {
+		//Scan to Unset all:
+		Token* t;
+		int tokenSetSize = (int)tokens.getSize();
+		for (int i = operatorIndex; i < tokenSetSize; i++) {
+			t = tokens.getTokenObject(i);
+			if (t->token == Lang::dicLang_comma) { continue; }
+			if (t->type != TokenType::VAR) { return 19; }
+			if (!evaluateVarNotObjectCall(t)) { return 19; }
+			script->addInstruction(Instruction(ByteCode::UNS, t->token));
+		}
+	}
+	return 0;
+}
+
+int Parser::compile_condition_if(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	// if (expression) {
+	tokens.pop(operatorIndex);	//erase the if keyword
+	// (expression) {
+	if (tokens.getToken(tokens.getSize() - 1) != Lang::dicLang_bracesOpen) 
+		return 4;
+	// Erase block open == brace open:
+	tokens.pop(tokens.getSize() - 1);
+	// (expression)
+	mark(ParseMark::IF);
+	// recursively evaluate the condition of this if statement
+	int ret = compilerNew(script, tokens, debug, rCount);
+	if (ret != 0) return ret;
+	script->addInstruction(Instruction(ByteCode::CMP, comobj.operatorTokenStr));
+	return 0;
+}
+int Parser::compile_condition_else(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	//else (expression) {
+	tokens.pop(0);	//erase the else keyword
+	// (expression) {
+	if (tokens.getToken(tokens.getSize() - 1) != Lang::dicLang_bracesOpen)
+		return 6;
+	tokens.pop(tokens.getSize() - 1);
+	// (expression)
+	mark(ParseMark::ELSE); // 1- marks ELSE
+	// recursively evaluate the condition of this else statement
+	int ret = compilerNew(script, tokens, debug, rCount);
+	if (ret != 0) return ret;
+	script->addInstruction(Instruction(ByteCode::ELE, comobj.operatorTokenStr));
+	return 0;
+}
+
+int Parser::compile_loop_while(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	// while (expression) {
+	script->addInstruction(Instruction(ByteCode::LOOP, comobj.operatorTokenStr));
+	tokens.pop(0);	//erase the while keyword
+	// (expression) {
+	if (tokens.getToken(tokens.getSize() - 1) != Lang::dicLang_bracesOpen)
+		return 5;
+	tokens.pop(tokens.getSize() - 1);
+	// (expression)
+	mark(ParseMark::WHILE);
+	//recursively evaluate the condition of this while loop
+	int ret = compilerNew(script, tokens, debug, rCount);
+	if (ret != 0) return ret;
+	script->addInstruction(Instruction(ByteCode::CMP, comobj.operatorTokenStr));
+	return 0;
+}
+int Parser::compile_loop_break(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	//Check for number of breaks or default to one:
+	if (comobj.rightToken == nullptr) {
+		script->addInstruction(Instruction(ByteCode::PUSH, "1"));
+		script->addInstruction(Instruction(ByteCode::BRE));
+		return 0;
+	}
+	//mark break:
+	mark(ParseMark::BREAKEXP);
+	//Evaluate the break expression - keywords are not allowed:
+	Tokens sub = tokens.extractInclusive(operatorIndex + 1, tokens.getSize() - 1, comobj.eraseCount, script);
+	int ret = compilerNew(script, sub, debug, rCount); //compile the expression
+	if (ret > 0) { return ret; }
+	unmark(); //unmarks the break;
+	script->addInstruction(Instruction(ByteCode::BRE));
+	return 0;
+}
+int Parser::compile_condition_break(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	//Check for number of breaks:
+	if (comobj.rightToken == nullptr) {
+		script->addInstruction(Instruction(ByteCode::PUSH, "1"));
+		script->addInstruction(Instruction(ByteCode::BIF));
+		return 0;
+	}
+	//mark break same as loop break:
+	mark(ParseMark::BREAKEXP);
+	//Evaluate the break expression keywords are not allowed:
+	Tokens sub = tokens.extractInclusive(operatorIndex + 1, tokens.getSize() - 1, comobj.eraseCount, script);
+	int ret = compilerNew(script, sub, debug, rCount); //compile the expression
+	if (ret > 0) { return ret; }
+	unmark(); //unmarks the break;
+	script->addInstruction(Instruction(ByteCode::BIF));
+	return 0;
+}
+
+
+int Parser::compile_push(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	//Compile cached before:
+	if (comobj.operatorToken->arrayTraverse != -1) {
+		int ret = compilerNew(script, cachedSubsPool.at(comobj.operatorToken->subTokenCache), debug, rCount);
+		if (ret != 0) return ret;
+	}
+	if (
+			getMark() == ParseMark::ARRAYDEF
+		||	getMark() == ParseMark::GROUPDEFINE
+	)
+		script->addInstruction(Instruction(ByteCode::PUSH, *comobj.operatorToken, comobj.operatorToken->rstPos), true);
+	else
+		script->addInstruction(Instruction(ByteCode::PUSH, *comobj.operatorToken, comobj.operatorToken->rstPos));
+	tokens.extractInclusiveWithoutRst(operatorIndex, operatorIndex, comobj.eraseCount);
+	operatorIndex -= comobj.eraseCount;
+	return 0;
+}
+int Parser::compile_inc_dec_op(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	if (comobj.leftToken != nullptr && (comobj.leftToken->type == TokenType::VAR)) {
+		//Is of type Postfix
+		if (operatorIndex == 1 && rCount == 1) // A garbage preventor:
+			script->addInstruction(Instruction(ByteCode::DPUSH, comobj.operatorToken->token));
+		if (comobj.operatorToken->token == Lang::dicLang_dec) {
+			script->addInstruction(Instruction(ByteCode::DECL, comobj.leftToken->token, comobj.leftToken->rstPos), true);
+		} else {
+			script->addInstruction(Instruction(ByteCode::INCL, comobj.leftToken->token, comobj.leftToken->rstPos), true);
+		}
+		tokens.extractInclusive(operatorIndex - 1, operatorIndex, comobj.eraseCount, script, true);
+	} else if (comobj.rightToken != nullptr && (comobj.rightToken->type == TokenType::VAR)) {
+		//Is of type Prefix
+		if (operatorIndex == 0) // A garbage preventor:
+			script->addInstruction(Instruction(ByteCode::DPUSH, comobj.operatorToken->token));
+		if (comobj.operatorToken->token == Lang::dicLang_dec) {
+			script->addInstruction(Instruction(ByteCode::DECR, comobj.rightToken->token, comobj.rightToken->rstPos), true);
+		} else {
+			script->addInstruction(Instruction(ByteCode::INCR, comobj.rightToken->token, comobj.rightToken->rstPos), true);
+		}
+		tokens.extractInclusive(operatorIndex, operatorIndex + 1, comobj.eraseCount, script, true);
+	} else {
+		//Error with increment decrement operator:
+		return 20;
+	}
+	operatorIndex -= comobj.eraseCount;
+	return 0;
+}
+int Parser::compile_expon(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	return compile_LR_math(ByteCode::EXPON, comobj, operatorIndex, script, tokens, debug, rCount);
+}
+int Parser::compile_add_sub(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	if (comobj.operatorToken->token == Lang::dicLang_plus) // ADD values 
+		return compile_LR_math(ByteCode::ADD, comobj, operatorIndex, script, tokens, debug, rCount);
+	// Subtract values
+	return compile_LR_math(ByteCode::SUB, comobj, operatorIndex, script, tokens, debug, rCount);
+}
+int Parser::compile_mul_div(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	if (comobj.operatorToken->token == Lang::dicLang_multi) // Multiply values 
+		return compile_LR_math(ByteCode::MULT, comobj, operatorIndex, script, tokens, debug, rCount);
+	// Divide values
+	return compile_LR_math(ByteCode::DIV, comobj, operatorIndex, script, tokens, debug, rCount);
+
+}
+int Parser::compile_grt_lsr(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	if (comobj.operatorToken->token == Lang::dicLang_greater) // Is greater than
+		return compile_LR_math(ByteCode::GTR, comobj, operatorIndex, script, tokens, debug, rCount);
+	if (comobj.operatorToken->token == Lang::dicLang_smaller) // Is smaller than
+		return compile_LR_math(ByteCode::LSR, comobj, operatorIndex, script, tokens, debug, rCount);
+	if (comobj.operatorToken->token == Lang::dicLang_greater_equal) // Is greater or equal to
+		return compile_LR_math(ByteCode::GTRE, comobj, operatorIndex, script, tokens, debug, rCount);
+	if (comobj.operatorToken->token == Lang::dicLang_smaller_equal) // Is smaller or equal to
+		return compile_LR_math(ByteCode::LSRE, comobj, operatorIndex, script, tokens, debug, rCount);
+	return 0;
+}
+int Parser::compile_equality_op(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	if (comobj.operatorToken->token == Lang::dicLang_c_equal) // Is value Equal to
+		return compile_LR_math(ByteCode::CVE, comobj, operatorIndex, script, tokens, debug, rCount);
+	if (comobj.operatorToken->token == Lang::dicLang_c_nequal) // Is value not Equal to
+		return compile_LR_math(ByteCode::CVN, comobj, operatorIndex, script, tokens, debug, rCount);
+	if (comobj.operatorToken->token == Lang::dicLang_c_tequal) // Is type Equal to
+		return compile_LR_math(ByteCode::CTE, comobj, operatorIndex, script, tokens, debug, rCount);
+	if (comobj.operatorToken->token == Lang::dicLang_c_ntequal) // Is type not Equal to
+		return compile_LR_math(ByteCode::CTN, comobj, operatorIndex, script, tokens, debug, rCount);
+	return 0;
+}
+int Parser::compile_logic_gates(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	if (comobj.operatorToken->token == Lang::dicLang_and) // Is LOGIC AND
+		return compile_LR_math(ByteCode::AND, comobj, operatorIndex, script, tokens, debug, rCount);
+	// Is LOGIC OR
+	return compile_LR_math(ByteCode::POR, comobj, operatorIndex, script, tokens, debug, rCount);
+}
+int Parser::compile_equal(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
+	//extract from 1 past the equal sign to the end of the tokens 
+	//This will push the needed assign:
+	
+	int ret;
+	Tokens sub = tokens.extractInclusive(operatorIndex + 1, tokens.getSize() - 1, comobj.eraseCount, script);
+	ret = compilerNew(script, sub, debug, rCount);
+	if (ret != 0) return ret;
+
+	// Validate left and right are present:
+
+	//Compile cached left before:
+	if (comobj.leftToken->arrayTraverse != -1) {
+		ret = compilerNew(script, cachedSubsPool.at(comobj.leftToken->subTokenCache), debug, rCount);
+		if (ret != 0) return ret;
+	}
+
+	if (comobj.operatorToken->token == Lang::dicLang_equal) {
+		script->addInstruction(Instruction(ByteCode::ASN, *comobj.leftToken));
+	}
+	else if (comobj.operatorToken->token == Lang::dicLang_equalAdd) {
+		script->addInstruction(Instruction(ByteCode::ASNA, *comobj.leftToken));
+	}
+	else if (comobj.operatorToken->token == Lang::dicLang_equalSub) {
+		script->addInstruction(Instruction(ByteCode::ASNS, *comobj.leftToken));
+	} else {
+		//Validate pointer array restrictions:
+		if (comobj.leftToken->arrayTraverse != -1 || comobj.leftToken->arrayPush)
+			return 24;
+		if (comobj.rightToken != nullptr && comobj.rightToken->arrayTraverse != -1)
+			return 23;
+		script->addInstruction(Instruction(ByteCode::POI, comobj.leftToken->token));
+	}
+
+	tokens.extractInclusive(operatorIndex - 1, operatorIndex + 1, comobj.eraseCount, script);
+	operatorIndex -= comobj.eraseCount;
+
+	return 0;
+}
+
 
 
 
@@ -1258,22 +1830,17 @@ int Parser::getDelimiterPriorty() {
 int Parser::getDelimiterPriorty(std::string toCheckToken, TokenType toCheckType) {
 	if (toCheckType == TokenType::KEYWORD) {
 		return 5000;
-	}
-	else if (toCheckToken == Lang::dicLang_bracesClose) {
+	} else if (toCheckToken == Lang::dicLang_bracesClose) {
 		return 4999;
-	}
-	else if (toCheckToken == Lang::dicLang_braketOpen) {
+	} else if (toCheckToken == Lang::dicLang_braketOpen) {
 		return 2000;
-	}
-	else if (toCheckToken == Lang::dicLang_sBraketOpen) {
+	} else if (toCheckToken == Lang::dicLang_sBraketOpen) {
 		return 110;
-	}
-	else if (toCheckToken == Lang::dicLang_dec || toCheckToken == Lang::dicLang_inc) {
+	} else if (toCheckToken == Lang::dicLang_dec || toCheckToken == Lang::dicLang_inc) {
 		return 91;
-	}
-	else if (toCheckToken == Lang::dicLang_power) {
+	} else if (toCheckToken == Lang::dicLang_power) {
 		return 90;
-	}else if (toCheckToken == Lang::dicLang_multi || toCheckToken == Lang::dicLang_divide) {
+	} else if (toCheckToken == Lang::dicLang_multi || toCheckToken == Lang::dicLang_divide) {
 		return 80;
 	} else if (toCheckToken == Lang::dicLang_plus || toCheckToken == Lang::dicLang_minus) {
 		return 70;
@@ -1290,92 +1857,18 @@ int Parser::getDelimiterPriorty(std::string toCheckToken, TokenType toCheckType)
 		return 50;
 	} else if (toCheckToken == Lang::dicLang_or) {
 		return 49;
-	}
-	else if (toCheckToken == Lang::dicLang_equal || toCheckToken == Lang::dicLang_pointer) {
+	} else if (
+		toCheckToken == Lang::dicLang_equal ||
+		toCheckToken == Lang::dicLang_equalAdd ||
+		toCheckToken == Lang::dicLang_equalSub ||
+		toCheckToken == Lang::dicLang_pointer
+		) {
 		return 40;
-	}
-	else if (toCheckToken == Lang::dicLang_comma) {
+	} else if (toCheckToken == Lang::dicLang_comma) {
 		return -100;
-	}
-	else {
+	} else {
 		return 0;
 	}
-}
-/** Check to see if a token group has commas in it 
- * 
- * @param Tokens token  -> the entire Token set
- * @return boolean
- */
-bool Parser::hasCommas(Tokens& tokens) {
-    int size = tokens.getSize();
-    for (int i = 0; i < size; i++){
-        if(tokens.getToken(i) == Lang::dicLang_comma){
-            return true;
-        }
-    }
-    return false;
-}
-/** Check to see if a token group has commas in it but avoid nested (, , ,)
-*
-* @param Tokens token  -> the entire Token set
-* @return boolean
-*/
-bool Parser::hasCommasNotNested(Tokens& tokens) {
-	int size = tokens.getSize();
-	int nested = 0;
-	for (int i = 0; i < size; i++) {
-		std::string t = tokens.getToken(i);
-		if (t == Lang::dicLang_braketOpen || t == Lang::dicLang_sBraketOpen) {
-			nested++;
-		}
-		else if ((t == Lang::dicLang_braketClose || t == Lang::dicLang_sBraketClose)&& nested > 0) {
-			nested--;
-		}
-		if (nested < 1 && t == Lang::dicLang_comma) {
-			return true;
-		}
-	}
-	return false;
-}
-/** Get floating commas count:
- *
- */
-int Parser::countCommasNotNested(Tokens& sub) {
-	int size = sub.getSize();
-	if (size == 0) return 0;
-	int count = 1;
-	int nested = 0;
-	for (int i = 0; i < size; i++) {
-		std::string t = sub.getToken(i);
-		if (t == Lang::dicLang_braketOpen || t == Lang::dicLang_sBraketOpen) {
-			nested++;
-		} else if ((t == Lang::dicLang_braketClose || t == Lang::dicLang_sBraketClose) && nested > 0) {
-			nested--;
-		} else if (nested < 1 && t == Lang::dicLang_comma) {
-			count++;
-		}
-	}
-	return count;
-}
-/** Get the comma index that is hanging and not nested in a group:
- *  -1 means no commas.
- */
-int Parser::getCommaIndexNotNested(Tokens& tokens) {
-	int size = tokens.getSize();
-	int nested = 0;
-	for (int i = 0; i < size; i++) {
-		std::string t = tokens.getToken(i);
-		if (t == Lang::dicLang_braketOpen || t == Lang::dicLang_sBraketOpen) {
-			nested++;
-		}
-		else if ((t == Lang::dicLang_braketClose || t == Lang::dicLang_sBraketClose) && nested > 0) {
-			nested--;
-		}
-		if (nested < 1 && t == Lang::dicLang_comma) {
-			return i;
-		}
-	}
-	return -1;
 }
 /** Parse any string to lower ASCII chars
  * 

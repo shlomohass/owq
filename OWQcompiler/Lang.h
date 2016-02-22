@@ -93,6 +93,8 @@ namespace Eowq
 		static std::string dicLang_dec;
 		static std::string dicLang_divide;
 		static std::string dicLang_equal;
+		static std::string dicLang_equalAdd;
+		static std::string dicLang_equalSub;
 		static std::string dicLang_pointer;
 		static std::string dicLang_braketOpen;
 		static std::string dicLang_braketClose;

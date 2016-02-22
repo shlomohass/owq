@@ -99,7 +99,6 @@ namespace Eowq {
 	}
 	StackData* Stack::pop(int offset) {
 		if (stack.size() == 0) {
-			ScriptError::msg("stack is zero as vm is instructed to pop value off the stack");
 			return nullptr;
 		}
 		int size = stack.size() - 1 - offset;
@@ -108,8 +107,12 @@ namespace Eowq {
 			stack.at(size).setGc();
 			return extract(rstPos);
 		}
-		stack[size].setOrigin(size);
-		return &stack[size];
+		if (!stack[size].isGc()) {
+			stack[size].setOrigin(size);
+			return &stack[size];
+		}
+		//If its GC take one after:
+		return pop(offset + 1);
 	}
 	void Stack::setTopPointer(int pointer) {
 		int s = stack.size();

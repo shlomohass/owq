@@ -25,6 +25,7 @@ namespace Eowq
 		Ex_AVAR_ASN,
 		Ex_ARRAY_PATH_MIS,
 		Ex_AVAR_RESOLVE,
+		Ex_FATAL_CALCULATION
 	};
 
 	enum ScopeType {

@@ -27,7 +27,10 @@ namespace Eowq
 		static StackData isPointer(ScriptVariable* sv);
 		static StackData isPointed(ScriptVariable* sv);
 		static std::string toString(double number);
-
+		
+		//Generic methods only arrays:
+		static StackData join(StackData* sd);
+		static StackData sum(StackData* sd);
 		//Helpers 
 		static std::string stackTypeName(SDtype sdtype);
 

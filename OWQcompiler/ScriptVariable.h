@@ -59,6 +59,7 @@ namespace Eowq
 
 		//Set value:
 		bool setValue(StackData& sd);
+		int setValueAddSub(StackData& sd, bool add);
 		int setValueInArray(StackData& sd, int* path, int index, bool push);
 		StackData* getValueInArray(int* path, int index);
 		

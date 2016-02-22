@@ -83,41 +83,75 @@ namespace Eowq {
 		if (!isRegistered) {
 			// Try to Mutate the variable otherwise Deep copy the StackData
 			// We do this avoids a object destruction and new copy - this is good for perormance. 
-			if (sd.isNumber()) {
-				value.MutateToNumber(sd.getNumber());
-			}
-			else if (sd.isString()) {
-				value.MutateToString(sd.getString());
-			}
-			else if (sd.isBoolean()) {
-				value.MutateToBoolean(sd.getBoolean());
-			}
-			else if (sd.isNull()) {
-				value.MutateToNull();
-			}
-			else {
-				// Deep Copy
+			if (!value.MutateTo(sd)) {
 				value = sd;
 			}
-		}
-		else {
-			if (sd.isNumber() && type == RegisteredVariable::REGISTERED_DOUBLE) {
+		} else {
+			if (type == RegisteredVariable::REGISTERED_DOUBLE) {
 				double* v = static_cast<double*>(address);
-				*v = sd.getNumber();
+				*v = sd.getAsNumber();
 			}
-			else if (sd.isString() && type == RegisteredVariable::REGISTERED_STRING) {
+			else if (type == RegisteredVariable::REGISTERED_STRING) {
 				std::string* v = static_cast<std::string*>(address);
-				*v = sd.getString();
+				*v = sd.getAsString();
 			}
-			else if (sd.isBoolean() && type == RegisteredVariable::REGISTERED_DOUBLE) {
+			else if (sd.isBoolean() && type == RegisteredVariable::REGISTERED_BOOLEAN) {
 				bool* v = static_cast<bool*>(address);
 				*v = sd.getRealBoolean();
-			}
-			else {
+			} else {
 				return false;
 			}
 		}
 		return true;
+	}
+
+	int ScriptVariable::setValueAddSub(StackData& sd, bool sub) {
+		if (type == RegisteredVariable::GLOBAL_POINTER && pointer != nullptr)
+			return pointer->setValueAddSub(sd,sub);
+
+		int preserveOrigin = sd.getOrigin();
+		if (!isRegistered) {
+			//First perform the operation:
+			if (value.isString()) {
+				if (!sub) {
+					sd.MutateTo(StackData(value.getAsString() + sd.getAsString()));
+				} else {
+					return 25;
+				}
+			}
+			else if (value.isNumber()) {
+				if (!sub) sd.MutateTo(StackData(value.getAsNumber() + sd.getAsNumber()));
+				else sd.MutateTo(StackData(value.getAsNumber() - sd.getAsNumber()));
+			} else if (!sub && value.isArray() && sd.isArray()) {
+				//We make a copy in case we use the same array:
+				std::vector<StackData> tempVec = *sd.getArrayPointer();
+				std::vector<StackData>* target = value.getArrayPointer();
+				target->insert(target->end(), tempVec.begin(), tempVec.end());
+				return 0;
+			} else {
+				return 24;
+			}
+			// Try to Mutate the variable otherwise Deep copy the StackData
+			// We do this avoids a object destruction and new copy - this is good for perormance. 
+			sd.setOrigin(preserveOrigin);
+			if (!value.MutateTo(sd)) {
+				value = sd;
+			}
+		} else {
+			if (type == RegisteredVariable::REGISTERED_DOUBLE) {
+				double* v = static_cast<double*>(address);
+				if (sub) *v -= sd.getAsNumber();
+				else  *v += sd.getAsNumber();
+			}
+			else if (type == RegisteredVariable::REGISTERED_STRING) {
+				std::string* v = static_cast<std::string*>(address);
+				if (!sub) *v += sd.getAsString();
+				else return 25;
+			} else {
+				return 24;
+			}
+		}
+		return 0;
 	}
 
 	// 6-> is not array, 7 general error cant set, 8 path not correct
