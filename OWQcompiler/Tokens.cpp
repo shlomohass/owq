@@ -105,8 +105,7 @@ namespace Eowq {
 			Token rstToken(Lang::dicLangValue_rst_upper, 0, TokenType::RST, TokenFlag::NORMAL, script->internalStaticPointer);
 			tokens.insert(tokens.begin() + startParenthesisIndex, rstToken);
 			//Mark the last operation to set result with pointer:
-			script->code.back().setPointer(script->internalStaticPointer);
-
+			// script->code.back().setPointer(script->internalStaticPointer);
 		} else {
 			Token rstToken(Lang::dicLangValue_rst_upper, 0, TokenType::RST, TokenFlag::NORMAL, 0);
 			tokens.insert(tokens.begin() + startParenthesisIndex, rstToken);
@@ -124,9 +123,12 @@ namespace Eowq {
 	 * @return
 	 */
 	Tokens Tokens::extractInclusive(int startIndex, int endIndex, int& extractionCount, Script* script) {
-		return extractInclusive(startIndex, endIndex, extractionCount, script, false);
+		return extractInclusive(startIndex, endIndex, extractionCount, script, false, true);
 	}
 	Tokens Tokens::extractInclusive(int startIndex, int endIndex, int& extractionCount, Script* script, bool setPointer) {
+		return extractInclusive(startIndex, endIndex, extractionCount, script, setPointer, true);
+	}
+	Tokens Tokens::extractInclusive(int startIndex, int endIndex, int& extractionCount, Script* script, bool setPointer, bool setBackCode) {
 		Tokens newTokenSet;
 		if (startIndex < 0 || startIndex > getSize() - 1) {
 			stdError("token extraction, startIndex out of bounds");
@@ -155,7 +157,8 @@ namespace Eowq {
 			Token rstToken(Lang::dicLangValue_rst_upper, 0, TokenType::RST, TokenFlag::NORMAL, script->internalStaticPointer);
 			tokens.insert(tokens.begin() + startIndex, rstToken);
 			//Mark the last operation to set result with pointer:
-			script->code.back().setPointer(script->internalStaticPointer);
+			if (setBackCode)
+				script->code.back().setPointer(script->internalStaticPointer);
 		} else {
 			Token rstToken(Lang::dicLangValue_rst_upper, 0, TokenType::RST, TokenFlag::NORMAL, 0);
 			tokens.insert(tokens.begin() + startIndex, rstToken);

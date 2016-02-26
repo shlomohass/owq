@@ -1308,8 +1308,10 @@ int Parser::compile_squareb_grouping(Compileobj& comobj, int operatorIndex, Scri
 			ret = compilerNew(script, sub, debug, rCount);
 			unmark();
 		}
+
 		//Rst pointer sync:
-		// tokens.extractInclusive(operatorIndex, operatorIndex, comobj.eraseCount, script, true);
+		tokens.extractInclusive(operatorIndex, operatorIndex, comobj.eraseCount, script, true, false);
+
 		//If everything is fine add the constructor instructions:
 		if (ret == 0) {
 			std::stringstream strtoa;

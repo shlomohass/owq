@@ -16,12 +16,10 @@
 // [ ] String.split(","); <- by char, all chars, number means slice
 // [ ] Array.join("-");      <- Merge array to string with spacer.
 
-// let a = [1,2,[4,6]];
 
 
-let a = [1];
-let b;
-a[0] -> b;
+let a = [1,2,[4,6]];
+
 
 print(a.sum());
 

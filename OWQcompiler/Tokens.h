@@ -39,6 +39,7 @@ namespace Eowq
 		Tokens extractContentOfParenthesis(int startIndex, int endIndex, int& extractionCount, Script* script, bool setPointer);
 		Tokens extractInclusive(int startIndex, int endIndex, int& extractionCount, Script* script);
 		Tokens extractInclusive(int startIndex, int endIndex, int& extractionCount, Script* script, bool setPointer);
+		Tokens extractInclusive(int startIndex, int endIndex, int& extractionCount, Script* script, bool setPointer, bool setBackCode);
 		Tokens extractInclusiveWithoutRst(int startIndex, int endIndex, int& extractionCount);
 		Tokens extractSubExpr();
 

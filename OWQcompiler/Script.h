@@ -73,10 +73,10 @@ namespace Eowq
 
 		//Containers:
 		std::vector<Instruction> code;
+
+		//Global Scope:
 		std::map<std::string, int> functionTable;
 		std::unordered_map<std::string, ScriptVariable> variables;
-
-		//Arrays space for all scopes:
 		std::unordered_map<double, std::vector<StackData>> arraySpace;
 		double arraySpacePointer;
 
