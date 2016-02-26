@@ -678,7 +678,15 @@ namespace Eowq {
 				else if (sysCall == 9) { //join
 					if (!Compute::flagPush) {
 						// Add error when not array
-						Stack::push(ScriptConsole::join(sv->getValuePointer()));
+						StackData* dl = Stack::pop(0);
+						if (dl == nullptr) {
+							ScriptError::msg("WARNINIG -> join expects 1 argument");
+							Stack::push(sv->getValuePointer()->getAsString());
+						} else {
+							int originDL = dl->getOrigin();
+							Stack::push(ScriptConsole::join(sv->getValuePointer(), dl));
+							Stack::eraseAsGC(originDL);
+						}
 						if (_xcode.getPointer() > 0) {
 							Stack::setTopPointer(_xcode.getPointer());
 						}

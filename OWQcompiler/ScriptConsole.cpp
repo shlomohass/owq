@@ -57,7 +57,7 @@ namespace Eowq {
 	}
 
 
-	StackData ScriptConsole::join(StackData* sd) {
+	StackData ScriptConsole::join(StackData* sd, StackData* dl) {
 		if (sd->getType() != SDtype::SD_ARRAY)
 			return StackData();
 		std::vector<StackData>* arrayTarget = sd->getArrayPointer();
@@ -67,12 +67,14 @@ namespace Eowq {
 		for (int i = 0; i < size; i++) {
 			StackData* sdChild = &arrayTarget->at(i);
 			if (sdChild->isArray()) {
-				ss << join(sdChild).getAsString();
+				ss << join(sdChild, dl).getAsString() << dl->getAsString();
 			} else {
-				ss << sdChild->getAsString();
+				ss << sdChild->getAsString() << dl->getAsString();
 			}
 		}
-		return StackData(ss.str());
+		std::string res = ss.str();
+		int dls = (int)dl->getAsString().length();
+		return StackData(res.substr(0, res.length() - dls));
 	}
 
 	StackData ScriptConsole::sum(StackData* sd) {

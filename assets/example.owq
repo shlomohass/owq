@@ -17,15 +17,7 @@
 // [ ] Array.join("-");      <- Merge array to string with spacer.
 
 
-
-let a = [
-	1,2,
-	[4, 6 - 3],
-	4*3,4,
-	[1,[9,3]],
-	[(5),(8),-9]
-];
-
-
-print(a.sum());
-
+let a = [1,"a",2,"b",[3,"c"],[4,"d"]],
+    b = ",";
+print(a.join(b));
+print(a.join(""));
