@@ -1,0 +1,9 @@
+let a = [ 1, "a", 2, "b", [ 3, "c" ], [ 4, "d" ] ],
+    b = ",";
+print( a.join( b ) );
+print( a.join( "" ) );
+/*
+@expected-output
+1,a,2,b,3,c,4,d1a2b3c4d
+@end-expected-output
+*/

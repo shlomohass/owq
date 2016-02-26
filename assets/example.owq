@@ -14,7 +14,7 @@
 // [ ] a.sort();
 // [ ] a.fill(); // String or Array filled with a value -> for String any Data will be represented as char.
 // [ ] String.split(","); <- by char, all chars, number means slice
-// [ ] Array.join("-");      <- Merge array to string with spacer.
+// [x] Array.join("-");      <- Merge array to string with spacer.
 
 
 let a = [1,"a",2,"b",[3,"c"],[4,"d"]],
