@@ -30,8 +30,7 @@ namespace Eowq
 		static void push(StackData& data);
 		static void push_rvalue_obj(StackData&& data);
 		static void push(ScriptVariable& data);
-
-		static void push(std::vector<StackData>* arrayPointer);
+		static void push(std::vector<StackData>* arrayPointer, double arrayName);
 
 		static int  size();
 		static StackData* pop();

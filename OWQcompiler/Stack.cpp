@@ -86,8 +86,8 @@ namespace Eowq {
 	/**  Push an array pointer to the stack
 	*
 	*/
-	void Stack::push(std::vector<StackData>* arrayPointer) {
-		stack.push_back(StackData(arrayPointer));
+	void Stack::push(std::vector<StackData>* arrayPointer, double arrayName) {
+		stack.push_back(StackData(arrayPointer, arrayName));
 	}
 
 	/** Pop a value from the stack

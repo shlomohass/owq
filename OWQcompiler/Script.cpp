@@ -429,8 +429,7 @@ namespace Eowq {
 					deleted = true;
 					break;
 				}
-			}
-			else {
+			} else {
 				it = scope[i]->m.getVariableIt(name);
 				if (it != scope[i]->m.getVariableContainerEnd()) {
 					scope[i]->l.deleteFromScope(it);
@@ -442,13 +441,36 @@ namespace Eowq {
 		if (!deleted) {
 			it = getGlobalVariableIt(name);
 			if (it != variables.end()) {
+				//Handle arrays:
+				if (it->second.getValue().isArray()) {
+					std::vector<StackData>* toparray = it->second.getValue().getArrayPointer();
+					removeSubArrays(toparray);
+					// Unset top:
+					double arrayName = it->second.getValue().getArrayName();
+					arraySpace.erase(arrayName);
+				}
+				//Erase variable name:
 				variables.erase(it);
-			}
-			else {
+			} else {
 				return false;
 			}
 		}
 		return true;
+	}
+	void Script::removeSubArrays(std::vector<StackData>* toparray) {
+		int arraySize = (int)toparray->size();
+		std::vector<double> toremove;
+		toremove.reserve(15);
+		// get list of other nested arrays:
+		for (int i = 0; i < arraySize; i++) {
+			if (toparray->at(i).isArray()) {
+				toremove.push_back(toparray->at(i).getArrayName());
+				removeSubArrays(toparray->at(i).getArrayPointer());
+			}
+		}
+		//Delete Arrays:
+		for (int i = (int)toremove.size() - 1; i >= 0; i--)
+			arraySpace.erase(toremove[i]);
 	}
 	/**
 	 *

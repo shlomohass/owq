@@ -46,6 +46,7 @@ namespace Eowq
 		bool isOwqArr = false;
 		std::map<std::string, StackData>* owqObj = nullptr;
 		std::vector<StackData>* owqArray = nullptr;
+		double owqArrayName = 0.0;
 
 		//Positions and origins:
 		int rstPos = -1;
@@ -94,8 +95,8 @@ namespace Eowq
 		StackData(bool _rst, int _pos); // Asign a pointer stack value
 
 		//Array constructor:
-		StackData(std::vector<StackData>* arrayPointer); // Asign an array pointer stack value
-		void MutateToArray(std::vector<StackData>* arrayPointer);
+		StackData(std::vector<StackData>* arrayPointer, double arrayName); // Asign an array pointer stack value
+		void MutateToArray(std::vector<StackData>* arrayPointer, double arrayName);
 		StackData* traverseInArray(int* path, int index);
 		bool arrayPush(StackData& sd);
 
@@ -123,6 +124,8 @@ namespace Eowq
 		int         getBoolean();
 		bool        getRealBoolean();
 		std::vector<StackData>* getArrayPointer();
+		double      getArrayName();
+
 		std::string& getString();
 		std::string getAsString();
 

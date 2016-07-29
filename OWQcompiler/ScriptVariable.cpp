@@ -160,6 +160,7 @@ namespace Eowq {
 			return pointer->setValueInArray(sd, path, index, push);
 		if (type != RegisteredVariable::GLOBAL_FLEX || !value.isArray())
 			return 6; //Not array.
+
 		//Traverse
 		std::vector<StackData>* baseArr = value.getArrayPointer();
 		StackData* candid = &value;
@@ -172,9 +173,11 @@ namespace Eowq {
 				return 8; //Not in array.
 			}
 		}
+
 		//Push to candid:
 		if (push && candid != nullptr)
 			return (candid->arrayPush(sd)) ? 0 : 7;
+
 		//Set array element:
 		if (!push && candid != nullptr)
 			return (candid->MutateTo(sd)) ? 0 : 7;

@@ -1259,7 +1259,7 @@ namespace Eowq {
 		}
 
 		//Push the array pointer:
-		Stack::push(Temp);
+		Stack::push(Temp, script->arraySpacePointer);
 		if (xcode.getPointer() > 0) {
 			Stack::setTopPointer(xcode.getPointer());
 		}
@@ -1274,6 +1274,13 @@ namespace Eowq {
 			return ExecReturn::Ex_NULL_STACK_EXTRACTION;
 		}
 		StackData* sd = Stack::pop(0);
+
+		StackData* willBeReplaced = sv->getValueInArray(path, travNum - 1);
+		if (!xcode.isArrayPush() && willBeReplaced->isArray()) {
+			script->removeSubArrays(willBeReplaced->getArrayPointer());
+			script->arraySpace.erase(willBeReplaced->getArrayName());
+			willBeReplaced->MutateToNull();
+		}
 		int ret = sv->setValueInArray(*sd, path, travNum - 1, xcode.isArrayPush());
 		Stack::eraseAsGC(sd->getOrigin());
 
@@ -1283,7 +1290,8 @@ namespace Eowq {
 			ScriptError::fatal(execute_errors[ret] + xcode.toString());
 			return (ExecReturn)ret;
 		}
-		return ExecReturn::Ex_OK;
+	
+	return			ExecReturn::Ex_OK;
 	}
 
 	ExecReturn Compute::execute_array_assignment_add_sub(Instruction &xcode, Script *script, ScriptVariable* sv) {

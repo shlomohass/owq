@@ -13,11 +13,11 @@
 // [ ] unset a[3]
 // [ ] a.sort();
 // [ ] a.fill(); // String or Array filled with a value -> for String any Data will be represented as char.
-// [ ] String.split(","); <- by char, all chars, number means slice
-// [x] Array.join("-");      <- Merge array to string with spacer.
+// [ ] String.split(",");   <- by char, all chars, number means slice
+// [x] Array.join("-");     <- Merge array to string with spacer.
 
-
-let a = [1,"a",2,"b",[3,"c"],[4,"d"]],
-    b = ",";
-print(a.join(b));
-print(a.join(""));
+let a = [1,[2,3,[7,8]],[5,6]],
+    b = "shlomi";
+a[1,2] = 4;
+b = a.join("][");
+print("[" + b + "]");

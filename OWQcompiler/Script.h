@@ -67,6 +67,7 @@ namespace Eowq
 		friend class Method;
 		friend class Compute;
 		friend class Tokens;
+		friend class ScriptVariable;
 
 		// Debugger flag:
 		bool script_debug;
@@ -126,6 +127,7 @@ namespace Eowq
 
 		//Array handlers:
 		std::vector<StackData>* pushNewArray(int baseSpace);
+		void removeSubArrays(std::vector<StackData>* toparray);
 
 		//Register variable to global scope from Application layer:
 		bool registerVariable(std::string& varName, RegisteredVariable type, void* address);

@@ -25,23 +25,23 @@ namespace Eowq {
 
 	bool StackData::MutateTo(StackData& sd) {
 		switch (sd.getType()) {
-		case SDtype::SD_NULL:
-			MutateToNull();
-			break;
-		case SDtype::SD_BOOLEAN:
-			MutateToBoolean(sd.getRealBoolean());
-			break;
-		case SDtype::SD_NUMBER:
-			MutateToNumber(sd.getNumber());
-			break;
-		case SDtype::SD_STRING:
-			MutateToString(sd.getString());
-			break;
-		case SDtype::SD_ARRAY:
-			MutateToArray(sd.getArrayPointer());
-			break;
-		default:
-			return false;
+			case SDtype::SD_NULL:
+				MutateToNull();
+				break;
+			case SDtype::SD_BOOLEAN:
+				MutateToBoolean(sd.getRealBoolean());
+				break;
+			case SDtype::SD_NUMBER:
+				MutateToNumber(sd.getNumber());
+				break;
+			case SDtype::SD_STRING:
+				MutateToString(sd.getString());
+				break;
+			case SDtype::SD_ARRAY:
+				MutateToArray(sd.getArrayPointer(), sd.getArrayName());
+				break;
+			default:
+				return false;
 		}
 		return true;
 	}
@@ -122,14 +122,15 @@ namespace Eowq {
 	}
 
 	//Array constructor:
-	StackData::StackData(std::vector<StackData>* arrayPointer) {
-		MutateToArray(arrayPointer);
+	StackData::StackData(std::vector<StackData>* arrayPointer, double arrayName) {
+		MutateToArray(arrayPointer, arrayName);
 	}
-	void StackData::MutateToArray(std::vector<StackData>* arrayPointer) {
+	void StackData::MutateToArray(std::vector<StackData>* arrayPointer, double arrayName) {
 		type = SDtype::SD_ARRAY;
 		owqval = NULLOWQVALUE;
 		owqval.isOwqArr = true;
 		owqval.owqArray = arrayPointer;
+		owqval.owqArrayName = arrayName;
 	}
 	StackData* StackData::traverseInArray(int* path, int index) {
 		if (index > -1) {
@@ -310,12 +311,18 @@ namespace Eowq {
 	bool StackData::getRealBoolean() {
 		return (owqval.bvalue > 0) ? true : false;
 	}
-	/** Returns the Stack Data boolean value in real form
+	/** Returns the array pointer.
 	*
-	* @return bool
 	*/
 	std::vector<StackData>* StackData::getArrayPointer() {
 		return owqval.owqArray;
+	}
+	/** Returns array space name
+	*
+	* @return double
+	*/
+	double StackData::getArrayName() {
+		return owqval.owqArrayName;
 	}
 	/** Converts a double to string
 	 * @param double number DEFAUT : current dvalue
