@@ -30,6 +30,7 @@ namespace Eowq
 		
 		//Generic methods only arrays:
 		static StackData join(StackData* sd, StackData* dl);
+		static int split(StackData* sd, StackData* sp, std::vector<StackData>* arrayTarget);
 		static StackData sum(StackData* sd);
 		//Helpers 
 		static std::string stackTypeName(SDtype sdtype);

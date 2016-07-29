@@ -56,7 +56,10 @@ namespace Eowq {
 		return ss.str();
 	}
 
-
+	/**
+     * Write to the console
+	 * @param StackData sd
+	*/
 	StackData ScriptConsole::join(StackData* sd, StackData* dl) {
 		if (sd->getType() != SDtype::SD_ARRAY)
 			return StackData();
@@ -76,7 +79,51 @@ namespace Eowq {
 		int dls = (int)dl->getAsString().length();
 		return StackData(res.substr(0, res.length() - dls));
 	}
-
+	/**
+	 * Split a string or a number:
+	 * return codes: 0 -> Ok, 1 -> Bad value, 2 -> bad argu, 
+	*/
+	int ScriptConsole::split(StackData* sd, StackData* sp, std::vector<StackData>* arrayTarget) {
+		if (sd->getType() != SDtype::SD_NUMBER && sd->getType() != SDtype::SD_STRING)
+			return 1;
+		if (sp->getType() != SDtype::SD_NUMBER && sp->getType() != SDtype::SD_STRING)
+			return 2;
+		std::string delim = sp->getAsString();
+		std::string input = sd->getAsString();
+		int counter = 0;
+		int limit = 0;
+		std::stringstream value;
+		value << "";
+		// in case the argument is a number or empty string:
+		if (sp->isNumber() || (sp->isString() && delim.length() == 0)) {
+			limit = sp->isString() ? 1 : (int)sp->getAsNumber();
+			for (unsigned int i = 0; i<input.length(); i++) {
+				if (limit > 0 && counter == limit) {
+					arrayTarget->push_back(StackData(value.str()));
+					value.str("");
+					counter = 0;
+				}
+				value << input[i];
+				counter++;
+			}
+			if (value.tellp() > 0) {
+				arrayTarget->push_back(StackData(value.str()));
+			}
+		// in case the argument is a string delimiter
+		} else {
+			for (unsigned int i = 0; i<input.length(); i++) {
+				if (value.tellp() > delim.length() && value.str().substr((int)value.tellp() - delim.length()) == delim) {
+					arrayTarget->push_back(StackData(value.str().substr(0, (int)value.tellp() - delim.length())));
+					value.str("");
+				}
+				value << input[i];
+			}
+			if (value.tellp() > 0) {
+				arrayTarget->push_back(StackData(value.str()));
+			}
+		}
+		return 0;
+	}
 	StackData ScriptConsole::sum(StackData* sd) {
 		if (sd->getType() != SDtype::SD_ARRAY)
 			return StackData();

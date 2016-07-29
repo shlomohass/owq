@@ -110,7 +110,8 @@ namespace Eowq {
 		{ 7,  "isPointed" },
 		{ 8,  "substr"	  },
 		{ 9,  "join"	  },
-		{ 10, "sum"		  }
+		{ 10, "split"     },
+		{ 11, "sum"		  }
 	};
 
 	Lang::Lang() {

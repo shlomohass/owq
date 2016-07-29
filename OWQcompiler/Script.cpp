@@ -714,7 +714,36 @@ namespace Eowq {
 						}
 					}
 				}
-				else if (sysCall == 10) { //sum
+				else if (sysCall == 10) { //split
+					if (!Compute::flagPush) {
+						// Add error when not string sv
+						// Add error when argument is not string or int
+						StackData* dl = Stack::pop(0);
+						if (dl == nullptr || ( !dl->isNumber() && !dl->isString())) {
+							ScriptError::msg("WARNINIG -> split expects 1 argument of type String Or Int");
+							Stack::push(sv->getValuePointer()->getAsString());
+						} else {
+							int originDL = dl->getOrigin();
+							int returnCode = 0;
+							//The result array:
+							std::vector<StackData>* newArray = pushNewArray(0);
+							//Fill the array:
+							returnCode = ScriptConsole::split(sv->getValuePointer(), dl, newArray);
+							//Check for errors:
+							if (returnCode > 0) {
+								ScriptError::msg("WARNINIG -> split used on unsupported variable type or bad argument type");
+							}
+							//Push to stack
+							Stack::push(newArray, arraySpacePointer);
+							//Erase args:
+							Stack::eraseAsGC(originDL);
+						}
+						if (_xcode.getPointer() > 0) {
+							Stack::setTopPointer(_xcode.getPointer());
+						}
+					}
+				}
+				else if (sysCall == 11) { //sum
 					if (!Compute::flagPush) {
 						// Add error when not array
 						Stack::push(ScriptConsole::sum(sv->getValuePointer()));

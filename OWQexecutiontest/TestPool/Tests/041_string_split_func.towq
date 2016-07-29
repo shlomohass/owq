@@ -1,0 +1,27 @@
+let a = "abcdefghijk",
+    b,
+	c,
+	d = 1234567,
+	e,
+	f,
+	g,
+	h;
+
+b = a.split("efg");
+c = a.split("");
+e = d.split(2);
+f = b.join("8");
+g = f.split(0);
+h = d.split(1);
+
+print(b.join("-"));
+print(c.join("-"));
+print(e.join("-"));
+print(g.join("-"));
+print(h.join("-"));
+
+/*
+@expected-output
+abcd-hijka-b-c-d-e-f-g-h-i-j-k12-34-56-7abcd8hijk1-2-3-4-5-6-7
+@end-expected-output
+*/

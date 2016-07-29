@@ -5,6 +5,7 @@
 // [x] a -= 5
 // [x] rearange compiler lib
 // [x] Pointer can't point to array ele and array ele can't hold pointer.
+// [] rearrange sysfuncs struct
 // [ ] unset arrays handlers.
 // [ ] array scoping 
 // [ ] print 5,6,7;
@@ -13,11 +14,11 @@
 // [ ] unset a[3]
 // [ ] a.sort();
 // [ ] a.fill(); // String or Array filled with a value -> for String any Data will be represented as char.
-// [ ] String.split(",");   <- by char, all chars, number means slice
+// [x] String.split(",");   <- by char, all chars, number means slice
 // [x] Array.join("-");     <- Merge array to string with spacer.
 
-let a = [1,[2,3,[7,8]],[5,6]],
-    b = "shlomi";
-a[1,2] = 4;
-b = a.join("][");
-print("[" + b + "]");
+let a = "abcdefghijk",b;
+
+b = a.split(0);
+
+print(b.join(" - "));

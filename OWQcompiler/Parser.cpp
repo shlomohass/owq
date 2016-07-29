@@ -731,8 +731,7 @@ int Parser::compiler(Script* script, Tokens& tokens, bool debug, int rCount){
 	
     //-----------------------------------------------------------
     // Handle tokens with commas in them
-    //			i.e
-    //		x , 32 + y , z
+    //			i.e x, 32+y, z
     // will seperate them into subs and re-compile:
     //-----------------------------------------------------------
     if (tokens.hasCommasNotNested()) {
@@ -993,10 +992,10 @@ int Parser::compilerNew(Script* script, Tokens& tokens, bool debug, int rCount) 
 	Compileobj comobj;
 	int operatorIndex = tokens.getHighestOperatorPriorityIndex(comobj.priortyCode);
 	if (operatorIndex > 0)
-		comobj.leftToken = tokens.getTokenObject(operatorIndex - 1);
+		comobj.leftToken	= tokens.getTokenObject(operatorIndex - 1);
 	if (operatorIndex < tokens.getSize() && tokens.getSize() > 1)
-		comobj.rightToken = tokens.getTokenObject(operatorIndex + 1);
-	comobj.operatorToken = tokens.getTokenObject(operatorIndex);
+		comobj.rightToken	= tokens.getTokenObject(operatorIndex + 1);
+	comobj.operatorToken	= tokens.getTokenObject(operatorIndex);
 	comobj.operatorTokenStr = comobj.operatorToken->token;
 
 	//If none:
