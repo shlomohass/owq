@@ -16,6 +16,8 @@
 // [ ] a.fill(); // String or Array filled with a value -> for String any Data will be represented as char.
 // [x] String.split(",");   <- by char, all chars, number means slice
 // [x] Array.join("-");     <- Merge array to string with spacer.
+// [x] Array.highest();     <- Find the highest numeric value.
+// [x] Array.lowest();      <- Find the lowest numeric value.
 
 let a = [1,34,4,5,2,4];
 let b,c;
