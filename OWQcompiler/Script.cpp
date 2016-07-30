@@ -610,163 +610,6 @@ namespace Eowq {
 		return script->getSize();
 	}
 
-	bool Script::isSystemCall(std::string& object, std::string& functionName, Instruction& _xcode) {
-		/* CACHE THE SYS */
-		//Console print:
-		int sysCall = Lang::LangFindSystemLib(functionName);
-		if (sysCall == 1 || sysCall == 2) { // Print
-			StackData* sd = Stack::pop(0);
-			if (sd != nullptr) {
-				ScriptConsole::print(sd, this->script_debug);
-				Stack::eraseAsGC(sd->getOrigin());
-			}
-			if (Compute::flagPush) { Compute::flagPush = false; }
-			return true;
-		}
-
-		//Handle objects
-		if (!object.empty()) {
-			/**
-			 * Here, we find the variable denoted by 'object', then depending on the value of funcName depends
-			 * on the variables behavior
-			 */
-			ScriptVariable* sv = getVariable(object);
-			if (sv != nullptr) {
-				if (sysCall == 3) { // Length
-					if (!Compute::flagPush) {
-						Stack::push(ScriptConsole::length(sv->getValuePointer()));
-						if (_xcode.getPointer() > 0) {
-							Stack::setTopPointer(_xcode.getPointer());
-						}
-					}
-				}
-				else if (sysCall == 4) { //type
-					if (!Compute::flagPush) {
-						Stack::push(ScriptConsole::type(sv->getValuePointer()));
-						if (_xcode.getPointer() > 0) {
-							Stack::setTopPointer(_xcode.getPointer());
-						}
-					}
-				}
-				else if (sysCall == 5) { //isNull
-					if (!Compute::flagPush) {
-						Stack::push(ScriptConsole::isNull(sv->getValuePointer()));
-						if (_xcode.getPointer() > 0) {
-							Stack::setTopPointer(_xcode.getPointer());
-						}
-					}
-				}
-				else if (sysCall == 6) { //isPointer
-					if (!Compute::flagPush) {
-						Stack::push(ScriptConsole::isPointer(sv));
-						if (_xcode.getPointer() > 0) {
-							Stack::setTopPointer(_xcode.getPointer());
-						}
-					}
-				}
-				else if (sysCall == 7) { //isPointed
-					if (!Compute::flagPush) {
-						Stack::push(ScriptConsole::isPointed(sv));
-						if (_xcode.getPointer() > 0) {
-							Stack::setTopPointer(_xcode.getPointer());
-						}
-					}
-				}
-				else if (sysCall == 8) { //substr
-					if (!Compute::flagPush) {
-						if (sv->getValuePointer()->isString()) {
-							Stack::render();
-							StackData* sb = Stack::pop(0);	//second argument first
-							StackData* sa = Stack::pop(1);	//first argument
-							if (sb == nullptr || sa == nullptr) {
-								ScriptError::msg("WARNINIG -> substr expects 2 arguments");
-								Stack::push(sv->getValuePointer()->getString());
-							}
-							else {
-								int a = (int)sa->getNumber(true);
-								int b = (int)sb->getNumber(true);
-								int originSB = sb->getOrigin();
-								int originSA = sa->getOrigin();
-								Stack::push(sv->getValuePointer()->getString().substr(a, b));
-								Stack::eraseAsGC(originSB);
-								Stack::eraseAsGC(originSA);
-							}
-							if (_xcode.getPointer() > 0) {
-								Stack::setTopPointer(_xcode.getPointer());
-							}
-						}
-					}
-				}
-				else if (sysCall == 9) { //join
-					if (!Compute::flagPush) {
-						// Add error when not array
-						StackData* dl = Stack::pop(0);
-						if (dl == nullptr) {
-							ScriptError::msg("WARNINIG -> join expects 1 argument");
-							Stack::push(sv->getValuePointer()->getAsString());
-						} else {
-							int originDL = dl->getOrigin();
-							Stack::push(ScriptConsole::join(sv->getValuePointer(), dl));
-							Stack::eraseAsGC(originDL);
-						}
-						if (_xcode.getPointer() > 0) {
-							Stack::setTopPointer(_xcode.getPointer());
-						}
-					}
-				}
-				else if (sysCall == 10) { //split
-					if (!Compute::flagPush) {
-						// Add error when not string sv
-						// Add error when argument is not string or int
-						StackData* dl = Stack::pop(0);
-						if (dl == nullptr || ( !dl->isNumber() && !dl->isString())) {
-							ScriptError::msg("WARNINIG -> split expects 1 argument of type String Or Int");
-							Stack::push(sv->getValuePointer()->getAsString());
-						} else {
-							int originDL = dl->getOrigin();
-							int returnCode = 0;
-							//The result array:
-							std::vector<StackData>* newArray = pushNewArray(0);
-							//Fill the array:
-							returnCode = ScriptConsole::split(sv->getValuePointer(), dl, newArray);
-							//Check for errors:
-							if (returnCode > 0) {
-								ScriptError::msg("WARNINIG -> split used on unsupported variable type or bad argument type");
-							}
-							//Push to stack
-							Stack::push(newArray, arraySpacePointer);
-							//Erase args:
-							Stack::eraseAsGC(originDL);
-						}
-						if (_xcode.getPointer() > 0) {
-							Stack::setTopPointer(_xcode.getPointer());
-						}
-					}
-				}
-				else if (sysCall == 11) { //sum
-					if (!Compute::flagPush) {
-						// Add error when not array
-						Stack::push(ScriptConsole::sum(sv->getValuePointer()));
-						if (_xcode.getPointer() > 0) {
-							Stack::setTopPointer(_xcode.getPointer());
-						}
-					}
-				}
-				else {
-					return false;
-				}
-				if (Compute::flagPush) { Compute::flagPush = false; }
-				return true;
-			}
-			else {
-				ScriptError::msg("Unable to find object " + object + " for system call " + functionName);
-				if (Compute::flagPush) { Compute::flagPush = false; }
-				return true;
-			}
-		}
-		return false;
-	}
-
 	/** Validate if an extension is supported or not
 	 * Extension type is set in Lang
 	 *
@@ -904,6 +747,229 @@ namespace Eowq {
 		return true;
 	}
 
+	/**
+	* All language built in functions:
+	* All hooks attached
+	*/
+	bool Script::isSystemCall(std::string& object, std::string& functionName, Instruction& _xcode) {
+		/* CACHE THE SYS */
+
+		//Console print:
+		int sysCall = Lang::LangFindSystemLib(functionName);
+		if (sysCall == 1 || sysCall == 2) { // Print
+			StackData* sd = Stack::pop(0);
+			if (sd != nullptr) {
+				ScriptConsole::print(sd, this->script_debug);
+				Stack::eraseAsGC(sd->getOrigin());
+			}
+			if (Compute::flagPush) { Compute::flagPush = false; }
+			return true;
+		}
+
+		//Handle objects
+		if (!object.empty()) {
+			/**
+			* Here, we find the variable denoted by 'object', then depending on the value of funcName depends
+			* on the variables behavior
+			*/
+			ScriptVariable* sv = getVariable(object);
+			if (sv != nullptr) {
+				if (sysCall == 3) { // length
+					if (!Compute::flagPush) {
+						hookFunc_length(sv, _xcode);
+					}
+				}
+				else if (sysCall == 4) { //type
+					if (!Compute::flagPush) {
+						hookFunc_type(sv, _xcode);
+					}
+				}
+				else if (sysCall == 5) { //isNull
+					if (!Compute::flagPush) {
+						hookFunc_isNull(sv, _xcode);
+					}
+				}
+				else if (sysCall == 6) { //isPointer
+					if (!Compute::flagPush) {
+						hookFunc_isPointer(sv, _xcode);
+					}
+				}
+				else if (sysCall == 7) { //isPointed
+					if (!Compute::flagPush) {
+						hookFunc_isPointed(sv, _xcode);
+					}
+				}
+				else if (sysCall == 8) { //substr
+					if (!Compute::flagPush) {
+						hookFunc_substr(sv, _xcode);
+					}
+				}
+				else if (sysCall == 9) { //join
+					if (!Compute::flagPush) {
+						hookFunc_join(sv, _xcode);
+					}
+				}
+				else if (sysCall == 10) { //split
+					if (!Compute::flagPush) {
+						hookFunc_split(sv, _xcode);
+					}
+				}
+				else if (sysCall == 11) { //sum
+					if (!Compute::flagPush) {
+						hookFunc_sum(sv, _xcode);
+					}
+				}
+				else if (sysCall == 12) { //highest
+					if (!Compute::flagPush) {
+						hookFunc_highest(sv, _xcode);
+					}
+				}
+				else if (sysCall == 13) { //lowest
+					if (!Compute::flagPush) {
+						hookFunc_lowest(sv, _xcode);
+					}
+				}
+				else {
+					return false;
+				}
+				if (Compute::flagPush) { Compute::flagPush = false; }
+				return true;
+			} else {
+				ScriptError::msg("Unable to find object " + object + " for system call " + functionName);
+				if (Compute::flagPush) { Compute::flagPush = false; }
+				return true;
+			}
+		}
+		return false;
+	}
+	bool Script::hookFunc_length(ScriptVariable* sv, Instruction& _xcode) {
+		Stack::push(ScriptConsole::length(sv->getValuePointer()));
+		if (_xcode.getPointer() > 0) {
+			Stack::setTopPointer(_xcode.getPointer());
+		}
+		return true;
+	}
+	bool Script::hookFunc_type(ScriptVariable* sv, Instruction& _xcode) {
+		Stack::push(ScriptConsole::type(sv->getValuePointer()));
+		if (_xcode.getPointer() > 0) {
+			Stack::setTopPointer(_xcode.getPointer());
+		}
+		return true;
+	}
+	bool Script::hookFunc_isNull(ScriptVariable* sv, Instruction& _xcode) {
+		Stack::push(ScriptConsole::isNull(sv->getValuePointer()));
+		if (_xcode.getPointer() > 0) {
+			Stack::setTopPointer(_xcode.getPointer());
+		}
+		return true;
+	}
+	bool Script::hookFunc_isPointer(ScriptVariable* sv, Instruction& _xcode) {
+		Stack::push(ScriptConsole::isPointer(sv));
+		if (_xcode.getPointer() > 0) {
+			Stack::setTopPointer(_xcode.getPointer());
+		}
+		return true;
+	}
+	bool Script::hookFunc_isPointed(ScriptVariable* sv, Instruction& _xcode) {
+		Stack::push(ScriptConsole::isPointed(sv));
+		if (_xcode.getPointer() > 0) {
+			Stack::setTopPointer(_xcode.getPointer());
+		}
+		return true;
+	}
+	bool Script::hookFunc_substr(ScriptVariable* sv, Instruction& _xcode) {
+		if (sv->getValuePointer()->isString()) {
+			Stack::render();
+			StackData* sb = Stack::pop(0);	//second argument first
+			StackData* sa = Stack::pop(1);	//first argument
+			if (sb == nullptr || sa == nullptr) {
+				ScriptError::msg("WARNINIG -> substr expects 2 arguments");
+				Stack::push(sv->getValuePointer()->getString());
+			}
+			else {
+				int a = (int)sa->getNumber(true);
+				int b = (int)sb->getNumber(true);
+				int originSB = sb->getOrigin();
+				int originSA = sa->getOrigin();
+				Stack::push(sv->getValuePointer()->getString().substr(a, b));
+				Stack::eraseAsGC(originSB);
+				Stack::eraseAsGC(originSA);
+			}
+			if (_xcode.getPointer() > 0) {
+				Stack::setTopPointer(_xcode.getPointer());
+			}
+		}
+		return true;
+	}
+	bool Script::hookFunc_join(ScriptVariable* sv, Instruction& _xcode) {
+		// Add error when not array
+		StackData* dl = Stack::pop(0);
+		if (dl == nullptr) {
+			ScriptError::msg("WARNINIG -> join expects 1 argument");
+			Stack::push(sv->getValuePointer()->getAsString());
+		} else {
+			int originDL = dl->getOrigin();
+			Stack::push(ScriptConsole::join(sv->getValuePointer(), dl));
+			Stack::eraseAsGC(originDL);
+		}
+		if (_xcode.getPointer() > 0) {
+			Stack::setTopPointer(_xcode.getPointer());
+		}
+		return true;
+	}
+	bool Script::hookFunc_split(ScriptVariable* sv, Instruction& _xcode) {
+		// Add error when not string sv
+		// Add error when argument is not string or int
+		StackData* dl = Stack::pop(0);
+		if (dl == nullptr || (!dl->isNumber() && !dl->isString())) {
+			ScriptError::msg("WARNINIG -> split expects 1 argument of type String Or Int");
+			Stack::push(sv->getValuePointer()->getAsString());
+		}
+		else {
+			int originDL = dl->getOrigin();
+			int returnCode = 0;
+			//The result array:
+			std::vector<StackData>* newArray = pushNewArray(0);
+			//Fill the array:
+			returnCode = ScriptConsole::split(sv->getValuePointer(), dl, newArray);
+			//Check for errors:
+			if (returnCode > 0) {
+				ScriptError::msg("WARNINIG -> split used on unsupported variable type or bad argument type");
+			}
+			//Push to stack
+			Stack::push(newArray, arraySpacePointer);
+			//Erase args:
+			Stack::eraseAsGC(originDL);
+		}
+		if (_xcode.getPointer() > 0) {
+			Stack::setTopPointer(_xcode.getPointer());
+		}
+		return true;
+	}
+	bool Script::hookFunc_sum(ScriptVariable* sv, Instruction& _xcode) {
+		// Add error when not array
+		Stack::push(ScriptConsole::sum(sv->getValuePointer()));
+		if (_xcode.getPointer() > 0) {
+			Stack::setTopPointer(_xcode.getPointer());
+		}
+		return true;
+	}
+	bool Script::hookFunc_highest(ScriptVariable* sv, Instruction& _xcode) {
+		// Add error when not array
+		Stack::push(ScriptConsole::highest(sv->getValuePointer()));
+		if (_xcode.getPointer() > 0) {
+			Stack::setTopPointer(_xcode.getPointer());
+		}
+		return true;
+	}
+	bool Script::hookFunc_lowest(ScriptVariable* sv, Instruction& _xcode) {
+		// Add error when not array
+		Stack::push(ScriptConsole::lowest(sv->getValuePointer()));
+		if (_xcode.getPointer() > 0) {
+			Stack::setTopPointer(_xcode.getPointer());
+		}
+		return true;
+	}
 	/** Destructor
 	 *
 	 */

@@ -7,13 +7,14 @@
 #ifndef SCRIPT_H
 #define	SCRIPT_H
 
-
-//#include <boost\filesystem.hpp>
-//#include <boost\filesystem\fstream.hpp>
+// Boost Includes:
 #include <boost\filesystem\operations.hpp>
 #include <boost\filesystem\path.hpp>
+
 namespace Eowq
 {
+
+	// Return codes:
 	enum ExecReturn {
 		Ex_OK,
 		Ex_RETURN,
@@ -28,12 +29,14 @@ namespace Eowq
 		Ex_FATAL_CALCULATION
 	};
 
+	// Scope Types:
 	enum ScopeType {
 		ST_METHOD,
 		ST_LOOP
 	};
 }
 
+// Main Includes:
 #include "Instruction.h"
 #include "Loop.h"
 #include "Method.h"
@@ -51,6 +54,7 @@ namespace Eowq
 
 	class Parser;
 
+	//OWQ Scope:
 	struct OWQScope {
 		ScopeType type;
 		Method m;
@@ -60,8 +64,10 @@ namespace Eowq
 		OWQScope(Loop _l) { l = _l; type = ScopeType::ST_LOOP; }
 	};
 
+	//Main Script Core:
 	class Script {
 
+		// Friend Classes:
 		friend class Parser;
 		friend class Loop;
 		friend class Method;
@@ -75,35 +81,33 @@ namespace Eowq
 		//Containers:
 		std::vector<Instruction> code;
 
-		//Global Scope:
+		//Global Scope - Storage for the running code:
 		std::map<std::string, int> functionTable;
 		std::unordered_map<std::string, ScriptVariable> variables;
 		std::unordered_map<double, std::vector<StackData>> arraySpace;
 		double arraySpacePointer;
 
-		// Scope tracker:
+		// Scope tracker & container:
 		std::unordered_map<int, OWQScope> scopeStore;
 		std::vector<OWQScope*> scope;
 
 		int internalStaticPointer;
 
+		// Scope and functions actions:
 		void popActiveScope();
 		void pushMethodScope(int address, int retAddress, std::string name);
 		void pushLoopScope(int address);
-
 		OWQScope* scopeStoreHas(int scopeAddress);
-
 		int getFunctionAddress(std::string funcName);
 		OWQScope* getActiveScope();
 		OWQScope* getActiveScope(int scopeOffset);
 
+
+
 		ExecReturn executeInstruction(Instruction &code, int& instructionPointer);
 		ExecReturn executeInstruction(Instruction &code, int& instructionPointer, bool debug);
-
-
 		int injectScript(Script* script);
 
-		bool isSystemCall(std::string& object, std::string& functionName, Instruction& _xcode);
 		bool validateExtension(std::wstring extension);
 		int  mergeLinesAndCompile(Source* source, Parser* parser, int linenum, bool debug);
 
@@ -121,7 +125,20 @@ namespace Eowq
 
 		void addInstruction(Instruction I);
 		void addInstruction(Instruction I, bool allowRST);
-
+		
+		//System Hooks:
+		bool isSystemCall(std::string& object, std::string& functionName, Instruction& _xcode);
+		bool hookFunc_length(ScriptVariable* sv, Instruction& _xcode);
+		bool hookFunc_type(ScriptVariable* sv, Instruction& _xcode);
+		bool hookFunc_isNull(ScriptVariable* sv, Instruction& _xcode);
+		bool hookFunc_isPointer(ScriptVariable* sv, Instruction& _xcode);
+		bool hookFunc_isPointed(ScriptVariable* sv, Instruction& _xcode);
+		bool hookFunc_substr(ScriptVariable* sv, Instruction& _xcode);
+		bool hookFunc_join(ScriptVariable* sv, Instruction& _xcode);
+		bool hookFunc_split(ScriptVariable* sv, Instruction& _xcode);
+		bool hookFunc_sum(ScriptVariable* sv, Instruction& _xcode);
+		bool hookFunc_highest(ScriptVariable* sv, Instruction& _xcode);
+		bool hookFunc_lowest(ScriptVariable* sv, Instruction& _xcode);
 	public:
 		Script();
 

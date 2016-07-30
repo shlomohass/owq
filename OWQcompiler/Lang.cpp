@@ -111,7 +111,9 @@ namespace Eowq {
 		{ 8,  "substr"	  },
 		{ 9,  "join"	  },
 		{ 10, "split"     },
-		{ 11, "sum"		  }
+		{ 11, "sum"		  },
+		{ 12, "highest"	  },
+		{ 13, "lowest"	  },
 	};
 
 	Lang::Lang() {

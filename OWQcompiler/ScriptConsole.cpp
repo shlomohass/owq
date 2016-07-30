@@ -142,16 +142,59 @@ namespace Eowq {
 		}
 		return StackData(result);
 	}
+	StackData ScriptConsole::highest(StackData* sd) {
+		if (sd->getType() != SDtype::SD_ARRAY) {
+			return StackData();
+		}
+		std::vector<StackData>* arrayTarget = sd->getArrayPointer();
+		int size = (int)arrayTarget->size();
+		double result = 0;
+		double temp = 0;
+		for (int i = 0; i < size; i++) {
+			StackData* sdChild = &arrayTarget->at(i);
+			if (sdChild->isArray()) {
+				temp = highest(sdChild).getAsNumber();
+			} else {
+				temp = sdChild->getAsNumber();
+			}
+			if (i == 0 || temp > result) {
+				result = temp;
+			}
+		}
+		return StackData(result);
+	}
+	StackData ScriptConsole::lowest(StackData* sd) {
+		if (sd->getType() != SDtype::SD_ARRAY) {
+			return StackData();
+		}
+		std::vector<StackData>* arrayTarget = sd->getArrayPointer();
+		int size = (int)arrayTarget->size();
+		double result = 0;
+		double temp = 0;
+		for (int i = 0; i < size; i++) {
+			StackData* sdChild = &arrayTarget->at(i);
+			if (sdChild->isArray()) {
+				temp = lowest(sdChild).getAsNumber();
+			}
+			else {
+				temp = sdChild->getAsNumber();
+			}
+			if (i == 0 || temp < result) {
+				result = temp;
+			}
+		}
+		return StackData(result);
+	}
 	std::string ScriptConsole::stackTypeName(SDtype sdtype) {
 		switch (sdtype) {
-		case SDtype::SD_ARRAY:	return "ARRAY";			break;
-		case SDtype::SD_BOOLEAN:	return "BOOLEAN";		break;
-		case SDtype::SD_NULL:		return "NULL";			break;
-		case SDtype::SD_NUMBER:	return "NUMBER";		break;
-		case SDtype::SD_OBJ:		return "OBJECT";		break;
-		case SDtype::SD_OBJpointer: return "OBJECT";		break;
-		case SDtype::SD_RST:		return "INTERNAL_RST";	break;
-		case SDtype::SD_STRING:	return "STRING";		break;
+			case SDtype::SD_ARRAY:		return "ARRAY";			break;
+			case SDtype::SD_BOOLEAN:	return "BOOLEAN";		break;
+			case SDtype::SD_NULL:		return "NULL";			break;
+			case SDtype::SD_NUMBER:		return "NUMBER";		break;
+			case SDtype::SD_OBJ:		return "OBJECT";		break;
+			case SDtype::SD_OBJpointer: return "OBJECT";		break;
+			case SDtype::SD_RST:		return "INTERNAL_RST";	break;
+			case SDtype::SD_STRING:		return "STRING";		break;
 		}
 		return "UNKNOWN";
 	}
