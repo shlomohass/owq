@@ -109,9 +109,10 @@ int main(int argc, char** argv) {
 	std::vector<fs::wpath> test_files;
 	std::map <std::wstring, std::wstring> expected_results_list;
 	std::map <std::wstring, std::wstring> computed_results_list;
+	std::vector<std::wstring> failedTests;
 
 	int testcount = 0;
-
+	int actualTestsPerform = 0;
 	//Check if tests folder is here and scan the directory:
 	if (fs::exists(settings.testdir) || fs::exists(settings.outdir))
 	{
@@ -197,11 +198,28 @@ int main(int argc, char** argv) {
 						std::wcout << L"       Result: " << ((resultbuf == iterator->second) ? L"Test PASSED!" : (L"Test FAILLED!  actual result ----> " + un_escaped_resultbuf)) << std::endl;
 					}
 					computed_results_list[iterator->first] = resultbuf;
+					if (resultbuf != iterator->second) {
+						failedTests.push_back(iterator->first);
+					}
 				clock_t tEnd = clock();
 				printf("       Execution: %.2fs, %dms\n\n", (double)(tEnd - tStart) / CLOCKS_PER_SEC, (tEnd - tStart) / (CLOCKS_PER_SEC / 1000));
+				actualTestsPerform++;
 			} else {
 				std::wcout << std::endl;
 			}
+		}
+		std::wcout << std::endl << std::endl;
+		std::wcout << L"OWQ Execution Test Results: " << std::endl;
+		std::wcout << L"------------------------------------------" << std::endl;
+		std::wcout << L"  TOTAL TESTS FOUND  : " << testcount << std::endl;
+		std::wcout << L"  TOTAL TESTS DONE   : " << actualTestsPerform << std::endl;
+		std::wcout << L"  TOTAL TESTS PASSED : " << (actualTestsPerform - failedTests.size()) << std::endl;
+		std::wcout << L"  TOTAL TESTS FAILED : " << failedTests.size() << std::endl;
+		if (failedTests.size() > 0) {
+			std::wcout << L"  FAILED TESTS LIST  : " << std::endl;
+		}
+		for (std::vector<std::wstring>::iterator it = failedTests.begin(); it != failedTests.end(); ++it) {
+			std::wcout << L"    -> " << *it << std::endl;
 		}
 	} else {
 		std::wcout << std::endl << L" * ERROR: Tests or Result folder not found!" << std::endl;
@@ -209,8 +227,7 @@ int main(int argc, char** argv) {
 	}
 
 	//Write to log and output to console:
-	
-	std::wcout << std::endl;
+	std::wcout << std::endl << std::endl;
 	system("pause");
 	return exitCode;
 }
