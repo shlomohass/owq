@@ -1,0 +1,30 @@
+# nl : "\n" #
+let arr = [1,2,3,4,5,6,7,8,9,10,
+           "test","owq","rev",44,
+		   6,5,8,7,6,5,3,4,
+		   8,6,7,0,9,2,8,3,
+		   4,0,9,8,8,9,10,
+		   "test","owq","rev",
+		   44,6,5,8,3,5,9],
+    order = 10,
+	it = 0;
+while (it < order) {
+	let itt = arr.length() - 1;
+	while (itt > 0) {
+		let temp = arr[itt];
+		arr[itt] = arr[itt - 1];
+		arr[itt - 1] = temp;
+		itt--;
+	}
+	it++;
+}
+print(arr.join(",") + #nl#);
+print(arr.highest() + #nl#);
+print(arr.lowest());
+/*
+@expected-output
+test,owq,rev,44,6,5,8,3,5,9,1,2,3,4,5,6,7,8,9,10,test,owq,rev,44,6,5,8,7,6,5,3,4,8,6,7,0,9,2,8,3,4,0,9,8,8,9,10
+44
+0
+@end-expected-output
+*/

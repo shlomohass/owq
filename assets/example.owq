@@ -20,13 +20,17 @@
 // [x] Array.highest();     <- Find the highest numeric value.
 // [x] Array.lowest();      <- Find the lowest numeric value.
 
-let a = [], b = 1;
-
-while (b < 2) {
-	b++;
-	a[] = 3;
-	let c = [1,2,3];
-	print(c[1]);
+let arr = [1,2,3,4,5],
+    order = 2,
+	it = 0;
+while (it < order) {
+	let itt = arr.length() - 1;
+	while (itt > 0) {
+		let temp = arr[itt];
+		arr[itt] = arr[itt - 1];
+		arr[itt - 1] = temp
+		itt--;
+	}
+	it++;
 }
-
-print(a.join("-"));
+print(arr.join(" "));

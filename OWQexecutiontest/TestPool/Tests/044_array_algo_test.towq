@@ -1,0 +1,19 @@
+# nl : "\n" #
+let a = [1, 2, 3, 4, 5, 6, 7, 8];
+
+let b = a.length(), 	
+	c = [];
+	
+while (b > 0) {
+	c[] = a[b - 1];
+	b--;
+}
+
+print(a.join("-") + #nl#);
+print(c.join("-"));
+/*
+@expected-output
+1-2-3-4-5-6-7-8
+8-7-6-5-4-3-2-1
+@end-expected-output
+*/
