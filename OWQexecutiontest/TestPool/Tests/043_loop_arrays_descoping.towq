@@ -1,0 +1,16 @@
+let a = [], b = 1;
+
+while (b < 2) {
+	b++;
+	a[] = 3;
+	let c = [1,2,3];
+	print(c[1]);
+}
+
+print(a.join("-"));
+
+/*
+@expected-output
+23
+@end-expected-output
+*/

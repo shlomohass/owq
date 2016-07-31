@@ -1,13 +1,14 @@
 
+// [ ] BUG -> pointer count only ones.
 // [x] a[-1]
 // [x] Treat any value as numeric in array path.
 // [x] a += 4
 // [x] a -= 5
 // [x] rearange compiler lib
 // [x] Pointer can't point to array ele and array ele can't hold pointer.
-// [ ] rearrange sysfuncs struct
+// [x] rearrange sysfuncs struct
 // [ ] unset arrays handlers.
-// [ ] array scoping 
+// [x] array scoping 
 // [ ] print 5,6,7;
 // [ ] isset a[1]; <- isset value check if its defined
 // [ ] continue
@@ -19,10 +20,13 @@
 // [x] Array.highest();     <- Find the highest numeric value.
 // [x] Array.lowest();      <- Find the lowest numeric value.
 
-let a = [1,34,4,5,2,4];
-let b,c;
+let a = [], b = 1;
 
-b = a.highest();
-c = a.lowest();
+while (b < 2) {
+	b++;
+	a[] = 3;
+	let c = [1,2,3];
+	print(c[1]);
+}
 
-print(b + " - " + c);
+print(a.join("-"));

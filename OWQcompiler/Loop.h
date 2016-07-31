@@ -47,7 +47,8 @@ namespace Eowq
 		void derefInScope(std::string& name);
 
 		//Delete from scope:
-		void deleteFromScope(std::unordered_map<std::string, ScriptVariable>::iterator& it);
+		void deleteFromScope(Script* script, std::unordered_map<std::string, ScriptVariable>::iterator& it);
+		void deleteFromScope(Script* script, std::unordered_map<std::string, ScriptVariable>::iterator& it, bool avoidDelete);
 
 		//Reset personal scope:
 		void resetScope(Script* script);

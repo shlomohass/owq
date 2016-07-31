@@ -78,9 +78,29 @@ namespace Eowq {
 	}
 
 	//Delete from scope:
-	void Loop::deleteFromScope(std::unordered_map<std::string, ScriptVariable>::iterator& it) {
-		var.erase(it);
-		varSize--;
+	void Loop::deleteFromScope(Script* script, std::unordered_map<std::string, ScriptVariable>::iterator& it) {
+		deleteFromScope(script, it, false);
+	}
+	void Loop::deleteFromScope(Script* script, std::unordered_map<std::string, ScriptVariable>::iterator& it, bool avoidDelete) {
+		//Deref a pointer -> means go to actual variable and unmark pointed.
+		if (it->second.getPointer() != nullptr) {
+			it->second.getPointer()->remHasPointers();
+		}
+		//Deref if pointed -> means go to actual variable and null pointers.
+		if (it->second.isPointed()) {
+			script->derefBackwordsInScopes(it->second.getName());
+		}
+		//Kill arrays:
+		if (it->second.getValue().isArray()) {
+			//Releases any sub arrays:
+			script->removeSubArrays(it->second.getValuePointer()->getArrayPointer());
+			//Release the array
+			script->arraySpace.erase(it->second.getValuePointer()->getArrayName());
+		}
+		if (!avoidDelete) {
+			var.erase(it);
+			varSize--;
+		}
 	}
 
 	void Loop::resetScope(Script* script) {
@@ -88,12 +108,8 @@ namespace Eowq {
 			//Backward deref:
 			std::unordered_map<std::string, ScriptVariable>::iterator it;
 			for (it = var.begin(); it != var.end(); it++) {
-				if (it->second.getPointer() != nullptr) {
-					it->second.getPointer()->remHasPointers();
-				}
-				if (it->second.isPointed()) {
-					script->derefBackwordsInScopes(it->second.getName());
-				}
+				//will only handle the cleaning without actual earasing!
+				deleteFromScope(script, it, true);
 			}
 			//Clear safely:
 			var.clear();

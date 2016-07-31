@@ -425,14 +425,14 @@ namespace Eowq {
 			if (scope[i]->type == ScopeType::ST_LOOP) {
 				it = scope[i]->l.getVariableIt(name);
 				if (it != scope[i]->l.getVariableContainerEnd()) {
-					scope[i]->l.deleteFromScope(it);
+					scope[i]->l.deleteFromScope(this, it);
 					deleted = true;
 					break;
 				}
 			} else {
 				it = scope[i]->m.getVariableIt(name);
 				if (it != scope[i]->m.getVariableContainerEnd()) {
-					scope[i]->l.deleteFromScope(it);
+					scope[i]->l.deleteFromScope(this, it);
 					deleted = true;
 					break;
 				}

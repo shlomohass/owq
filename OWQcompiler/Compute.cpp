@@ -969,7 +969,7 @@ namespace Eowq {
 				if (numberOfBreaks == 0) {
 					instructionPointer = j;
 					//Now safely exit scopes:
-					//Yhis will make sure poiters are deref before poping:
+					//This will make sure pointers are deref before poping:
 					for (int i = (int)a->getNumber(); i > 0; i--) {
 						OWQScope* scopeToRemove = script->getActiveScope();
 						if (scopeToRemove != nullptr) {
