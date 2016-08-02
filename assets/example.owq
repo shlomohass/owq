@@ -1,6 +1,6 @@
 
 // [ ] BUG -> pointer count only ones.
-// [x] a[-1]
+// [ ] a[-1]
 // [x] Treat any value as numeric in array path.
 // [x] a += 4
 // [x] a -= 5
@@ -12,25 +12,29 @@
 // [ ] print 5,6,7;
 // [ ] isset a[1]; <- isset value check if its defined
 // [ ] continue
-// [ ] unset a[3]
+// [ ] a.erase(3)
+// [ ] Array.keep(string); <- keep only types : STRING, NUMBER, ARRAY, NULL
+// [ ] Array.unique();
+// [ ] Array.remove(from{str, int, array})
+// [ ] Array.find({str, int, array}) <- find first return index
+// [ ] Array.keep({str, int, array})
+// [ ] Array.count({str, int, array}) <- number of times we find
+// [ ] Array.merge({Array}) <- number of times we find
 // [ ] a.sort();
 // [ ] a.fill(); // String or Array filled with a value -> for String any Data will be represented as char.
 // [x] String.split(",");   <- by char, all chars, number means slice
 // [x] Array.join("-");     <- Merge array to string with spacer.
 // [x] Array.highest();     <- Find the highest numeric value.
 // [x] Array.lowest();      <- Find the lowest numeric value.
+// [ ] String.tolower();
+// [ ] String.toupper();
+// [ ] Number.round(Int);
+// [ ] Number.round(Int);
+// [ ] Number.floor(Int);
+// [ ] Number.ceil(Int);
 
-let arr = [1,2,3,4,5],
-    order = 2,
-	it = 0;
-while (it < order) {
-	let itt = arr.length() - 1;
-	while (itt > 0) {
-		let temp = arr[itt];
-		arr[itt] = arr[itt - 1];
-		arr[itt - 1] = temp
-		itt--;
-	}
-	it++;
-}
-print(arr.join(" "));
+let a = "OwQ Is Amazing 414";
+print(a);
+print(a.tolower());
+let b = a.toupper();
+print(b);

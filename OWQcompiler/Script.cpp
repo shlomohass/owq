@@ -829,6 +829,16 @@ namespace Eowq {
 						hookFunc_lowest(sv, _xcode);
 					}
 				}
+				else if (sysCall == 14) { //tolower
+					if (!Compute::flagPush) {
+						hookFunc_tolower(sv, _xcode);
+					}
+				}
+				else if (sysCall == 15) { //toupper
+					if (!Compute::flagPush) {
+						hookFunc_toupper(sv, _xcode);
+					}
+				}
 				else {
 					return false;
 				}
@@ -965,6 +975,20 @@ namespace Eowq {
 	bool Script::hookFunc_lowest(ScriptVariable* sv, Instruction& _xcode) {
 		// Add error when not array
 		Stack::push(ScriptConsole::lowest(sv->getValuePointer()));
+		if (_xcode.getPointer() > 0) {
+			Stack::setTopPointer(_xcode.getPointer());
+		}
+		return true;
+	}
+	bool Script::hookFunc_tolower(ScriptVariable* sv, Instruction& _xcode) {
+		Stack::push(ScriptConsole::tolower(sv->getValuePointer()));
+		if (_xcode.getPointer() > 0) {
+			Stack::setTopPointer(_xcode.getPointer());
+		}
+		return true;
+	}
+	bool Script::hookFunc_toupper(ScriptVariable* sv, Instruction& _xcode) {
+		Stack::push(ScriptConsole::toupper(sv->getValuePointer()));
 		if (_xcode.getPointer() > 0) {
 			Stack::setTopPointer(_xcode.getPointer());
 		}

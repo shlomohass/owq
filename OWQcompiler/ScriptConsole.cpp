@@ -56,6 +56,18 @@ namespace Eowq {
 		return ss.str();
 	}
 
+	StackData ScriptConsole::tolower(StackData* sd) {
+		std::string tempStr = sd->getAsString();
+		std::transform(tempStr.begin(), tempStr.end(), tempStr.begin(), ::tolower);
+		return StackData(tempStr);
+	}
+
+	StackData ScriptConsole::toupper(StackData* sd) {
+		std::string tempStr = sd->getAsString();
+		std::transform(tempStr.begin(), tempStr.end(), tempStr.begin(), ::toupper);
+		return StackData(tempStr);
+	}
+
 	/**
      * Write to the console
 	 * @param StackData sd

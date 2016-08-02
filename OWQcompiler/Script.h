@@ -139,6 +139,8 @@ namespace Eowq
 		bool hookFunc_sum(ScriptVariable* sv, Instruction& _xcode);
 		bool hookFunc_highest(ScriptVariable* sv, Instruction& _xcode);
 		bool hookFunc_lowest(ScriptVariable* sv, Instruction& _xcode);
+		bool hookFunc_tolower(ScriptVariable* sv, Instruction& _xcode);
+		bool hookFunc_toupper(ScriptVariable* sv, Instruction& _xcode);
 	public:
 		Script();
 

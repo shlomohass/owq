@@ -114,6 +114,8 @@ namespace Eowq {
 		{ 11, "sum"		  },
 		{ 12, "highest"	  },
 		{ 13, "lowest"	  },
+		{ 14, "tolower"	  },
+		{ 15, "toupper"   }
 	};
 
 	Lang::Lang() {

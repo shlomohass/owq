@@ -1,0 +1,10 @@
+let a = "OwQ";
+print(a);
+print(a.tolower());
+let b = a.toupper();
+print(b);
+/*
+@expected-output
+OwQowqOWQ
+@end-expected-output
+*/

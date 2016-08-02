@@ -9,6 +9,7 @@
 #include "Setowq.h"
 #include "StackData.h"
 #include "ScriptVariable.h"
+#include <algorithm>
 #include <iostream>
 #include <sstream>
 namespace Eowq
@@ -27,7 +28,8 @@ namespace Eowq
 		static StackData isPointer(ScriptVariable* sv);
 		static StackData isPointed(ScriptVariable* sv);
 		static std::string toString(double number);
-		
+		static StackData tolower(StackData* sd);
+		static StackData toupper(StackData* sd);
 		//Generic methods only arrays:
 		static StackData join(StackData* sd, StackData* dl);
 		static int split(StackData* sd, StackData* sp, std::vector<StackData>* arrayTarget);
