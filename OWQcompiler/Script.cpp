@@ -716,8 +716,7 @@ namespace Eowq {
 				//Clear vectors and allocated memory for new pre-parse
 				source.clearLines();
 
-			}
-			else {
+			} else {
 				source.cleanLine();
 				source.pushLine(linenum);
 			}
@@ -772,7 +771,18 @@ namespace Eowq {
 			* Here, we find the variable denoted by 'object', then depending on the value of funcName depends
 			* on the variables behavior
 			*/
-			ScriptVariable* sv = getVariable(object);
+			ScriptVariable* sv = nullptr;
+			ScriptVariable fromstacksv;
+			if (object != "-1") {
+				sv = getVariable(object);
+			} else {
+				StackData* sd = Stack::pop(0);
+				if (sd != nullptr) {
+					fromstacksv.setValue(*sd);
+					Stack::eraseAsGC(sd->getOrigin());
+					sv = &fromstacksv;
+				}
+			}
 			if (sv != nullptr) {
 				if (sysCall == 3) { // length
 					if (!Compute::flagPush) {
@@ -849,8 +859,11 @@ namespace Eowq {
 				if (Compute::flagPush) { Compute::flagPush = false; }
 				return true;
 			}
+		} else {
+			//try from stack:
 		}
-		return false;
+	
+		return	false;
 	}
 	bool Script::hookFunc_length(ScriptVariable* sv, Instruction& _xcode) {
 		Stack::push(ScriptConsole::length(sv->getValuePointer()));

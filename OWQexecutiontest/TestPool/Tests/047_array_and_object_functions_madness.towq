@@ -1,0 +1,20 @@
+# showme : 
+	print($1 + ",");
+#
+let a = ["OwQ - "];
+let h = a[0] + "yes";
+let b = a[0 + 0].tolower();
+let c = ["boo","zoo","yes","no"],
+    d = "tw";
+let e = c[d.length()].toupper();
+
+let g = ["in1",["in2","in3"],"in4"];
+let z = g[0].toupper() + " owq";
+let t = g[a.length(),d.length() - 1].toupper() + " - " + d.length();
+
+# showme(b,e,h,z,t) #
+/*
+@expected-output
+owq - ,YES,OwQ - yes,IN1 owq,IN3 - 2,
+@end-expected-output
+*/

@@ -212,7 +212,60 @@ namespace Eowq {
 		return newTokenSet;
 	}
 	
-	
+	/** Mark a left token as the attached to object:
+	*
+	* @param integer markId
+	*/
+	void Tokens::markAttachedTokenObj(int markId, int startIndex) {
+		if (startIndex < 0 || startIndex > getSize() - 1) {
+			stdError("token extraction, startIndex left objMark out of bounds");
+			return;
+		} else if (startIndex == 0) {
+			stdError("token extraction, startIndex left objMark out of bounds");
+			return;
+		}
+		int grouping = 0;
+		int i = startIndex;
+		while (i > 0) {
+			i--;
+			if (
+					(
+						tokens[i].type == TokenType::VAR ||
+						tokens[i].type == TokenType::STRING ||
+						tokens[i].type == TokenType::NUMBER ||
+						tokens[i].type == TokenType::RST 
+					) 
+					&& grouping == 0
+				) {
+				tokens[i].markAsAttachedObj = markId;
+				break;
+			}
+			if (tokens[i].type == TokenType::DELIMITER && tokens[i].token == Lang::dicLang_bracesClose) {
+				grouping++;
+				continue;
+			}
+			if (tokens[i].type == TokenType::DELIMITER && tokens[i].token == Lang::dicLang_braketClose) {
+				grouping++;
+				continue;
+			}
+			if (tokens[i].type == TokenType::DELIMITER && tokens[i].token == Lang::dicLang_sBraketClose) {
+				grouping++;
+				continue;
+			}
+			if (tokens[i].type == TokenType::DELIMITER && tokens[i].token == Lang::dicLang_braketOpen) {
+				grouping--;
+				continue;
+			}
+			if (tokens[i].type == TokenType::DELIMITER && tokens[i].token == Lang::dicLang_sBraketOpen) {
+				grouping--;
+				continue;
+			}
+			if (tokens[i].type == TokenType::DELIMITER && tokens[i].token == Lang::dicLang_bracesOpen) {
+				grouping--;
+				continue;
+			}
+		}
+	}
 	/** Remove token at index
 	*
 	* @param integer index

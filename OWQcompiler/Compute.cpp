@@ -1204,10 +1204,34 @@ namespace Eowq {
 		std::string object;
 		std::string method;
 		int dotOperator = operand.find_last_of(Lang::dicLangKey_sub_object);
-		if (dotOperator != -1) {
+		if (dotOperator > 0) {
+			// normal object or system call:
 			object = operand.substr(0, dotOperator);
 			method = operand.substr(dotOperator + 1);
+		}
+		else if (dotOperator == 0) {
+			// its a call on an traverse array or an temp variable:
+			//Execute all next pushes:
+			instructionPointer++;
+			bool flag = true;
+			while (flag) {
+				ExecReturn result = script->executeInstruction(script->code[instructionPointer], instructionPointer, script->script_debug);
+				if (result == ExecReturn::Ex_OK) {
+					if (script->code[instructionPointer].isAttachedObj() != xcode.isAttachedObj()) {
+						instructionPointer++;
+					} else {
+						flag = false;
+					}
+				} else {
+					return result;
+				}
+			}
+			//return one cause we will increment later:
+			//instructionPointer--;
+			object = "-1";
+			method = operand.substr(dotOperator + 1);
 		} else {
+			// normal function call:
 			method = operand;
 		}
 		if (!script->isSystemCall(object, method, xcode)) {

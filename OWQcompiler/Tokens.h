@@ -43,6 +43,8 @@ namespace Eowq
 		Tokens extractInclusiveWithoutRst(int startIndex, int endIndex, int& extractionCount);
 		Tokens extractSubExpr();
 
+		void markAttachedTokenObj(int markId, int startIndex);
+
 		void pop(int index);
 		bool pushBefore(int index, std::string _token, int pri, TokenType type);
 		bool pushAfter(int index, std::string _token, int pri, TokenType type);

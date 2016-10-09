@@ -29,7 +29,8 @@ namespace Eowq
 		bool arrayPush;
 		int  arrayTraverse;
 		int  subTokenCache;
-		int       rstPos;
+		int markAsAttachedObj;
+		int  rstPos;
 
 		Token(std::string _token, int _priority, TokenType _type, TokenFlag _flag);
 		Token(std::string _token, int _priority, TokenType _type, TokenFlag _flag, int _pos);

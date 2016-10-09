@@ -67,6 +67,7 @@ namespace Eowq {
 		isRST = false;
 		arrayPush = false;
 		arrayTraverse = -1;
+		attachedObj = -1;
 	}
 
 	Instruction::Instruction(ByteCode inst) {
@@ -78,6 +79,7 @@ namespace Eowq {
 		operandType = OperandType::OPER_NEW;
 		arrayPush = false;
 		arrayTraverse = -1;
+		attachedObj = -1;
 	}
 
 	Instruction::Instruction(ByteCode inst, const std::string& xOperand) {
@@ -89,6 +91,7 @@ namespace Eowq {
 		operandType = OperandType::OPER_NEW;
 		arrayPush = false;
 		arrayTraverse = -1;
+		attachedObj = -1;
 		if (operand[0] == Lang::LangStringIndicator && operand[operand.size() - 1] == Lang::LangStringIndicator) {
 			containsQuotes = true;
 			//remove the quotes now
@@ -108,6 +111,7 @@ namespace Eowq {
 		operandType = OperandType::OPER_NEW;
 		arrayPush = false;
 		arrayTraverse = -1;
+		attachedObj = -1;
 		if (operand[0] == Lang::LangStringIndicator && operand[operand.size() - 1] == Lang::LangStringIndicator) {
 			containsQuotes = true;
 			//remove the quotes now
@@ -129,6 +133,7 @@ namespace Eowq {
 		staticPointer = 0;
 		jmpCache = -1;
 		isRST = false;
+		attachedObj = imptoken.markAsAttachedObj;
 		operandType = OperandType::OPER_NEW;
 		if (operand[0] == Lang::LangStringIndicator && operand[operand.size() - 1] == Lang::LangStringIndicator) {
 			containsQuotes = true;
@@ -150,6 +155,7 @@ namespace Eowq {
 		staticPointer = pointer;
 		operandType = OperandType::OPER_NEW;
 		isRST = false;
+		attachedObj = imptoken.markAsAttachedObj;
 		if (operand[0] == Lang::LangStringIndicator && operand[operand.size() - 1] == Lang::LangStringIndicator) {
 			containsQuotes = true;
 			//remove the quotes now
@@ -292,6 +298,15 @@ namespace Eowq {
 	bool Instruction::operandHasQuote() {
 		return containsQuotes;
 	}
+
+
+	void Instruction::setAttachedObj(int set) {
+		attachedObj = set;
+	}
+	int Instruction::isAttachedObj() {
+		return attachedObj;
+	}
+
 
 	OperandType& Instruction::getOperandType() {
 		return operandType;

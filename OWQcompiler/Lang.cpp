@@ -467,6 +467,18 @@ namespace Eowq {
 	bool Lang::LangIsKeyword(const std::string& value) {
 		return LangInverseKeywords.count(value) == 1;
 	}
+	/** Check whether a key is an actual object callee keyword:
+	*
+	* @param char value
+	* @return bool
+	*/
+	bool Lang::LangIsObjectCall(const char& value) {
+		std::string str(1, value);
+		if (str == LangKeywords["sub-object"]) {
+			return true;
+		}
+		return false;
+	}
 	/** Checks whether a letter is allowed as function or variable name:
 	 *
 	 * @param char|string[0] value

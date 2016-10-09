@@ -18,6 +18,7 @@ namespace Eowq {
 		rstPos = 0;
 		arrayPush = false;
 		arrayTraverse = -1;
+		markAsAttachedObj = -1;
 	}
 
 	Token::Token(std::string _token, int _priority, TokenType _type, TokenFlag _flag, int _pos) {
@@ -28,6 +29,7 @@ namespace Eowq {
 		rstPos = _pos;
 		arrayPush = false;
 		arrayTraverse = -1;
+		markAsAttachedObj = -1;
 	}
 
 	Token::~Token() {

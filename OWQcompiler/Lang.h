@@ -38,6 +38,7 @@ namespace Eowq
 		static bool LangIsComparison(const std::string& value);
 		static bool LangIsOfCondition(const char& value);
 		static bool LangIsOfCondition(const std::string& value);
+		
 		//Digits Definition and functions:
 		static std::map<int, char> LangDigits;
 
@@ -48,6 +49,7 @@ namespace Eowq
 		static std::string LangFindKeyword(const std::string& key);
 		static bool		   LangHasKeyKeyword(const std::string& key);
 		static bool		   LangIsKeyword(const std::string& value);
+		static bool		   LangIsObjectCall(const char& value);
 		static void		   LangPopulate();
 		//Naming system Definition and functions:
 		static std::vector<char> LangNamingAllowedChars;

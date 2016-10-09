@@ -91,6 +91,7 @@ namespace Eowq
 		int				staticPointer;
 		bool			isRST;
 		bool			containsQuotes;
+		int             attachedObj;
 
 	public:
 
@@ -110,6 +111,9 @@ namespace Eowq
 		bool isOperandBoolean();
 		bool isOperandNull();
 		bool operandHasQuote();
+
+		void setAttachedObj(int set);
+		int isAttachedObj();
 
 		OperandType& getOperandType();
 		OperandType& setOperandType();

@@ -244,6 +244,7 @@ std::string Parser::getToken(bool& trimmedSpace) {
         }
         //Set all to lower that make sure we can check if its a keyword:
 		std::string temp_currentToken = toLowerString(&currentToken);
+
         //Set this current token type to either variable or keyword
         if (isKeyword(temp_currentToken)) {
             currentTokenType = TokenType::KEYWORD;
@@ -288,7 +289,16 @@ std::string Parser::getToken(bool& trimmedSpace) {
                 if(expressionIndex > (int)expression.length()) break;
             }
             currentTokenType = TokenType::NUMBER;
-    } else {
+    } else if (isObjectCall(expression[expressionIndex])) {
+		//Grab entire function call
+		while (whileNotDelimiter(expressionIndex)) { // `.` is a number too removed from the delimiter list
+			currentToken.insert(currentToken.end(), 1, expression[expressionIndex]);
+			expressionIndex++;
+			if (expressionIndex > (int)expression.length()) break;
+		}
+		currentTokenType = TokenType::VAR;
+	}
+	else {
         currentToken = "\0";
         return currentToken;
     }
@@ -976,6 +986,7 @@ int Parser::compilerNew(Script* script, Tokens& tokens, bool debug, int rCount) 
 	//Early exits:
 	if (!script || script == nullptr) return 1;
 	if (tokens.getSize() == 0) return 0;
+
 	//Debuging:
 	if (debug && OWQ_DEBUG_EXPOSE_COMPILER_PARSE && OWQ_DEBUG_LEVEL > 1) {
 		tokens.renderTokens();
@@ -983,6 +994,7 @@ int Parser::compilerNew(Script* script, Tokens& tokens, bool debug, int rCount) 
 		if (OWQ_DEBUG_LEVEL > 3) { tokens.renderTokenPriorty(); }
 		if (OWQ_DEBUG_LEVEL > 2) { Lang::printEmpLine(1); }
 	}
+
 	//rCount is the nesting recursive calls limit:
 	rCount++;
 	if (rCount > 50) return 2;
@@ -1227,17 +1239,17 @@ int Parser::compile_LR_math(ByteCode bc, Compileobj& comobj, int &operatorIndex,
 	return 0;
 }
 int Parser::compile_parenthetical_gouping(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
-	
+
 	//get the close of this parenthesis
 	int closeOfParenthesis = tokens.getMatchingCloseParenthesis(operatorIndex);
-	
+
 	//Validate close par:
 
 	//extract the content and replace with RST later depending if its a group or a function
 	Tokens sub = tokens.extractContentOfParenthesis(operatorIndex, closeOfParenthesis, comobj.eraseCount, script);
 	operatorIndex -= 1;	//Just in case its a function call set next block to parse the call name,
-	
-						//Make appropriate function Call check:
+
+	//Make appropriate function Call check:
 	bool funcCall = false;
 	if (tokens.getSize() > 1 && operatorIndex >= 0 && comobj.leftToken != nullptr) { //two or more																		 //if previous token before the parenthesis has a non zero priority of 2 then make function call
 		if (tokens.getTokenPriorty(operatorIndex) && comobj.leftToken->type != TokenType::KEYWORD && comobj.leftToken->type != TokenType::DELIMITER) {
@@ -1249,25 +1261,39 @@ int Parser::compile_parenthetical_gouping(Compileobj& comobj, int operatorIndex,
 
 	int ret = compilerNew(script, sub, debug, rCount);
 
+	bool isObjatt = false;
 	//Make appropriate function Call
 	if (funcCall) { //two or more
-		if (operatorIndex == 0 && rCount == 1) { 
+		if (operatorIndex == 0 && rCount == 1) {
 			// A garbage preventor: for no assignment functions:
 			script->addInstruction(Instruction(ByteCode::DPUSH, "CALL"));
 		}
-		script->addInstruction(Instruction(ByteCode::CALL, comobj.leftToken->token, tokens.tokens[operatorIndex + 1].rstPos));
+		if (comobj.leftToken->token[0] == Lang::dicLangKey_sub_object[0]) {
+			tokens.markAttachedTokenObj((int)script->code.size(), operatorIndex);
+			comobj.leftToken->markAsAttachedObj = (int)script->code.size();
+			isObjatt = true;
+		}
+		script->addInstruction(Instruction(ByteCode::CALL, *comobj.leftToken, tokens.tokens[operatorIndex + 1].rstPos));
 		tokens.pop(operatorIndex); //removes function name, operatorIndex points to function name
 		unmark();
 	}
 
 	//Sync RST -> will pop RST and replace it with newest RST and sync latest Operation wil the same RST pos:
-	tokens.extractInclusive(
-		funcCall ? operatorIndex : operatorIndex + 1, 
-		funcCall ? operatorIndex : operatorIndex + 1, 
-		comobj.eraseCount, 
-		script, 
-		true
-	);
+	if (!isObjatt) {
+		tokens.extractInclusive(
+			funcCall ? operatorIndex : operatorIndex + 1,
+			funcCall ? operatorIndex : operatorIndex + 1,
+			comobj.eraseCount,
+			script,
+			true
+		);
+	} else {
+		tokens.extractInclusiveWithoutRst(
+			funcCall ? operatorIndex : operatorIndex + 1,
+			funcCall ? operatorIndex : operatorIndex + 1,
+			comobj.eraseCount
+		);
+	}
 	return ret;
 }
 int Parser::compile_squareb_grouping(Compileobj& comobj, int operatorIndex, Script* script, Tokens& tokens, bool debug, int rCount) {
@@ -1282,8 +1308,10 @@ int Parser::compile_squareb_grouping(Compileobj& comobj, int operatorIndex, Scri
 	//Evaluate sub tokens of array call:
 	int evSBres = evaluateArraySbrackets(sub);
 	if (evSBres > 0) { return evSBres == 1 ? 22 : 21; }
+
 	//Count comma cells:
 	int arrayElementsCount = sub.countCommasNotNested();
+
 	//This will indicate an array push flag the left token, remove rst and continue:
 	Token* leftOverLook = tokens.tokenLeftLookBeforeArrayTraverse(operatorIndex);
 	if (arrayElementsCount == 0 && leftOverLook != nullptr && leftOverLook->type == TokenType::VAR) {
@@ -1808,12 +1836,27 @@ bool Parser::isDigit(const char& c) {
  * @param string s
  * @return boolean
  */
+bool Parser::isKeyword(char& c) {
+	std::string str(1, c);
+	return isKeyword(str);
+}
 bool Parser::isKeyword(std::string s) {
     if (Lang::LangIsKeyword(s)) {
         currentTokenType = TokenType::KEYWORD;
         return true;
     }
     return false;
+}
+/** Indicate if supplied char, c, is an object callee
+*
+* @param char c
+* @return boolean
+*/
+bool Parser::isObjectCall(char& c) {
+	if (Lang::LangIsObjectCall(c)) {
+		return true;
+	}
+	return false;
 }
 /** Translates an delimiter string to a Precedence Priority
  * 

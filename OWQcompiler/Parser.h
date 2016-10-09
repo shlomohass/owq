@@ -90,6 +90,8 @@ namespace Eowq
 		bool isDigit(const char& c);
 		bool isDigit(const std::string& c);
 		bool isKeyword(std::string s);
+		bool isKeyword(char& c);
+		bool isObjectCall(char& c);
 
 		int  getDelimiterPriorty();
 		int  getDelimiterPriorty(std::string toCheckToken, TokenType toCheckType);
